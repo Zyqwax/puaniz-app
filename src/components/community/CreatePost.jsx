@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
-import { Image, X, Send, Camera } from "lucide-react";
+import { Image as ImageIcon, X, Send, Camera } from "lucide-react";
+import NextImage from "next/image";
 import { createPost } from "../../services/communityService";
 
 const PREDEFINED_TAGS = [
@@ -88,7 +89,7 @@ const CreatePost = ({ user, onPostCreated, onClose }) => {
     <div className="p-4">
       <form onSubmit={handleSubmit}>
         <div className="flex gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center font-bold text-white shrink-0 shadow-lg shadow-purple-500/20">
+          <div className="w-10 h-10 rounded-full bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center font-bold text-white shrink-0 shadow-lg shadow-purple-500/20">
             {user?.displayName ? user.displayName[0].toUpperCase() : user?.email?.[0].toUpperCase() || "?"}
           </div>
 
@@ -131,7 +132,13 @@ const CreatePost = ({ user, onPostCreated, onClose }) => {
             {previewUrl && (
               <div className="relative mt-3 inline-block group">
                 <div className="relative rounded-xl overflow-hidden border border-white/10">
-                  <img src={previewUrl} alt="Preview" className="h-40 w-auto object-cover" />
+                  <NextImage
+                    src={previewUrl}
+                    alt="Preview"
+                    width={200}
+                    height={160}
+                    className="h-40 w-auto object-cover"
+                  />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
                 </div>
                 <button
@@ -151,7 +158,7 @@ const CreatePost = ({ user, onPostCreated, onClose }) => {
                 className="flex items-center gap-2 px-4 py-2 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors group cursor-pointer"
               >
                 <div className="p-1.5 rounded-full bg-slate-800 group-hover:bg-purple-500/20 group-hover:text-purple-400 transition-colors">
-                  <Image size={18} />
+                  <ImageIcon size={18} />
                 </div>
                 <span>Fotoğraf Ekle</span>
               </button>
@@ -170,7 +177,7 @@ const CreatePost = ({ user, onPostCreated, onClose }) => {
                 <button
                   type="submit"
                   disabled={loading || (!text.trim() && !image) || !title.trim()}
-                  className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium shadow-lg shadow-purple-900/20 hover:shadow-purple-900/40 active:scale-95 cursor-pointer"
+                  className="flex items-center gap-2 px-6 py-2 bg-linear-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium shadow-lg shadow-purple-900/20 hover:shadow-purple-900/40 active:scale-95 cursor-pointer"
                 >
                   {loading ? (
                     <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

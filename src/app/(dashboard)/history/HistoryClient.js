@@ -351,13 +351,13 @@ const HistoryClient = () => {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedExam, setSelectedExam] = useState(null);
-  const [viewMode, setViewMode] = useState("list");
+  const [viewMode, setViewMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("historyViewMode") || "list";
+    }
+    return "list";
+  });
   const { user } = useAuth();
-
-  useEffect(() => {
-    const savedMode = localStorage.getItem("historyViewMode");
-    if (savedMode) setViewMode(savedMode);
-  }, []);
 
   useEffect(() => {
     const fetchExams = async () => {

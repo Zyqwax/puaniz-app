@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   MessageCircle,
   Heart,
@@ -30,6 +30,18 @@ const PostCard = ({ post, user, onPostDeleted, isDetail = false }) => {
   // We'll use this to navigate to the room structure
   const roomLink = `/community/${post.id}`;
 
+  const fetchComments = useCallback(async () => {
+    setLoadingComments(true);
+    try {
+      const fetchedComments = await getComments(post.id);
+      setComments(fetchedComments);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    } finally {
+      setLoadingComments(false);
+    }
+  }, [post.id]);
+
   useEffect(() => {
     if (post.likes) {
       setIsLiked(post.likes.includes(user.uid));
@@ -40,7 +52,7 @@ const PostCard = ({ post, user, onPostDeleted, isDetail = false }) => {
     if (isDetail) {
       fetchComments();
     }
-  }, [post, user.uid, isDetail]);
+  }, [post, user.uid, isDetail, fetchComments]);
 
   const handleLike = async () => {
     // Optimistic update
@@ -79,18 +91,6 @@ const PostCard = ({ post, user, onPostDeleted, isDetail = false }) => {
     setShowComments(!showComments);
     if (!showComments && comments.length === 0) {
       fetchComments();
-    }
-  };
-
-  const fetchComments = async () => {
-    setLoadingComments(true);
-    try {
-      const fetchedComments = await getComments(post.id);
-      setComments(fetchedComments);
-    } catch (error) {
-      console.error("Error fetching comments:", error);
-    } finally {
-      setLoadingComments(false);
     }
   };
 
@@ -275,12 +275,17 @@ const PostCard = ({ post, user, onPostDeleted, isDetail = false }) => {
           </p>
           {post.imageUrl &&
             (isDetail ? (
-              <div className="relative rounded-lg overflow-hidden border border-white/5 bg-slate-900/50 w-full mt-3">
-                {/* Remove fixed aspect ratio for detailed view to show full image */}
-                <img
+              <div
+                className="relative rounded-lg overflow-hidden border border-white/5 bg-slate-900/50 w-full mt-3"
+                style={{ maxHeight: "80vh" }}
+              >
+                <Image
                   src={post.imageUrl}
                   alt={post.title || "Post content"}
-                  className="w-full h-auto object-contain max-h-[80vh]"
+                  width={800}
+                  height={600}
+                  className="w-full h-auto object-contain"
+                  sizes="(max-width: 768px) 100vw, 800px"
                 />
               </div>
             ) : (

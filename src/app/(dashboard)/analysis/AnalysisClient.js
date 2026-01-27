@@ -234,7 +234,7 @@ const AnalysisClient = () => {
             </div>
             <div>
               <h3 className="text-lg font-bold text-blue-100 mb-2">Yapay Zeka Koç Görüşü</h3>
-              <p className="text-slate-300 leading-relaxed italic">"{aiAnalysis}"</p>
+              <p className="text-slate-300 leading-relaxed italic">&ldquo;{aiAnalysis}&rdquo;</p>
             </div>
           </div>
         </div>
