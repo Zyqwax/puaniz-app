@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Users, FileText, MessageSquare, Activity, Calendar, Mail, User } from "lucide-react";
 import AdminRoute from "@/components/AdminRoute";
 import { getAdminStats, getAllUsers, getUserExamStats } from "@/services/adminService";
@@ -141,9 +142,11 @@ const AdminClient = () => {
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
                           {user.avatarUrl ? (
-                            <img
+                            <Image
                               src={user.avatarUrl}
                               alt={user.name || "Avatar"}
+                              width={40}
+                              height={40}
                               className="w-10 h-10 rounded-full object-cover"
                             />
                           ) : (
