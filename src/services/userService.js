@@ -1,5 +1,5 @@
 import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs, writeBatch } from "firebase/firestore";
 
 // Generic User Profile Functions
 export const getUserProfile = async (userId) => {
@@ -43,4 +43,36 @@ export const updateUserGoals = async (userId, goals) => {
 
 export const updateUserWelcomeMessage = async (userId, message) => {
   return updateUserProfile(userId, { welcomeMessage: message });
+};
+
+/**
+ * Delete all user data from Firestore (exams, posts, profile)
+ * @param {string} userId
+ * @returns {Promise<{success: boolean, error?: any}>}
+ */
+export const deleteUserAccountData = async (userId) => {
+  try {
+    const batch = writeBatch(db);
+
+    // 1. Delete user profile
+    const userRef = doc(db, "users", userId);
+    batch.delete(userRef);
+
+    // 2. Delete all exams
+    const examsQuery = query(collection(db, "exams"), where("userId", "==", userId));
+    const examsSnap = await getDocs(examsQuery);
+    examsSnap.docs.forEach((d) => batch.delete(d.ref));
+
+    // 3. Delete all posts
+    const postsQuery = query(collection(db, "posts"), where("userId", "==", userId));
+    const postsSnap = await getDocs(postsQuery);
+    postsSnap.docs.forEach((d) => batch.delete(d.ref));
+
+    // Commit batch
+    await batch.commit();
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting user account data:", error);
+    return { success: false, error };
+  }
 };

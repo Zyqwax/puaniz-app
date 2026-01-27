@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Users, FileText, MessageSquare, Activity, Calendar, Mail, User } from "lucide-react";
 import AdminRoute from "@/components/AdminRoute";
-import { getAdminStats, getAllUsers, getUserExamStats } from "@/services/adminService";
+import { getAdminStats, getAllUsers, getUserExamStats, deleteAllUserExams } from "@/services/adminService";
 import Skeleton from "@/components/Skeleton";
 
 const StatCard = ({ icon: Icon, label, value, color }) => (
@@ -36,6 +36,41 @@ const AdminClient = () => {
   const [users, setUsers] = useState([]);
   const [userExamStats, setUserExamStats] = useState({});
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState(null);
+
+  const handleDeleteExams = async (userId, userName) => {
+    if (
+      !window.confirm(
+        `${userName} isimli kullanıcının tüm denemelerini silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`,
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setDeletingId(userId);
+      const result = await deleteAllUserExams(userId);
+
+      if (result.success) {
+        // Update local stats
+        setUserExamStats((prev) => ({
+          ...prev,
+          [userId]: {
+            examCount: 0,
+            lastExamDate: null,
+          },
+        }));
+        alert("Kullanıcının tüm denemeleri başarıyla silindi.");
+      } else {
+        alert("Hata: " + (result.error?.message || "Bilinmeyen bir hata oluştu."));
+      }
+    } catch (error) {
+      console.error("Error deleting exams:", error);
+      alert("İşlem sırasında bir hata oluştu.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -134,6 +169,7 @@ const AdminClient = () => {
                     <th className="text-left text-slate-400 text-sm font-medium py-3 px-4">Kayıt Tarihi</th>
                     <th className="text-center text-slate-400 text-sm font-medium py-3 px-4">Deneme Sayısı</th>
                     <th className="text-left text-slate-400 text-sm font-medium py-3 px-4">Son Deneme</th>
+                    <th className="text-center text-slate-400 text-sm font-medium py-3 px-4">İşlemler</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -179,6 +215,19 @@ const AdminClient = () => {
                         </span>
                       </td>
                       <td className="py-3 px-4 text-slate-400 text-sm">{formatDate(user.lastExamDate)}</td>
+                      <td className="py-3 px-4 text-center">
+                        <button
+                          onClick={() => handleDeleteExams(user.id, user.name || "İsimsiz")}
+                          disabled={deletingId === user.id || user.examCount === 0}
+                          className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                            user.examCount === 0
+                              ? "bg-slate-500/10 text-slate-500 cursor-not-allowed"
+                              : "bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white disabled:opacity-50"
+                          }`}
+                        >
+                          {deletingId === user.id ? "Siliniyor..." : "Denemeleri Sil"}
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

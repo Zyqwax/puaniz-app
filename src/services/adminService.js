@@ -1,5 +1,5 @@
 import { db } from "@/lib/firebase";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, where, writeBatch, doc, updateDoc } from "firebase/firestore";
 
 const USERS_COLLECTION = "users";
 const EXAMS_COLLECTION = "exams";
@@ -109,12 +109,46 @@ export const getUserExamStats = async () => {
 export const getAllExams = async () => {
   try {
     const examsSnapshot = await getDocs(collection(db, EXAMS_COLLECTION));
-    return examsSnapshot.docs.map((doc) => ({
+    return querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
   } catch (error) {
     console.error("Error getting all exams:", error);
     return [];
+  }
+};
+
+/**
+ * Delete all exams for a specific user and reset their welcome message
+ * @param {string} userId - ID of the user whose exams to delete
+ * @returns {Promise<object>} Result object
+ */
+export const deleteAllUserExams = async (userId) => {
+  try {
+    // 1. Get all exams for this user
+    const q = query(collection(db, EXAMS_COLLECTION), where("userId", "==", userId));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      return { success: true, message: "No exams found for this user." };
+    }
+
+    // 2. Use batch to delete them
+    const batch = writeBatch(db);
+    querySnapshot.docs.forEach((examDoc) => {
+      batch.delete(examDoc.ref);
+    });
+
+    // 3. Reset user's welcome message to trigger regenerations
+    const userRef = doc(db, USERS_COLLECTION, userId);
+    batch.update(userRef, { welcomeMessage: null });
+
+    await batch.commit();
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting all user exams:", error);
+    return { success: false, error };
   }
 };

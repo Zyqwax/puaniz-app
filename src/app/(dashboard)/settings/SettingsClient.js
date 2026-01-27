@@ -5,9 +5,10 @@ import { User, Link, BookOpen, Save, ArrowLeft, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
-import { getUserProfile, updateUserProfile } from "@/services/userService";
-import { updateProfile } from "firebase/auth";
+import { getUserProfile, updateUserProfile, deleteUserAccountData } from "@/services/userService";
+import { updateProfile, deleteUser } from "firebase/auth";
 import { uploadProfileImage } from "@/services/cloudinaryService";
+import { Trash2, AlertTriangle } from "lucide-react";
 
 const SettingsClient = () => {
   const router = useRouter();
@@ -22,6 +23,9 @@ const SettingsClient = () => {
   });
 
   const [message, setMessage] = useState({ type: "", content: "" });
+  const [confirmText, setConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -67,6 +71,44 @@ const SettingsClient = () => {
       setMessage({ type: "error", content: "Güncelleme sırasında bir hata oluştu." });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (confirmText !== "onaylıyorum") return;
+
+    setDeleting(true);
+    setMessage({ type: "", content: "" });
+
+    try {
+      if (user) {
+        // 1. Delete Firestore Data
+        const dbResult = await deleteUserAccountData(user.uid);
+        if (!dbResult.success) {
+          throw new Error("Veri silme işlemi sırasında hata oluştu.");
+        }
+
+        // 2. Delete Auth Account
+        await deleteUser(user);
+
+        // 3. Redirect
+        router.push("/auth/login");
+      }
+    } catch (error) {
+      console.error("Account deletion error:", error);
+      if (error.code === "auth/requires-recent-login") {
+        setMessage({
+          type: "error",
+          content: "Güvenlik nedeniyle bu işlemi yapmadan önce tekrar giriş yapmalısınız.",
+        });
+      } else {
+        setMessage({
+          type: "error",
+          content: "Hesap silme sırasında bir hata oluştu: " + (error.message || "Bilinmeyen hata"),
+        });
+      }
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -234,6 +276,75 @@ const SettingsClient = () => {
               </button>
             </div>
           </form>
+        </div>
+      </div>
+
+      {/* Danger Zone */}
+      <div className="glass-panel p-8 border-red-500/20">
+        <div className="flex items-center gap-3 text-red-400 mb-6">
+          <AlertTriangle size={24} />
+          <h2 className="text-xl font-bold">Tehlikeli Bölge</h2>
+        </div>
+
+        <div className="space-y-6">
+          <p className="text-slate-400 text-sm">
+            Hesabınızı sildiğinizde tüm denemeleriniz, gönderileriniz ve profil bilgileriniz kalıcı olarak silinir. Bu
+            işlem geri alınamaz.
+          </p>
+
+          {!showDeleteConfirm ? (
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="text-red-400 hover:text-red-300 text-sm font-medium flex items-center gap-2 transition-colors cursor-pointer"
+            >
+              <Trash2 size={16} />
+              <span>Hesabımı Silmek İstiyorum</span>
+            </button>
+          ) : (
+            <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-300">
+                  Onaylamak için <span className="text-white font-bold italic">onaylıyorum</span> yazın
+                </label>
+                <input
+                  type="text"
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  placeholder="onaylıyorum"
+                  className="glass-input w-full border-red-500/30 focus:border-red-500"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={confirmText !== "onaylıyorum" || deleting}
+                  className="bg-red-500 hover:bg-red-600 disabled:bg-slate-700 disabled:text-slate-500 text-white px-6 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer flex items-center gap-2"
+                >
+                  {deleting ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Siliniyor...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 size={16} />
+                      Hesabımı Kalıcı Olarak Sil
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setConfirmText("");
+                  }}
+                  className="text-slate-400 hover:text-white px-6 py-2 text-sm font-medium transition-colors cursor-pointer"
+                >
+                  Vazgeç
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
