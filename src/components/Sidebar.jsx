@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 
 import ProfileCard from "./ProfileCard";
-import { isAdminUser } from "./AdminRoute";
 
 const Sidebar = ({ isOpen, onClose, user, isCollapsed, toggleCollapse }) => {
   const pathname = usePathname();
@@ -35,9 +34,7 @@ const Sidebar = ({ isOpen, onClose, user, isCollapsed, toggleCollapse }) => {
   ];
 
   // Add admin link if user is admin
-  const navItems = isAdminUser(user)
-    ? [...baseNavItems, { path: "/admin", icon: Shield, label: "Admin" }]
-    : baseNavItems;
+  const navItems = baseNavItems;
 
   return (
     <>
