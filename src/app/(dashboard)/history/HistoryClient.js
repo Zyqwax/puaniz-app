@@ -14,6 +14,7 @@ import {
   LayoutList,
   LayoutGrid,
   RectangleVertical,
+  Download,
 } from "lucide-react";
 import { EXAM_CONFIG } from "@/constants";
 import HistorySkeleton from "@/components/history/HistorySkeleton";
@@ -404,6 +405,41 @@ const HistoryClient = () => {
     }
   };
 
+  const handleExportJSON = () => {
+    if (exams.length === 0) {
+      alert("Dışa aktarılacak deneme bulunamadı.");
+      return;
+    }
+
+    const exportedExams = exams.map((exam) => {
+      const cleanScores = {};
+      Object.entries(exam.scores || {}).forEach(([subject, stats]) => {
+        cleanScores[subject] = {
+          d: stats.d || 0,
+          y: stats.y || 0,
+        };
+      });
+
+      return {
+        name: exam.name,
+        date: exam.date,
+        type: exam.type,
+        subtype: exam.subtype || null,
+        scores: cleanScores,
+      };
+    });
+
+    const dataStr = JSON.stringify(exportedExams, null, 2);
+    const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+
+    const exportFileDefaultName = `puaniz_denemeler_${new Date().toISOString().split("T")[0]}.json`;
+
+    const linkElement = document.createElement("a");
+    linkElement.setAttribute("href", dataUri);
+    linkElement.setAttribute("download", exportFileDefaultName);
+    linkElement.click();
+  };
+
   const renderExamList = (list, emptyMessage) => (
     <div
       className={
@@ -534,28 +570,39 @@ const HistoryClient = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <h1 className="text-3xl font-bold text-white">Deneme Geçmişi</h1>
 
-        <div className="flex bg-slate-800/50 p-1 rounded-xl glass-panel self-start md:self-auto">
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => handleSetViewMode("list")}
-            className={`p-2 rounded-lg transition-all ${viewMode === "list" ? "bg-purple-600 text-white shadow-lg" : "text-slate-400 hover:text-white"}`}
-            title="Liste Görünümü"
+            onClick={handleExportJSON}
+            className="glass-btn px-4 py-2 flex items-center gap-2 text-sm"
+            title="Tüm Denemeleri JSON Olarak İndir"
           >
-            <LayoutList size={20} />
+            <Download size={18} />
+            <span className="hidden sm:inline">Dışa Aktar</span>
           </button>
-          <button
-            onClick={() => handleSetViewMode("grid")}
-            className={`p-2 rounded-lg transition-all ${viewMode === "grid" ? "bg-purple-600 text-white shadow-lg" : "text-slate-400 hover:text-white"}`}
-            title="Izgara Görünümü"
-          >
-            <LayoutGrid size={20} />
-          </button>
-          <button
-            onClick={() => handleSetViewMode("card")}
-            className={`p-2 rounded-lg transition-all ${viewMode === "card" ? "bg-purple-600 text-white shadow-lg" : "text-slate-400 hover:text-white"}`}
-            title="Kart Görünümü"
-          >
-            <RectangleVertical size={20} />
-          </button>
+
+          <div className="flex bg-slate-800/50 p-1 rounded-xl glass-panel">
+            <button
+              onClick={() => handleSetViewMode("list")}
+              className={`p-2 rounded-lg transition-all ${viewMode === "list" ? "bg-purple-600 text-white shadow-lg" : "text-slate-400 hover:text-white"}`}
+              title="Liste Görünümü"
+            >
+              <LayoutList size={20} />
+            </button>
+            <button
+              onClick={() => handleSetViewMode("grid")}
+              className={`p-2 rounded-lg transition-all ${viewMode === "grid" ? "bg-purple-600 text-white shadow-lg" : "text-slate-400 hover:text-white"}`}
+              title="Izgara Görünümü"
+            >
+              <LayoutGrid size={20} />
+            </button>
+            <button
+              onClick={() => handleSetViewMode("card")}
+              className={`p-2 rounded-lg transition-all ${viewMode === "card" ? "bg-purple-600 text-white shadow-lg" : "text-slate-400 hover:text-white"}`}
+              title="Kart Görünümü"
+            >
+              <RectangleVertical size={20} />
+            </button>
+          </div>
         </div>
       </div>
 

@@ -14,6 +14,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "cdn.pfps.gg",
       },
+      {
+        protocol: "https",
+        hostname: "ui-avatars.com",
+      },
     ],
   },
 };

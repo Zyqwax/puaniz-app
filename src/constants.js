@@ -26,3 +26,5 @@ export const EXAM_CONFIG = {
     din: 6,
   },
 };
+
+export const WHITELISTED_EMAILS = ["test@test.com"];
