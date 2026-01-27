@@ -15,14 +15,16 @@ import {
   ChevronLeft,
   ChevronRight,
   Users,
+  Shield,
 } from "lucide-react";
 
 import ProfileCard from "./ProfileCard";
+import { isAdminUser } from "./AdminRoute";
 
 const Sidebar = ({ isOpen, onClose, user, isCollapsed, toggleCollapse }) => {
   const pathname = usePathname();
 
-  const navItems = [
+  const baseNavItems = [
     { path: "/", icon: LayoutDashboard, label: "Özet" },
     { path: "/add-exam", icon: PlusCircle, label: "Deneme Ekle" },
     { path: "/analysis", icon: PieChart, label: "Analizler" },
@@ -31,6 +33,11 @@ const Sidebar = ({ isOpen, onClose, user, isCollapsed, toggleCollapse }) => {
     { path: "/history", icon: BookOpen, label: "Geçmiş" },
     { path: "/changelog", icon: Sparkles, label: "Yenilikler" },
   ];
+
+  // Add admin link if user is admin
+  const navItems = isAdminUser(user)
+    ? [...baseNavItems, { path: "/admin", icon: Shield, label: "Admin" }]
+    : baseNavItems;
 
   return (
     <>
