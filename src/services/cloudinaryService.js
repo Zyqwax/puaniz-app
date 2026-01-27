@@ -55,44 +55,13 @@ const upload = async (file, options) => {
     formData.append("folder", options.folder);
   }
 
-  // Note: transformations sent as a string if using signed uploads or specific presets,
-  // but for unsigned uploads with presets, we often rely on the preset settings.
-  // However, Cloudinary API supports 'transformation' parameter in the URL or sometimes form data
-  // depending on the setup. For raw API uploads, transformations are often part of the 'eager' parameter
-  // or done via a specific upload preset that has these settings.
-  // The user's snippet suggests passing params object to axios.
-  // Let's stick to the user's snippet logic but ensure params are correctly formatted.
-  // The user sent `params: { transformation: ... }`.
-  // IMPORTANT: The standard client-side upload API usually takes transformation as a string
-  // like "w_500,h_500,c_fill" in 'transformation' form field or 'eager' field.
-  // But axios params puts them in the query string.
-  // Let's assume the user's approach works for their specific Cloudinary setup or they are using a library wrapper,
-  // BUT the provided snippet uses direct axios.post.
-  // Standard Cloudinary V1.1 upload API does NOT accept transformations in query params for the main image generally,
-  // it applies incoming transformations.
-  // Let's assume the user knows what they are doing with that snippet, OR I should verify.
-  // Actually, for unsigned uploads, one usually defines these in the Upload Preset in Cloudinary Dashboard.
-  // On-the-fly transformations during upload (incoming transformation) is supported.
-  // Let's use the code as provided but ensure we pass options correctly.
-
-  // Checking user code again:
-  // params: { transformation: options.transformation }
-  // This might need serialization if it's an array/object.
-  // However, `resizeImage` does the heavy lifting already.
-  // The transformation params might be for 'eager' generation or 'incoming'.
-  // Let's adhere to the snippet as close as possible but safeguard against missing process.env.
-
-  const res = await axios.post(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, formData, {
-    params: {
-      // Cloudinary expects string for transformation generally, e.g. "w_200,h_200"
-      // If options.transformation is an array, we might need to stringify it or Cloudinary handles it?
-      // Let's trust the snippet but if it fails we might need to adjust.
-      // Actually, passing 'transformation' in query params acts as 'incoming transformation'
-      transformation: options.transformation,
-    },
-  });
-
-  return res.data.secure_url;
+  try {
+    const res = await axios.post(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, formData);
+    return res.data.secure_url;
+  } catch (error) {
+    console.error("Cloudinary upload error details:", error.response?.data || error.message);
+    throw error;
+  }
 };
 
 /* -------------------- PROFIL FOTO -------------------- */
@@ -104,7 +73,6 @@ export const uploadProfileImage = async (file) => {
 
   return upload(new File([resized], file.name, { type: file.type }), {
     folder: "profiles",
-    transformation: "w_256,h_256,c_fill,g_face,q_auto:low,f_auto", // Using string format to be safer
   });
 };
 
@@ -117,7 +85,6 @@ export const uploadPostImage = async (file) => {
 
   return upload(new File([resized], file.name, { type: file.type }), {
     folder: "posts",
-    transformation: "w_1080,c_limit,q_auto:eco,f_auto", // Using string format to be safer
   });
 };
 
