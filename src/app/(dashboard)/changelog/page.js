@@ -5,6 +5,12 @@ import Link from "next/link";
 import fs from "fs";
 import path from "path";
 
+export const metadata = {
+  title: "Yenilikler",
+  description: "Puanİz platformuna eklenen son özellikler ve güncellemeler.",
+  keywords: ["güncellemeler", "yenilikler", "changelog", "yeni özellikler"],
+};
+
 async function getUpdates() {
   const updatesDir = path.join(process.cwd(), "src/content/updates");
   if (!fs.existsSync(updatesDir)) return [];
@@ -54,9 +60,6 @@ export default async function Changelog() {
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-200">
-      <title>Yenilikler - Puanİz</title>
-      <meta name="description" content="Puanİz platformuna eklenen son özellikler ve güncellemeler." />
-
       <div className="max-w-4xl mx-auto px-4 py-12">
         {/* Header */}
         <div className="mb-12 flex items-center justify-between">
@@ -66,7 +69,7 @@ export default async function Changelog() {
               <span>Geri Dön</span>
             </Link>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center">
                 <Tag className="text-white" size={24} />
               </div>
               <h1 className="text-3xl font-bold text-white">Yenilikler</h1>

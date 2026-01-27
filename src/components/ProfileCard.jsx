@@ -73,7 +73,7 @@ const ProfileCard = ({ user, isCollapsed, onClose }) => {
       {/* Dropdown Menu */}
       {isOpen && (
         <div
-          className={`absolute bottom-full left-0 ${isCollapsed ? "left-12 bottom-0 w-48 ml-2" : "w-full mb-2"} bg-[#0f172a] border border-white/10 rounded-xl shadow-xl overflow-hidden animate-in fade-in ${isCollapsed ? "slide-in-from-left-2" : "slide-in-from-bottom-2"} duration-200 z-50`}
+          className={`absolute bottom-full left-0 ${isCollapsed ? "left-12 bottom-0 w-48 ml-2" : "w-full mb-2"} bg-gray-800 border border-white/10 rounded-xl shadow-xl overflow-hidden animate-in fade-in ${isCollapsed ? "slide-in-from-left-2" : "slide-in-from-bottom-2"} duration-200 z-50`}
         >
           <div className="p-1">
             <button
