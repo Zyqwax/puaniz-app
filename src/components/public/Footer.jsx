@@ -30,6 +30,9 @@ const Footer = () => {
               <Link href="/about" className="block text-sm text-slate-400 hover:text-white transition-colors">
                 Hakkında
               </Link>
+              <Link href="/pricing" className="block text-sm text-slate-400 hover:text-white transition-colors">
+                Fiyatlandırma
+              </Link>
               <Link href="/contact" className="block text-sm text-slate-400 hover:text-white transition-colors">
                 İletişim
               </Link>

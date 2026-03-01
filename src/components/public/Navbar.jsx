@@ -8,6 +8,7 @@ import { Menu, X, GraduationCap } from "lucide-react";
 const navLinks = [
   { href: "/", label: "Ana Sayfa" },
   { href: "/about", label: "Hakkında" },
+  { href: "/pricing", label: "Fiyatlandırma" },
   { href: "/contact", label: "İletişim" },
 ];
 
