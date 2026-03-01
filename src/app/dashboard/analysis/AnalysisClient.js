@@ -19,6 +19,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Cell,
 } from "recharts";
 import { getUserExams } from "@/services/examService";
 import { generateAnalysis } from "@/services/aiService";
@@ -29,7 +30,18 @@ import {
   prepareRadarData,
   prepareTrendData,
 } from "@/utils/analysisHelpers";
-import { FileDown, CheckSquare, Square } from "lucide-react";
+import {
+  FileDown,
+  CheckSquare,
+  Square,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Brain,
+  Shield,
+  AlertTriangle,
+  BarChart3,
+} from "lucide-react";
 import { generatePDF } from "@/utils/pdfGenerator";
 import AnalysisReport from "@/components/AnalysisReport";
 import AnalysisSkeleton from "@/components/analysis/AnalysisSkeleton";
@@ -63,6 +75,275 @@ const SUBJECT_ORDER = {
   ],
 };
 
+const SUBJECT_LABELS = {
+  turkce: "Türkçe",
+  matematik: "Matematik",
+  geometri: "Geometri",
+  fizik: "Fizik",
+  kimya: "Kimya",
+  biyoloji: "Biyoloji",
+  tarih: "Tarih",
+  cografya: "Coğrafya",
+  felsefe: "Felsefe",
+  din: "Din",
+  edebiyat: "Edebiyat",
+  tarih1: "Tarih-1",
+  cografya1: "Coğrafya-1",
+  tarih2: "Tarih-2",
+  cografya2: "Coğrafya-2",
+};
+
+const SUBJECT_COLORS = {
+  turkce: "#ef4444",
+  matematik: "#3b82f6",
+  geometri: "#06b6d4",
+  fizik: "#eab308",
+  kimya: "#22c55e",
+  biyoloji: "#10b981",
+  tarih: "#f59e0b",
+  cografya: "#14b8a6",
+  felsefe: "#6366f1",
+  din: "#f97316",
+  edebiyat: "#ec4899",
+  tarih1: "#f59e0b",
+  cografya1: "#14b8a6",
+  tarih2: "#d97706",
+  cografya2: "#0d9488",
+};
+
+// ---------- AI Analysis Card ----------
+const AIAnalysisCard = ({ analysis }) => {
+  if (!analysis) return null;
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-900/30 via-purple-900/20 to-slate-900/40 p-5 md:p-6">
+      <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+
+      <div className="relative flex items-start gap-4">
+        <div className="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/20 flex items-center justify-center shrink-0">
+          <Brain size={20} className="text-blue-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base font-bold text-blue-100 mb-2">
+            Yapay Zeka Koç Görüşü
+          </h3>
+          <p className="text-sm text-slate-300 leading-relaxed">
+            &ldquo;{analysis}&rdquo;
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ---------- Strength & Weakness Cards ----------
+const StrengthWeaknessCards = ({ stats, sortedKeys }) => {
+  if (sortedKeys.length < 2) return null;
+
+  const sorted = [...sortedKeys].sort(
+    (a, b) => parseFloat(stats[b].avg) - parseFloat(stats[a].avg),
+  );
+
+  const top3 = sorted.slice(0, 3);
+  const bottom3 = sorted.slice(-3).reverse();
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Strong */}
+      <div className="rounded-2xl border border-green-500/20 bg-green-900/10 p-5">
+        <h3 className="text-sm font-bold text-green-400 mb-4 flex items-center gap-2">
+          <Shield size={16} />
+          En Güçlü Dersler
+        </h3>
+        <div className="space-y-3">
+          {top3.map((sub, i) => (
+            <div key={sub} className="flex items-center gap-3">
+              <span className="w-6 h-6 rounded-lg bg-green-500/15 flex items-center justify-center text-xs font-bold text-green-400">
+                {i + 1}
+              </span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm text-slate-200 font-medium">
+                    {SUBJECT_LABELS[sub] || sub}
+                  </span>
+                  <span className="text-sm font-bold text-green-400">
+                    {stats[sub].avg}
+                  </span>
+                </div>
+                <div className="w-full bg-white/5 rounded-full h-1.5">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-green-500 to-emerald-400 transition-all duration-500"
+                    style={{
+                      width: `${Math.min(100, (parseFloat(stats[sub].avg) / (stats[sub].max || 40)) * 100)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Weak */}
+      <div className="rounded-2xl border border-red-500/20 bg-red-900/10 p-5">
+        <h3 className="text-sm font-bold text-red-400 mb-4 flex items-center gap-2">
+          <AlertTriangle size={16} />
+          Geliştirilmesi Gereken
+        </h3>
+        <div className="space-y-3">
+          {bottom3.map((sub, i) => (
+            <div key={sub} className="flex items-center gap-3">
+              <span className="w-6 h-6 rounded-lg bg-red-500/15 flex items-center justify-center text-xs font-bold text-red-400">
+                {i + 1}
+              </span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm text-slate-200 font-medium">
+                    {SUBJECT_LABELS[sub] || sub}
+                  </span>
+                  <span className="text-sm font-bold text-red-400">
+                    {stats[sub].avg}
+                  </span>
+                </div>
+                <div className="w-full bg-white/5 rounded-full h-1.5">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-red-500 to-orange-400 transition-all duration-500"
+                    style={{
+                      width: `${Math.min(100, (parseFloat(stats[sub].avg) / (stats[sub].max || 40)) * 100)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ---------- Subject Stats Grid ----------
+const SubjectStatsGrid = ({ stats, sortedKeys }) => {
+  // Prepare bar chart data
+  const barData = sortedKeys.map((sub) => ({
+    name: SUBJECT_LABELS[sub] || sub,
+    avg: parseFloat(stats[sub].avg),
+    max: stats[sub].max,
+    min: stats[sub].min,
+    color: SUBJECT_COLORS[sub] || "#8b5cf6",
+  }));
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-5 md:p-6">
+      <h3 className="text-lg font-bold text-white mb-5">
+        Ders Bazlı Ortalama Karşılaştırma
+      </h3>
+      <div className="h-[300px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={barData} margin={{ bottom: 60, left: 0, right: 0 }}>
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#1e293b"
+              vertical={false}
+            />
+            <XAxis
+              dataKey="name"
+              stroke="#475569"
+              tick={{
+                angle: -45,
+                textAnchor: "end",
+                fontSize: 11,
+                fill: "#64748b",
+              }}
+              height={60}
+            />
+            <YAxis stroke="#475569" tick={{ fontSize: 11, fill: "#64748b" }} />
+            <Tooltip
+              content={({ active, payload }) => {
+                if (active && payload && payload.length) {
+                  const d = payload[0].payload;
+                  return (
+                    <div className="bg-slate-800/95 border border-white/10 backdrop-blur-sm p-3 rounded-xl shadow-xl">
+                      <p className="font-semibold text-white text-sm mb-1">
+                        {d.name}
+                      </p>
+                      <div className="space-y-0.5 text-xs">
+                        <p>
+                          <span className="text-slate-400">Ort: </span>
+                          <span className="font-bold text-white">{d.avg}</span>
+                        </p>
+                        <p>
+                          <span className="text-slate-400">Max: </span>
+                          <span className="text-green-400">{d.max}</span>
+                        </p>
+                        <p>
+                          <span className="text-slate-400">Min: </span>
+                          <span className="text-red-400">{d.min}</span>
+                        </p>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              }}
+            />
+            <Bar dataKey="avg" radius={[6, 6, 0, 0]} maxBarSize={36}>
+              {barData.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={entry.color}
+                  fillOpacity={0.7}
+                />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Stats Cards Below */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mt-6">
+        {sortedKeys.map((subject) => {
+          const color = SUBJECT_COLORS[subject] || "#8b5cf6";
+          return (
+            <div
+              key={subject}
+              className="rounded-xl bg-white/5 border border-white/5 p-3"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: color }}
+                />
+                <h4 className="text-xs font-medium text-slate-400 truncate">
+                  {SUBJECT_LABELS[subject] || subject}
+                </h4>
+              </div>
+              <p className="text-xl font-bold text-white">
+                {stats[subject].avg}
+              </p>
+              <div className="flex justify-between mt-2 text-[10px] text-slate-500 border-t border-white/5 pt-1.5">
+                <span>
+                  Max:{" "}
+                  <span className="text-green-400 font-medium">
+                    {stats[subject].max}
+                  </span>
+                </span>
+                <span>
+                  Min:{" "}
+                  <span className="text-red-400 font-medium">
+                    {stats[subject].min}
+                  </span>
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// ---------- Main Component ----------
 const AnalysisClient = () => {
   const reportRef = React.useRef();
   const [exams, setExams] = useState([]);
@@ -82,7 +363,6 @@ const AnalysisClient = () => {
         data.sort((a, b) => new Date(a.date) - new Date(b.date));
         setExams(data);
 
-        // Generate Analysis for the latest 5 exams
         if (data.length > 0) {
           const recentExams = data.slice(-5).map((e) => ({
             date: e.date,
@@ -94,7 +374,6 @@ const AnalysisClient = () => {
 
           const dataHash = JSON.stringify(recentExams);
 
-          // Check existing profile first
           const profile = await getUserProfile(user.uid);
 
           if (
@@ -104,7 +383,6 @@ const AnalysisClient = () => {
           ) {
             setAiAnalysis(profile.analysisMessage);
           } else {
-            // Generate new and save
             generateAnalysis(recentExams).then(async (res) => {
               setAiAnalysis(res);
               await updateUserProfile(user.uid, {
@@ -120,14 +398,7 @@ const AnalysisClient = () => {
     if (user) fetchExams();
   }, [user]);
 
-  const currentType =
-    activeTab === "REPORT" ? "TYT" : currentTabHelper(activeTab);
-
-  // Helper to safely determine type if strictly needed, though logic below seems fine.
-  // Actually checking original code: const currentType = activeTab === "REPORT" ? "TYT" : activeTab;
-  function currentTabHelper(tab) {
-    return tab;
-  }
+  const currentType = activeTab === "REPORT" ? "TYT" : activeTab;
 
   const stats = useMemo(
     () => calculateSubjectStats(exams, currentType),
@@ -180,11 +451,9 @@ const AnalysisClient = () => {
     const allSelected = visibleExams.every((e) => selectedExams.includes(e.id));
 
     if (allSelected) {
-      // Deselect only visible ones
       const visibleIds = visibleExams.map((e) => e.id);
       setSelectedExams(selectedExams.filter((id) => !visibleIds.includes(id)));
     } else {
-      // Select all visible ones
       const visibleIds = visibleExams.map((e) => e.id);
       setSelectedExams(visibleIds);
     }
@@ -192,7 +461,7 @@ const AnalysisClient = () => {
 
   const handleReportFilterChange = (type) => {
     setReportFilter(type);
-    setSelectedExams([]); // Clear selection when switching type to enforce separation
+    setSelectedExams([]);
   };
 
   const handleDownloadPDF = async () => {
@@ -215,97 +484,62 @@ const AnalysisClient = () => {
 
   return (
     <div className="space-y-6 pb-20">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-white">Detaylı Analiz</h1>
-        <div className="bg-slate-800 p-1 rounded-lg flex">
+      {/* Header + Tab */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+            <BarChart3 size={28} className="text-purple-400" />
+            Detaylı Analiz
+          </h1>
+          <p className="text-slate-400 text-sm mt-1">
+            Ders bazlı istatistikler, güçlü/zayıf alanlar ve trendler
+          </p>
+        </div>
+        <div className="flex gap-1 p-1 bg-white/5 rounded-xl w-fit">
           {["TYT", "AYT", "REPORT"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
                 activeTab === tab
-                  ? "bg-purple-600 text-white shadow-lg"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-purple-600 text-white shadow-lg shadow-purple-900/30"
+                  : "text-slate-400 hover:text-white hover:bg-white/5"
               }`}
             >
-              {tab === "REPORT" ? "Rapor Oluştur" : tab}
+              {tab === "REPORT" ? "Rapor" : tab}
             </button>
           ))}
         </div>
       </div>
 
-      {aiAnalysis && (
-        <div className="bg-linear-to-r from-blue-900/40 to-purple-900/40 border border-blue-500/30 p-6 rounded-xl relative overflow-hidden group hover:border-blue-500/50 transition-all">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="100"
-              height="100"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-blue-400"
-            >
-              <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5c0-5.523 4.477-10 10-10z" />
-              <path d="M8 12h.01" />
-              <path d="M16 12h.01" />
-              <path d="M12 16c-2 0-3-1-3-1" />
-            </svg>
-          </div>
-          <div className="flex items-start gap-4 z-10 relative">
-            <div className="mt-1 min-w-[40px] h-[40px] rounded-full bg-blue-600/20 flex items-center justify-center border border-blue-500/30">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-blue-400"
-              >
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-blue-100 mb-2">
-                Yapay Zeka Koç Görüşü
-              </h3>
-              <p className="text-slate-300 leading-relaxed italic">
-                &ldquo;{aiAnalysis}&rdquo;
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* AI Analysis */}
+      <AIAnalysisCard analysis={aiAnalysis} />
 
       {activeTab !== "REPORT" ? (
         exams.filter((e) => e.type === activeTab).length > 0 ? (
           <>
+            {/* Strength / Weakness */}
+            <StrengthWeaknessCards stats={stats} sortedKeys={sortedStatsKeys} />
+
             {/* Charts Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Radar Chart */}
-              <div className="glass-card">
-                <h3 className="text-lg font-bold text-white mb-4">
-                  Ders Bazlı Başarı Dağılımı
+              <div className="rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-5">
+                <h3 className="text-base font-bold text-white mb-4">
+                  Ders Başarı Dağılımı
                 </h3>
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <RadarChart
                       cx="50%"
                       cy="50%"
-                      outerRadius="80%"
+                      outerRadius="75%"
                       data={radarData}
                     >
-                      <PolarGrid stroke="#334155" />
+                      <PolarGrid stroke="#1e293b" />
                       <PolarAngleAxis
                         dataKey="subject"
-                        tick={{ fill: "#94a3b8", fontSize: 12 }}
+                        tick={{ fill: "#94a3b8", fontSize: 11 }}
                       />
                       <PolarRadiusAxis
                         angle={30}
@@ -319,25 +553,23 @@ const AnalysisClient = () => {
                         stroke="#8b5cf6"
                         strokeWidth={2}
                         fill="#8b5cf6"
-                        fillOpacity={0.3}
+                        fillOpacity={0.25}
                       />
                       <Tooltip
                         content={({ active, payload }) => {
                           if (active && payload && payload.length) {
                             const data = payload[0].payload;
                             return (
-                              <div className="bg-slate-800 border border-slate-700 p-3 rounded-lg shadow-xl">
-                                <p className="font-bold text-white mb-1">
+                              <div className="bg-slate-800/95 border border-white/10 backdrop-blur-sm p-3 rounded-xl shadow-xl">
+                                <p className="font-semibold text-white text-sm mb-1">
                                   {data.subject}
                                 </p>
-                                <div className="space-y-1">
-                                  <p className="text-purple-400 font-bold">
-                                    %{data.A} Başarı
-                                  </p>
-                                  <p className="text-slate-400 text-xs">
-                                    Net: {data.originalNet} / {data.fullMark}
-                                  </p>
-                                </div>
+                                <p className="text-purple-400 font-bold">
+                                  %{data.A}
+                                </p>
+                                <p className="text-slate-400 text-xs">
+                                  Net: {data.originalNet} / {data.fullMark}
+                                </p>
                               </div>
                             );
                           }
@@ -350,8 +582,8 @@ const AnalysisClient = () => {
               </div>
 
               {/* Trend Chart */}
-              <div className="glass-card">
-                <h3 className="text-lg font-bold text-white mb-4">
+              <div className="rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-5">
+                <h3 className="text-base font-bold text-white mb-4">
                   Genel Net Değişimi
                 </h3>
                 <div className="h-[300px]">
@@ -359,33 +591,51 @@ const AnalysisClient = () => {
                     <LineChart data={trendData}>
                       <CartesianGrid
                         strokeDasharray="3 3"
-                        stroke="#334155"
+                        stroke="#1e293b"
                         vertical={false}
                       />
                       <XAxis
                         dataKey="name"
-                        stroke="#94a3b8"
-                        fontSize={12}
+                        stroke="#475569"
+                        fontSize={11}
+                        tick={{ fill: "#64748b" }}
                         tickFormatter={(val) =>
                           val.split("-").slice(1).join("/")
                         }
                       />
-                      <YAxis stroke="#94a3b8" />
+                      <YAxis
+                        stroke="#475569"
+                        tick={{ fontSize: 11, fill: "#64748b" }}
+                      />
                       <Tooltip
-                        contentStyle={{
-                          backgroundColor: "#1e293b",
-                          borderColor: "#334155",
-                          color: "#f8fafc",
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="bg-slate-800/95 border border-white/10 backdrop-blur-sm p-3 rounded-xl shadow-xl">
+                                <p className="font-semibold text-white text-sm mb-1">
+                                  {payload[0].payload.examName}
+                                </p>
+                                <p className="text-pink-400 font-bold text-lg">
+                                  {payload[0].value} Net
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
                         }}
-                        labelStyle={{ color: "#94a3b8" }}
                       />
                       <Line
                         type="monotone"
                         dataKey="value"
                         stroke="#ec4899"
                         strokeWidth={3}
-                        dot={{ fill: "#ec4899" }}
-                        activeDot={{ r: 6 }}
+                        dot={{ fill: "#ec4899", r: 4, strokeWidth: 0 }}
+                        activeDot={{
+                          r: 6,
+                          fill: "#ec4899",
+                          stroke: "#fff",
+                          strokeWidth: 2,
+                        }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -393,59 +643,36 @@ const AnalysisClient = () => {
               </div>
             </div>
 
-            {/* Subject Stats Grid */}
-            <h3 className="text-xl font-bold text-white mt-8 mb-4">
-              Ders İstatistikleri
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {sortedStatsKeys.map((subject) => (
-                <div key={subject} className="glass-card p-4">
-                  <h4 className="text-slate-300 font-medium capitalize mb-2">
-                    {subject}
-                  </h4>
-                  <div className="flex items-end gap-2">
-                    <span className="text-2xl font-bold text-white">
-                      {stats[subject].avg}
-                    </span>
-                    <span className="text-xs text-slate-500 mb-1">
-                      Ort. Net
-                    </span>
-                  </div>
-                  <div className="flex justify-between mt-3 text-xs text-slate-400 border-t border-white/5 pt-2">
-                    <span>
-                      Max:{" "}
-                      <span className="text-green-400">
-                        {stats[subject].max}
-                      </span>
-                    </span>
-                    <span>
-                      Min:{" "}
-                      <span className="text-red-400">{stats[subject].min}</span>
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* Subject Stats Bar Chart + Grid */}
+            <SubjectStatsGrid stats={stats} sortedKeys={sortedStatsKeys} />
 
             {/* Subject Analysis Chart */}
-            <div className="glass-card mt-6">
-              <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
-                <h3 className="text-lg font-bold text-white">
+            <div className="rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-5 md:p-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-5 gap-3">
+                <h3 className="text-base font-bold text-white">
                   Ders Bazlı Net Değişimi
                 </h3>
 
-                <div className="flex flex-wrap justify-center gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {sortedStatsKeys.map((subject) => (
                     <button
                       key={subject}
                       onClick={() => setSelectedChartSubject(subject)}
-                      className={`px-3 py-1 rounded-md text-xs font-bold transition-all capitalize ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                         selectedChartSubject === subject
-                          ? "bg-blue-600 text-white shadow-lg"
-                          : "bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700"
+                          ? "text-white shadow-lg"
+                          : "bg-white/5 text-slate-400 hover:text-white hover:bg-white/10"
                       }`}
+                      style={
+                        selectedChartSubject === subject
+                          ? {
+                              backgroundColor:
+                                SUBJECT_COLORS[subject] || "#8b5cf6",
+                            }
+                          : {}
+                      }
                     >
-                      {subject}
+                      {SUBJECT_LABELS[subject] || subject}
                     </button>
                   ))}
                 </div>
@@ -464,46 +691,67 @@ const AnalysisClient = () => {
                       >
                         <stop
                           offset="5%"
-                          stopColor="#3b82f6"
+                          stopColor={
+                            SUBJECT_COLORS[selectedChartSubject] || "#3b82f6"
+                          }
                           stopOpacity={0.3}
                         />
                         <stop
                           offset="95%"
-                          stopColor="#3b82f6"
+                          stopColor={
+                            SUBJECT_COLORS[selectedChartSubject] || "#3b82f6"
+                          }
                           stopOpacity={0}
                         />
                       </linearGradient>
                     </defs>
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      stroke="#334155"
+                      stroke="#1e293b"
                       vertical={false}
                     />
                     <XAxis
                       dataKey="name"
-                      stroke="#94a3b8"
-                      tick={{ angle: -90, textAnchor: "end", fontSize: 12 }}
+                      stroke="#475569"
+                      tick={{
+                        angle: -45,
+                        textAnchor: "end",
+                        fontSize: 11,
+                        fill: "#64748b",
+                      }}
                       tickFormatter={(value) => {
                         if (!value) return "";
                         const date = new Date(value);
                         return date.toLocaleDateString("tr-TR", {
                           day: "numeric",
-                          month: "long",
+                          month: "short",
                         });
                       }}
                       height={60}
                     />
-                    <YAxis stroke="#94a3b8" />
+                    <YAxis
+                      stroke="#475569"
+                      tick={{ fontSize: 11, fill: "#64748b" }}
+                    />
                     <Tooltip
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
                           return (
-                            <div className="bg-slate-800 border border-slate-700 p-3 rounded-lg shadow-xl">
-                              <p className="font-medium text-slate-200 mb-1">
+                            <div className="bg-slate-800/95 border border-white/10 backdrop-blur-sm p-3 rounded-xl shadow-xl">
+                              <p className="font-semibold text-white text-sm mb-1">
                                 {payload[0].payload.examName}
                               </p>
-                              <p className="text-blue-400 font-bold capitalize">
-                                {selectedChartSubject}: {payload[0].value} Net
+                              <p
+                                className="font-bold text-lg"
+                                style={{
+                                  color:
+                                    SUBJECT_COLORS[selectedChartSubject] ||
+                                    "#3b82f6",
+                                }}
+                              >
+                                {SUBJECT_LABELS[selectedChartSubject] ||
+                                  selectedChartSubject}
+                                : {payload[0].value} Net
                               </p>
                             </div>
                           );
@@ -514,10 +762,21 @@ const AnalysisClient = () => {
                     <Area
                       type="monotone"
                       dataKey="value"
-                      stroke="#3b82f6"
+                      stroke={SUBJECT_COLORS[selectedChartSubject] || "#3b82f6"}
                       fillOpacity={1}
                       fill="url(#colorSubjectNet)"
                       strokeWidth={3}
+                      dot={{
+                        fill: SUBJECT_COLORS[selectedChartSubject] || "#3b82f6",
+                        r: 4,
+                        strokeWidth: 0,
+                      }}
+                      activeDot={{
+                        r: 6,
+                        fill: SUBJECT_COLORS[selectedChartSubject] || "#3b82f6",
+                        stroke: "#fff",
+                        strokeWidth: 2,
+                      }}
                       name="Net"
                     />
                   </AreaChart>
@@ -526,25 +785,28 @@ const AnalysisClient = () => {
             </div>
           </>
         ) : (
-          <div className="glass-card text-center py-16">
-            <p className="text-slate-400 text-lg">
-              Henüz {activeTab} deneme verisi bulunamadı.
+          <div className="rounded-2xl border border-dashed border-white/10 bg-slate-800/30 text-center py-16">
+            <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-5">
+              <BarChart3 size={28} className="text-purple-400" />
+            </div>
+            <p className="text-white text-lg font-semibold mb-2">
+              Henüz {activeTab} deneme verisi bulunamadı
             </p>
-            <p className="text-slate-500 text-sm mt-2">
+            <p className="text-slate-500 text-sm">
               Deneme ekledikten sonra analizler burada görünecek.
             </p>
           </div>
         )
       ) : (
         /* Report Generation View */
-        <div className="glass-card">
+        <div className="rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-5 md:p-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-4">
               <h3 className="text-lg font-bold text-white">Rapor Oluştur</h3>
-              <div className="flex bg-slate-800 p-1 rounded-lg">
+              <div className="flex gap-1 p-1 bg-white/5 rounded-xl">
                 <button
                   onClick={() => handleReportFilterChange("TYT")}
-                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     reportFilter === "TYT"
                       ? "bg-purple-600 text-white shadow"
                       : "text-slate-400 hover:text-white"
@@ -554,7 +816,7 @@ const AnalysisClient = () => {
                 </button>
                 <button
                   onClick={() => handleReportFilterChange("AYT")}
-                  className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     reportFilter === "AYT"
                       ? "bg-pink-600 text-white shadow"
                       : "text-slate-400 hover:text-white"
@@ -565,32 +827,32 @@ const AnalysisClient = () => {
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={selectAllExams}
-                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-sm transition-colors"
+                className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white text-sm transition-colors cursor-pointer"
               >
                 Tümünü Seç
               </button>
               <button
                 onClick={handleDownloadPDF}
-                className="glass-btn flex items-center gap-2"
+                className="glass-btn flex items-center gap-2 cursor-pointer"
               >
                 <FileDown size={18} />
-                PDF Olarak İndir
+                PDF İndir
               </button>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-xl border border-white/5">
             <table className="w-full text-left text-sm text-slate-400">
-              <thead className="text-xs uppercase bg-slate-800/50 text-slate-200">
+              <thead className="text-xs uppercase bg-white/5 text-slate-300">
                 <tr>
-                  <th className="px-4 py-3 rounded-tl-lg">Seç</th>
+                  <th className="px-4 py-3">Seç</th>
                   <th className="px-4 py-3">Tarih</th>
                   <th className="px-4 py-3">Deneme Adı</th>
                   <th className="px-4 py-3">Tür</th>
-                  <th className="px-4 py-3 rounded-tr-lg text-right">Net</th>
+                  <th className="px-4 py-3 text-right">Net</th>
                 </tr>
               </thead>
               <tbody>
@@ -599,7 +861,7 @@ const AnalysisClient = () => {
                   .map((exam) => (
                     <tr
                       key={exam.id}
-                      className={`border-b border-slate-700/50 hover:bg-white/5 transition-colors cursor-pointer ${selectedExams.includes(exam.id) ? "bg-purple-900/20" : ""}`}
+                      className={`border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer ${selectedExams.includes(exam.id) ? "bg-purple-900/20" : ""}`}
                       onClick={() => toggleExamSelection(exam.id)}
                     >
                       <td className="px-4 py-3">
@@ -615,7 +877,7 @@ const AnalysisClient = () => {
                       </td>
                       <td className="px-4 py-3">
                         <span
-                          className={`px-2 py-1 rounded text-xs ${exam.type === "TYT" ? "bg-purple-500/20 text-purple-300" : "bg-pink-500/20 text-pink-300"}`}
+                          className={`px-2.5 py-1 rounded-full text-xs font-medium ${exam.type === "TYT" ? "bg-purple-500/20 text-purple-300" : "bg-pink-500/20 text-pink-300"}`}
                         >
                           {exam.type} {exam.subtype && `(${exam.subtype})`}
                         </span>
@@ -630,6 +892,7 @@ const AnalysisClient = () => {
           </div>
         </div>
       )}
+
       {/* Hidden Report Component for PDF Generation */}
       <div style={{ position: "absolute", left: "-9999px", top: 0 }}>
         <AnalysisReport
