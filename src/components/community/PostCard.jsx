@@ -10,10 +10,13 @@ import {
   Trash2,
   X,
   ExternalLink,
+  Send,
+  Edit2,
+  Reply,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { toggleLike, addComment, getComments, deletePost } from "../../services/communityService";
+import { toggleLike, addComment, getComments, deletePost, editComment, deleteComment } from "../../services/communityService";
 
 const PostCard = ({ post, user, onPostDeleted, isDetail = false }) => {
   const [isLiked, setIsLiked] = useState(false);
@@ -27,8 +30,14 @@ const PostCard = ({ post, user, onPostDeleted, isDetail = false }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // New comment states
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [editingComment, setEditingComment] = useState(null);
+  const [loadingActionId, setLoadingActionId] = useState(null);
+  const [activeCommentMenu, setActiveCommentMenu] = useState(null);
+
   // We'll use this to navigate to the room structure
-  const roomLink = `/community/${post.id}`;
+  const roomLink = `/dashboard/community/${post.id}`;
 
   const fetchComments = useCallback(async () => {
     setLoadingComments(true);
@@ -98,10 +107,26 @@ const PostCard = ({ post, user, onPostDeleted, isDetail = false }) => {
     e.preventDefault();
     if (!newComment.trim()) return;
 
+    if (editingComment) {
+      setSubmittingComment(true);
+      try {
+        await editComment(post.id, editingComment.id, newComment);
+        setEditingComment(null);
+        setNewComment("");
+        fetchComments();
+      } catch (error) {
+        console.error("Error editing comment:", error);
+      } finally {
+        setSubmittingComment(false);
+      }
+      return;
+    }
+
     setSubmittingComment(true);
     try {
-      await addComment(post.id, newComment, user);
+      await addComment(post.id, newComment, user, replyingTo?.id, replyingTo?.userName);
       setNewComment("");
+      setReplyingTo(null);
       setCommentsCount((prev) => prev + 1);
       fetchComments(); // Refresh comments
     } catch (error) {
@@ -112,7 +137,7 @@ const PostCard = ({ post, user, onPostDeleted, isDetail = false }) => {
   };
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/community/${post.id}`;
+    const shareUrl = `${window.location.origin}/dashboard/community/${post.id}`;
     const shareData = {
       title: post.title || "Puanİz Gönderisi",
       text: post.text?.substring(0, 100) + "...",
@@ -136,6 +161,40 @@ const PostCard = ({ post, user, onPostDeleted, isDetail = false }) => {
     }
   };
 
+  const handleEditComment = (comment) => {
+    setEditingComment({ id: comment.id, text: comment.text });
+    setNewComment(comment.text);
+    setReplyingTo(null);
+    setActiveCommentMenu(null);
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Bu yorumu silmek istediğinden emin misin?")) return;
+    setLoadingActionId(commentId);
+    try {
+        await deleteComment(post.id, commentId);
+        setCommentsCount((prev) => Math.max(0, prev - 1));
+        fetchComments();
+    } catch(err) {
+        console.error("Error deleting comment:", err);
+    } finally {
+        setLoadingActionId(null);
+        setActiveCommentMenu(null);
+    }
+  };
+
+  const handleReplyClick = (comment) => {
+    setReplyingTo({ id: comment.id, userName: comment.userName });
+    setEditingComment(null);
+    setNewComment("");
+  };
+  
+  const cancelReplyOrEdit = () => {
+    setReplyingTo(null);
+    setEditingComment(null);
+    setNewComment("");
+  };
+
   const formatTime = (timestamp) => {
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -156,66 +215,68 @@ const PostCard = ({ post, user, onPostDeleted, isDetail = false }) => {
     <div
       className={`transition-all duration-300 ${
         isDetail
-          ? "bg-transparent h-full flex flex-col" // Full height, transparent, flex column for chat layout
+          ? "bg-slate-900/40 flex flex-col" 
           : "bg-slate-800 rounded-xl border border-white/10 overflow-hidden shadow-lg hover:shadow-xl hover:border-white/20 group relative"
       }`}
     >
       <div className={isDetail ? "p-6 md:p-8" : "p-4"}>
-        {/* Header */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div
-              className={`${isDetail ? "w-12 h-12" : "w-10 h-10"} rounded-full bg-slate-700 flex items-center justify-center overflow-hidden border-2 border-slate-600`}
-            >
-              {post.userPhoto ? (
-                <div className="relative w-full h-full">
-                  <Image src={post.userPhoto} alt={post.userName} fill className="object-cover" sizes="40px" />
+        {/* Header - Only show in feed/list view, Topic page has its own unified header */}
+        {!isDetail && (
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-3">
+              <div
+                className={`${isDetail ? "w-12 h-12" : "w-10 h-10"} rounded-full bg-slate-700 flex items-center justify-center overflow-hidden border-2 border-slate-600`}
+              >
+                {post.userPhoto ? (
+                  <div className="relative w-full h-full">
+                    <Image src={post.userPhoto} alt={post.userName} fill className="object-cover" sizes="40px" />
+                  </div>
+                ) : (
+                  <User size={20} className="text-slate-400" />
+                )}
+              </div>
+              <div>
+                {isDetail ? (
+                  <span className="font-semibold text-white text-sm">{post.userName}</span>
+                ) : (
+                  <Link href={roomLink} className="font-semibold text-white text-sm hover:underline">
+                    {post.userName}
+                  </Link>
+                )}
+                <div className="text-xs text-slate-400 flex items-center gap-1">
+                  <Clock size={10} />
+                  {formatTime(post.createdAt)}
                 </div>
-              ) : (
-                <User size={20} className="text-slate-400" />
-              )}
-            </div>
-            <div>
-              {isDetail ? (
-                <span className="font-semibold text-white text-sm">{post.userName}</span>
-              ) : (
-                <Link href={roomLink} className="font-semibold text-white text-sm hover:underline">
-                  {post.userName}
-                </Link>
-              )}
-              <div className="text-xs text-slate-400 flex items-center gap-1">
-                <Clock size={10} />
-                {formatTime(post.createdAt)}
               </div>
             </div>
+
+            {isOwner && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="text-slate-500 hover:text-white transition-colors p-1 rounded-full hover:bg-white/5"
+                >
+                  <MoreHorizontal size={18} />
+                </button>
+
+                {showMenu && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)}></div>
+                    <div className="absolute right-0 top-full mt-1 bg-slate-800 border border-white/10 rounded-lg shadow-xl z-20 w-32 py-1 overflow-hidden">
+                      <button
+                        onClick={handleDelete}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors text-left"
+                      >
+                        <Trash2 size={14} />
+                        <span>Sil</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
-
-          {isOwner && (
-            <div className="relative">
-              <button
-                onClick={() => setShowMenu(!showMenu)}
-                className="text-slate-500 hover:text-white transition-colors p-1 rounded-full hover:bg-white/5"
-              >
-                <MoreHorizontal size={18} />
-              </button>
-
-              {showMenu && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)}></div>
-                  <div className="absolute right-0 top-full mt-1 bg-slate-800 border border-white/10 rounded-lg shadow-xl z-20 w-32 py-1 overflow-hidden">
-                    <button
-                      onClick={handleDelete}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors text-left"
-                    >
-                      <Trash2 size={14} />
-                      <span>Sil</span>
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Content - Link to the room */}
         <div className="mb-4">
@@ -344,58 +405,206 @@ const PostCard = ({ post, user, onPostDeleted, isDetail = false }) => {
 
       {/* Comments Section */}
       {showComments && (
-        <div className={`${isDetail ? "bg-transparent p-0 mt-4" : "bg-slate-900/30 border-t border-white/5 p-4"}`}>
-          <form onSubmit={handleCommentSubmit} className="flex gap-2 mb-4">
-            <input
-              type="text"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Yorum yap..."
-              className="flex-1 bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-purple-500"
-            />
-            <button
-              type="submit"
-              disabled={submittingComment || !newComment.trim()}
-              className="bg-purple-600 hover:bg-purple-500 text-white rounded-lg p-2 disabled:opacity-50"
-            >
-              <Check size={18} />
-            </button>
-          </form>
+        <div className={`${isDetail ? "bg-slate-950 p-6 md:p-8 border-t border-white/10" : "bg-slate-900/30 border-t border-white/5 p-4"}`}>
+          <div className="mb-6">
+            <h4 className="text-lg font-bold text-white mb-4">Yanıtlar ({commentsCount})</h4>
+            <form onSubmit={handleCommentSubmit} className="flex flex-col gap-3">
+              {(replyingTo || editingComment) && (
+                <div className="flex items-center justify-between text-xs text-slate-400 bg-slate-800/50 px-3 py-2 rounded-lg border border-white/5">
+                  <div className="flex items-center gap-2">
+                    {replyingTo ? (
+                      <>
+                        <Reply size={14} className="text-purple-400" />
+                        <span><strong className="text-purple-400">{replyingTo.userName}</strong> kullanıcısına yanıt veriyorsun</span>
+                      </>
+                    ) : (
+                      <>
+                        <Edit2 size={14} className="text-blue-400" />
+                        <span>Yorumu düzenliyorsun</span>
+                      </>
+                    )}
+                  </div>
+                  <button type="button" onClick={cancelReplyOrEdit} className="p-1 hover:text-white rounded-full hover:bg-white/10 transition-colors">
+                    <X size={14} />
+                  </button>
+                </div>
+              )}
+              <div className="flex gap-3">
+                <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center shrink-0 border border-white/10 overflow-hidden">
+                  {user?.photoURL ? (
+                    <Image src={user.photoURL} alt="User" width={40} height={40} className="object-cover" />
+                  ) : (
+                    <User size={20} className="text-slate-400" />
+                  )}
+                </div>
+                <input
+                  type="text"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder={editingComment ? "Yorumu güncelle..." : "Bu konuya yanıt ver..."}
+                  className="flex-1 bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                />
+                <button
+                  type="submit"
+                  disabled={submittingComment || !newComment.trim()}
+                  className="bg-purple-600 hover:bg-purple-500 text-white rounded-xl px-4 py-2 disabled:opacity-50 transition-colors flex items-center gap-2 font-medium"
+                >
+                  <span className="hidden sm:inline">{editingComment ? "Güncelle" : "Gönder"}</span>
+                  {editingComment ? <Check size={16} /> : <Send size={16} />}
+                </button>
+              </div>
+            </form>
+          </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {loadingComments ? (
               <div className="flex justify-center p-2 text-slate-500 text-sm">Yükleniyor...</div>
             ) : comments.length > 0 ? (
-              comments.map((comment) => (
-                <div key={comment.id} className="flex gap-3 text-sm">
-                  <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center overflow-hidden border border-white/10 shrink-0">
-                    {comment.userPhoto ? (
-                      <div className="relative w-full h-full">
-                        <Image
-                          src={comment.userPhoto}
-                          alt={comment.userName}
-                          fill
-                          className="object-cover"
-                          sizes="32px"
-                        />
-                      </div>
-                    ) : (
-                      <User size={16} className="text-slate-400" />
-                    )}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-white">{comment.userName}</span>
-                      <span className="text-xs text-slate-500">{formatTime(comment.createdAt)}</span>
-                    </div>
-                    <p className="text-slate-300">{comment.text}</p>
-                  </div>
-                </div>
-              ))
+              comments
+                .filter((c) => !c.replyToId)
+                .map((comment) => (
+                  <CommentItem
+                    key={comment.id}
+                    comment={comment}
+                    allComments={comments}
+                    user={user}
+                    formatTime={formatTime}
+                    handleReplyClick={handleReplyClick}
+                    handleEditComment={handleEditComment}
+                    handleDeleteComment={handleDeleteComment}
+                    activeCommentMenu={activeCommentMenu}
+                    setActiveCommentMenu={setActiveCommentMenu}
+                    loadingActionId={loadingActionId}
+                  />
+                ))
             ) : (
               <div className="text-center text-slate-500 text-sm py-2">Henüz yorum yok. İlk yorumu sen yap!</div>
             )}
           </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const CommentItem = ({
+  comment,
+  allComments,
+  user,
+  formatTime,
+  handleReplyClick,
+  handleEditComment,
+  handleDeleteComment,
+  activeCommentMenu,
+  setActiveCommentMenu,
+  loadingActionId,
+}) => {
+  const [showAllReplies, setShowAllReplies] = useState(false);
+  const replies = allComments.filter((c) => c.replyToId === comment.id);
+  const displayedReplies = showAllReplies ? replies : replies.slice(0, 3);
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-4 p-4 rounded-xl bg-slate-900/50 border border-white/5 group/comment">
+        <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-700 shrink-0">
+          {comment.userPhoto ? (
+            <div className="relative w-full h-full">
+              <Image src={comment.userPhoto} alt={comment.userName} fill className="object-cover" sizes="40px" />
+            </div>
+          ) : (
+            <User size={20} className="text-slate-400" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-white text-sm">{comment.userName}</span>
+              <span className="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded-full">
+                {formatTime(comment.createdAt)}
+              </span>
+              {comment.isEdited && <span className="text-[10px] text-slate-500">(Düzenlendi)</span>}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleReplyClick(comment)}
+                className="text-slate-500 hover:text-purple-400 transition-colors text-xs font-medium opacity-0 group-hover/comment:opacity-100 flex items-center gap-1 cursor-pointer"
+              >
+                <Reply size={12} />
+                Yanıtla
+              </button>
+
+              {user?.uid === comment.userId && (
+                <div className="relative">
+                  <button
+                    onClick={() => setActiveCommentMenu(activeCommentMenu === comment.id ? null : comment.id)}
+                    className="text-slate-500 hover:text-white transition-colors p-1 rounded-full hover:bg-white/5 opacity-0 group-hover/comment:opacity-100 cursor-pointer"
+                  >
+                    <MoreHorizontal size={14} />
+                  </button>
+                  {activeCommentMenu === comment.id && (
+                    <>
+                      <div className="fixed inset-0 z-10" onClick={() => setActiveCommentMenu(null)}></div>
+                      <div className="absolute right-0 top-full mt-1 bg-slate-800 border border-white/10 rounded-lg shadow-xl z-20 w-32 py-1 overflow-hidden">
+                        <button
+                          onClick={() => handleEditComment(comment)}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-white/5 transition-colors text-left cursor-pointer"
+                        >
+                          <Edit2 size={14} />
+                          <span>Düzenle</span>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteComment(comment.id)}
+                          disabled={loadingActionId === comment.id}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors text-left disabled:opacity-50 cursor-pointer"
+                        >
+                          <Trash2 size={14} />
+                          <span>{loadingActionId === comment.id ? "Siliniyor..." : "Sil"}</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {comment.replyToUser && (
+            <div className="text-xs text-purple-400 font-medium mb-1 flex items-center gap-1">
+              <Reply size={12} />
+              {comment.replyToUser}
+            </div>
+          )}
+          <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap break-words">{comment.text}</p>
+        </div>
+      </div>
+
+      {replies.length > 0 && (
+        <div className="ml-4 md:ml-10 border-l border-white/5 pl-4 space-y-3 mt-1">
+          {displayedReplies.map((reply) => (
+            <CommentItem
+              key={reply.id}
+              comment={reply}
+              allComments={allComments}
+              user={user}
+              formatTime={formatTime}
+              handleReplyClick={handleReplyClick}
+              handleEditComment={handleEditComment}
+              handleDeleteComment={handleDeleteComment}
+              activeCommentMenu={activeCommentMenu}
+              setActiveCommentMenu={setActiveCommentMenu}
+              loadingActionId={loadingActionId}
+            />
+          ))}
+          {replies.length > 3 && !showAllReplies && (
+            <button
+              onClick={() => setShowAllReplies(true)}
+              className="text-xs text-purple-400 hover:text-purple-300 font-semibold py-1 px-3 rounded-lg hover:bg-purple-500/10 transition-all flex items-center gap-2 w-fit"
+            >
+              <div className="w-1 h-1 rounded-full bg-purple-500"></div>
+              {replies.length - 3} yanıtı daha göster...
+            </button>
+          )}
         </div>
       )}
     </div>

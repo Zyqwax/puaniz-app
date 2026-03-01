@@ -31,7 +31,9 @@ export const createPost = async (title, text, imageFile, tags = [], user) => {
   // Combine selected tags with any hashtags found in text (optional, but good for completeness)
   // For now, let's rely on the passed 'tags' array as the primary source of truth for filtering
   // parse hashtags from text and remove #:
-  const textTags = (text.match(/#[a-zA-Z0-9ığüşöçİĞÜŞÖÇ]+/g) || []).map((t) => t.replace("#", ""));
+  const textTags = (text.match(/#[a-zA-Z0-9ığüşöçİĞÜŞÖÇ]+/g) || []).map((t) =>
+    t.replace("#", ""),
+  );
   const allTags = [...new Set([...tags, ...textTags])];
 
   const postData = {
@@ -62,9 +64,17 @@ export const getPosts = async (tag = null) => {
     // Note: Using where + orderBy usually requires a composite index in Firestore.
     // To avoid "everything returned" (due to failed query caught silently) or index errors for now,
     // we will sort client-side for filtered results.
-    q = query(collection(db, POSTS_COLLECTION), where("tags", "array-contains", tag), limit(20));
+    q = query(
+      collection(db, POSTS_COLLECTION),
+      where("tags", "array-contains", tag),
+      limit(20),
+    );
   } else {
-    q = query(collection(db, POSTS_COLLECTION), orderBy("createdAt", "desc"), limit(20));
+    q = query(
+      collection(db, POSTS_COLLECTION),
+      orderBy("createdAt", "desc"),
+      limit(20),
+    );
   }
 
   const querySnapshot = await getDocs(q);
@@ -126,8 +136,16 @@ export const toggleLike = async (postId, userId, isLiked) => {
  * @param {string} postId
  * @param {string} text
  * @param {object} user
+ * @param {string|null} replyToId
+ * @param {string|null} replyToUser
  */
-export const addComment = async (postId, text, user) => {
+export const addComment = async (
+  postId,
+  text,
+  user,
+  replyToId = null,
+  replyToUser = null,
+) => {
   const commentsRef = collection(db, POSTS_COLLECTION, postId, "comments");
   const postRef = doc(db, POSTS_COLLECTION, postId);
 
@@ -137,6 +155,8 @@ export const addComment = async (postId, text, user) => {
     userName: user.displayName || user.email.split("@")[0],
     userPhoto: user.photoURL,
     text,
+    replyToId,
+    replyToUser,
     createdAt: serverTimestamp(),
   });
 
@@ -157,6 +177,41 @@ export const addComment = async (postId, text, user) => {
  */
 export const deletePost = async (postId) => {
   await deleteDoc(doc(db, POSTS_COLLECTION, postId));
+};
+
+/**
+ * Deletes a comment
+ * @param {string} postId
+ * @param {string} commentId
+ */
+export const deleteComment = async (postId, commentId) => {
+  const postRef = doc(db, POSTS_COLLECTION, postId);
+
+  // Delete comment
+  await deleteDoc(doc(db, POSTS_COLLECTION, postId, "comments", commentId));
+
+  // Decrement comment count on post
+  const postSnap = await getDoc(postRef);
+  const currentCount = postSnap.data()?.commentsCount || 1;
+
+  await updateDoc(postRef, {
+    commentsCount: Math.max(0, currentCount - 1),
+  });
+};
+
+/**
+ * Edits a comment
+ * @param {string} postId
+ * @param {string} commentId
+ * @param {string} newText
+ */
+export const editComment = async (postId, commentId, newText) => {
+  const commentRef = doc(db, POSTS_COLLECTION, postId, "comments", commentId);
+  await updateDoc(commentRef, {
+    text: newText,
+    isEdited: true,
+    updatedAt: serverTimestamp(),
+  });
 };
 
 /**

@@ -6,8 +6,8 @@ export async function generateMetadata({ params }) {
 
   try {
     const post = await getPost(id);
-    const title = post.title || "Soru Odası";
-    const description = post.text?.substring(0, 160) || "Puaniz topluluk soru odası";
+    const title = post.title || "Topluluk";
+    const description = post.text?.substring(0, 160) || "Puaniz topluluk";
 
     return {
       title: `${title} | Puaniz Topluluk`,
@@ -26,8 +26,8 @@ export async function generateMetadata({ params }) {
     };
   } catch {
     return {
-      title: "Soru Odası",
-      description: "Puaniz topluluk soru odası",
+      title: "Topluluk",
+      description: "Puaniz topluluk",
     };
   }
 }

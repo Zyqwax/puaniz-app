@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import CreatePost from "@/components/community/CreatePost";
-import PostCard from "@/components/community/PostCard";
+import ForumRow from "@/components/community/ForumRow";
 import PostSkeleton from "@/components/community/PostSkeleton";
 import Modal from "@/components/Modal";
 import { getPosts } from "@/services/communityService";
@@ -70,7 +70,9 @@ const CommunityClient = () => {
           <h1 className="text-3xl font-bold bg-linear-to-r from-white to-slate-400 bg-clip-text text-transparent">
             Topluluk & Soru-Cevap
           </h1>
-          <p className="text-slate-400 mt-2 text-lg">Sorularını sor, diğerlerine yardım et ve tartış.</p>
+          <p className="text-slate-400 mt-2 text-lg">
+            Sorularını sor, diğerlerine yardım et ve tartış.
+          </p>
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
@@ -90,7 +92,10 @@ const CommunityClient = () => {
                 }
               }}
             />
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+            <Search
+              size={18}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+            />
             {searchQuery && (
               <button
                 onClick={clearSearch}
@@ -117,7 +122,10 @@ const CommunityClient = () => {
           <span className="text-slate-400">Etikete göre filtrelendi:</span>
           <div className="flex items-center gap-2 px-3 py-1 bg-purple-500/20 text-purple-300 rounded-lg border border-purple-500/20">
             <span className="font-semibold">{activeTag}</span>
-            <button onClick={() => setActiveTag(null)} className="hover:text-white">
+            <button
+              onClick={() => setActiveTag(null)}
+              className="hover:text-white"
+            >
               <X size={14} />
             </button>
           </div>
@@ -129,7 +137,9 @@ const CommunityClient = () => {
         <div className="lg:col-span-1 hidden lg:block">
           <div className="sticky top-4 space-y-6">
             <div className="bg-slate-800/50 rounded-xl p-4 border border-white/5">
-              <h3 className="font-semibold text-white mb-2">Topluluk Kuralları</h3>
+              <h3 className="font-semibold text-white mb-2">
+                Topluluk Kuralları
+              </h3>
               <ul className="text-sm text-slate-400 space-y-2 list-disc list-inside">
                 <li>Saygılı ve yapıcı olun.</li>
                 <li>Net ve anlaşılır sorular sorun.</li>
@@ -165,18 +175,27 @@ const CommunityClient = () => {
           {/* Mobile Tags (Horizontal Scroll) */}
           <div className="lg:hidden mb-6 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
             <div className="flex gap-2 w-max">
-              {["TYT", "AYT", "Matematik", "Geometri", "Fizik", "Kimya", "Biyoloji", "Türkçe", "Tarih", "Coğrafya"].map(
-                (tag) => (
-                  <button
-                    key={tag}
-                    onClick={() => setActiveTag(tag)}
-                    className={`text-sm px-4 py-2 rounded-xl cursor-pointer transition-colors border border-white/5 whitespace-nowrap 
+              {[
+                "TYT",
+                "AYT",
+                "Matematik",
+                "Geometri",
+                "Fizik",
+                "Kimya",
+                "Biyoloji",
+                "Türkçe",
+                "Tarih",
+                "Coğrafya",
+              ].map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => setActiveTag(tag)}
+                  className={`text-sm px-4 py-2 rounded-xl cursor-pointer transition-colors border border-white/5 whitespace-nowrap 
                     ${activeTag === tag ? "bg-purple-600 text-white shadow-lg shadow-purple-900/20" : "bg-slate-800 text-slate-300 hover:bg-slate-700"}`}
-                  >
-                    #{tag}
-                  </button>
-                ),
-              )}
+                >
+                  #{tag}
+                </button>
+              ))}
               {activeTag && (
                 <button
                   onClick={() => setActiveTag(null)}
@@ -189,15 +208,15 @@ const CommunityClient = () => {
           </div>
 
           {loading ? (
-            <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+            <div className="flex flex-col gap-3">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="break-inside-avoid">
+                <div key={i} className="w-full">
                   <PostSkeleton />
                 </div>
               ))}
             </div>
           ) : posts.length > 0 ? (
-            <div className="columns-1 md:columns-2 gap-4 space-y-4">
+            <div className="flex flex-col gap-3">
               {posts
                 .filter((post) => {
                   if (!searchQuery) return true;
@@ -208,23 +227,31 @@ const CommunityClient = () => {
                   );
                 })
                 .map((post) => (
-                  <div key={post.id} className="break-inside-avoid mb-4">
-                    <PostCard post={post} user={user} onPostDeleted={handlePostCreated} />
-                  </div>
+                  <ForumRow key={post.id} post={post} user={user} />
                 ))}
             </div>
           ) : (
             <div className="text-center py-20 bg-slate-800/30 rounded-3xl border border-white/5 text-slate-400">
               <p className="text-xl">Henüz hiç gönderi yok.</p>
-              <p className="mt-2 text-sm">İlk paylaşımı sen yap ve topluluğu başlat!</p>
+              <p className="mt-2 text-sm">
+                İlk paylaşımı sen yap ve topluluğu başlat!
+              </p>
             </div>
           )}
         </div>
       </div>
 
       {/* Create Post Modal */}
-      <Modal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} title="Yeni Gönderi Oluştur">
-        <CreatePost user={user} onPostCreated={handlePostCreated} onClose={() => setIsCreateModalOpen(false)} />
+      <Modal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        title="Yeni Gönderi Oluştur"
+      >
+        <CreatePost
+          user={user}
+          onPostCreated={handlePostCreated}
+          onClose={() => setIsCreateModalOpen(false)}
+        />
       </Modal>
     </div>
   );
