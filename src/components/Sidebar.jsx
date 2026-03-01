@@ -14,6 +14,7 @@ import {
   Sparkles,
   Users,
   Shield,
+  ClipboardList,
 } from "lucide-react";
 
 import ProfileCard from "./ProfileCard";
@@ -24,6 +25,7 @@ const Sidebar = ({ isOpen, onClose, user, isCollapsed }) => {
   const baseNavItems = [
     { path: "/dashboard", icon: LayoutDashboard, label: "Özet" },
     { path: "/dashboard/add-exam", icon: PlusCircle, label: "Deneme Ekle" },
+    { path: "/dashboard/subjects", icon: ClipboardList, label: "Konu Takip" },
     { path: "/dashboard/analysis", icon: PieChart, label: "Analizler" },
     { path: "/dashboard/community", icon: Users, label: "Soru-Cevap" },
     { path: "/dashboard/assistant", icon: Bot, label: "Asistana Sor" },

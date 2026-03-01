@@ -1,7 +1,17 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { User, Link, BookOpen, Save, ArrowLeft, Loader2 } from "lucide-react";
+import {
+  User,
+  BookOpen,
+  Save,
+  Loader2,
+  Camera,
+  Mail,
+  Trash2,
+  AlertTriangle,
+  Shield,
+} from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
@@ -12,7 +22,6 @@ import {
 } from "@/services/userService";
 import { updateProfile, deleteUser } from "firebase/auth";
 import { uploadProfileImage } from "@/services/cloudinaryService";
-import { Trash2, AlertTriangle } from "lucide-react";
 
 const SettingsClient = () => {
   const router = useRouter();
@@ -72,6 +81,7 @@ const SettingsClient = () => {
           type: "success",
           content: "Profil başarıyla güncellendi!",
         });
+        setTimeout(() => setMessage({ type: "", content: "" }), 3000);
       }
     } catch (error) {
       console.error(error);
@@ -92,16 +102,11 @@ const SettingsClient = () => {
 
     try {
       if (user) {
-        // 1. Delete Firestore Data
         const dbResult = await deleteUserAccountData(user.uid);
         if (!dbResult.success) {
           throw new Error("Veri silme işlemi sırasında hata oluştu.");
         }
-
-        // 2. Delete Auth Account
         await deleteUser(user);
-
-        // 3. Redirect
         router.push("/auth/login");
       }
     } catch (error) {
@@ -137,265 +142,227 @@ const SettingsClient = () => {
     formData.avatarUrl ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name || "User")}&background=random`;
 
+  const grades = [
+    { value: "9. Sınıf", label: "9. Sınıf" },
+    { value: "10. Sınıf", label: "10. Sınıf" },
+    { value: "11. Sınıf", label: "11. Sınıf" },
+    { value: "12. Sınıf - SAY", label: "12. Sınıf — Sayısal" },
+    { value: "12. Sınıf - EA", label: "12. Sınıf — Eşit Ağırlık" },
+    { value: "12. Sınıf - SÖZ", label: "12. Sınıf — Sözel" },
+    { value: "12. Sınıf - DİL", label: "12. Sınıf — Dil" },
+    { value: "Mezun - SAY", label: "Mezun — Sayısal" },
+    { value: "Mezun - EA", label: "Mezun — Eşit Ağırlık" },
+    { value: "Mezun - SÖZ", label: "Mezun — Sözel" },
+    { value: "Mezun - DİL", label: "Mezun — Dil" },
+  ];
+
   return (
-    <div className="space-y-6 pb-20">
-      <button
-        onClick={() => router.push("/dashboard")}
-        className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors cursor-pointer"
-      >
-        <ArrowLeft size={20} />
-        <span>Geri Dön</span>
-      </button>
-
-      <div className="glass-panel p-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none -mr-32 -mt-32" />
-
-        <h2 className="text-2xl font-bold bg-linear-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-6">
-          Profil Ayarları
-        </h2>
-
-        <div className="flex flex-col md:flex-row gap-8">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="relative group">
-              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-purple-500/30 group-hover:border-purple-500 transition-colors bg-slate-800 relative">
-                <Image
-                  src={avatarPreview}
-                  alt="Profile Preview"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            </div>
-            <p className="text-sm text-slate-400">Profil Önizleme</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="flex-1 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                  <User size={16} /> Ad Soyad
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Adınız Soyadınız"
-                  className="glass-input w-full"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                  <BookOpen size={16} /> Sınıfım / Bölümüm
-                </label>
-                <select
-                  name="grade"
-                  value={formData.grade}
-                  onChange={handleChange}
-                  className="glass-input w-full"
-                >
-                  <option value="" className="bg-slate-800 text-white">
-                    Seçiniz...
-                  </option>
-                  <option
-                    value="12. Sınıf - SAY"
-                    className="bg-slate-800 text-white"
-                  >
-                    12. Sınıf - SAY
-                  </option>
-                  <option
-                    value="12. Sınıf - EA"
-                    className="bg-slate-800 text-white"
-                  >
-                    12. Sınıf - EA
-                  </option>
-                  <option
-                    value="12. Sınıf - SÖZ"
-                    className="bg-slate-800 text-white"
-                  >
-                    12. Sınıf - SÖZ
-                  </option>
-                  <option
-                    value="12. Sınıf - DİL"
-                    className="bg-slate-800 text-white"
-                  >
-                    12. Sınıf - DİL
-                  </option>
-                  <option
-                    value="Mezun - SAY"
-                    className="bg-slate-800 text-white"
-                  >
-                    Mezun - SAY
-                  </option>
-                  <option
-                    value="Mezun - EA"
-                    className="bg-slate-800 text-white"
-                  >
-                    Mezun - EA
-                  </option>
-                  <option
-                    value="Mezun - SÖZ"
-                    className="bg-slate-800 text-white"
-                  >
-                    Mezun - SÖZ
-                  </option>
-                  <option
-                    value="Mezun - DİL"
-                    className="bg-slate-800 text-white"
-                  >
-                    Mezun - DİL
-                  </option>
-                  <option value="11. Sınıf" className="bg-slate-800 text-white">
-                    11. Sınıf
-                  </option>
-                  <option value="10. Sınıf" className="bg-slate-800 text-white">
-                    10. Sınıf
-                  </option>
-                  <option value="9. Sınıf" className="bg-slate-800 text-white">
-                    9. Sınıf
-                  </option>
-                </select>
-              </div>
-
-              <div className="col-span-1 md:col-span-2 space-y-4">
-                <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-                  <Link size={16} /> Profil Fotoğrafı
-                </label>
-
-                <div className="flex gap-4 items-center">
-                  <label className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg border border-white/10 transition-colors flex items-center gap-2 text-sm w-full justify-center">
-                    <User size={16} />
-                    <span>Fotoğraf Yükle</span>
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={async (e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          setSaving(true);
-                          setMessage({
-                            type: "info",
-                            content: "Fotoğraf yükleniyor...",
-                          });
-                          try {
-                            const url = await uploadProfileImage(file);
-                            setFormData((prev) => ({
-                              ...prev,
-                              avatarUrl: url,
-                            }));
-                            setMessage({
-                              type: "success",
-                              content:
-                                "Fotoğraf yüklendi! Kaydetmeyi unutmayın.",
-                            });
-                          } catch {
-                            setMessage({
-                              type: "error",
-                              content: "Fotoğraf yüklenemedi.",
-                            });
-                          } finally {
-                            setSaving(false);
-                          }
-                        }
-                      }}
-                    />
-                  </label>
-                </div>
-
-                <p className="text-xs text-slate-500">
-                  Bilgisayarınızdan bir fotoğraf seçin.
-                </p>
-              </div>
-            </div>
-
-            {message.content && (
-              <div
-                className={`p-4 rounded-xl text-sm ${message.type === "success" ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20"}`}
-              >
-                {message.content}
-              </div>
-            )}
-
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={saving}
-                className="glass-btn px-8 py-3 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all text-purple-200 cursor-pointer"
-              >
-                {saving ? (
-                  <>
-                    <Loader2 size={20} className="animate-spin" />
-                    Kaydediliyor...
-                  </>
-                ) : (
-                  <>
-                    <Save size={20} />
-                    Değişiklikleri Kaydet
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
+    <div className="max-w-2xl mx-auto space-y-8 pb-20">
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-white mb-1">Profil</h1>
+        <p className="text-slate-400 text-sm">Hesap bilgilerinizi düzenleyin</p>
       </div>
 
-      {/* Danger Zone */}
-      <div className="glass-panel p-8 border-red-500/20">
-        <div className="flex items-center gap-3 text-red-400 mb-6">
-          <AlertTriangle size={24} />
-          <h2 className="text-xl font-bold">Tehlikeli Bölge</h2>
+      {/* Toast Message */}
+      {message.content && (
+        <div
+          className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+            message.type === "success"
+              ? "bg-green-500/10 text-green-400 border border-green-500/20"
+              : "bg-red-500/10 text-red-400 border border-red-500/20"
+          }`}
+        >
+          {message.content}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Avatar Section */}
+        <div className="flex items-center gap-6">
+          <div className="relative group">
+            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white/10 bg-slate-800 relative group-hover:border-purple-500/50 transition-all duration-300">
+              <Image
+                src={avatarPreview}
+                alt="Profile"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+              <Camera size={20} className="text-white" />
+              <input
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    setSaving(true);
+                    setMessage({
+                      type: "info",
+                      content: "Fotoğraf yükleniyor...",
+                    });
+                    try {
+                      const url = await uploadProfileImage(file);
+                      setFormData((prev) => ({ ...prev, avatarUrl: url }));
+                      setMessage({
+                        type: "success",
+                        content: "Fotoğraf yüklendi! Kaydetmeyi unutmayın.",
+                      });
+                    } catch {
+                      setMessage({
+                        type: "error",
+                        content: "Fotoğraf yüklenemedi.",
+                      });
+                    } finally {
+                      setSaving(false);
+                    }
+                  }
+                }}
+              />
+            </label>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white font-semibold text-lg truncate">
+              {formData.name || "İsimsiz Kullanıcı"}
+            </p>
+            <p className="text-slate-400 text-sm truncate flex items-center gap-1.5 mt-0.5">
+              <Mail size={13} />
+              {user?.email}
+            </p>
+          </div>
         </div>
 
-        <div className="space-y-6">
-          <p className="text-slate-400 text-sm">
-            Hesabınızı sildiğinizde tüm denemeleriniz, gönderileriniz ve profil
-            bilgileriniz kalıcı olarak silinir. Bu işlem geri alınamaz.
-          </p>
+        {/* Divider */}
+        <div className="h-px bg-white/5" />
+
+        {/* Form Fields */}
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-400 flex items-center gap-2">
+              <User size={14} /> Ad Soyad
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Adınız Soyadınız"
+              className="glass-input w-full"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-400 flex items-center gap-2">
+              <BookOpen size={14} /> Sınıf / Bölüm
+            </label>
+            <select
+              name="grade"
+              value={formData.grade}
+              onChange={handleChange}
+              className="glass-input w-full"
+            >
+              <option value="" className="bg-slate-800 text-white">
+                Seçiniz...
+              </option>
+              {grades.map((g) => (
+                <option
+                  key={g.value}
+                  value={g.value}
+                  className="bg-slate-800 text-white"
+                >
+                  {g.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Save Button */}
+        <button
+          type="submit"
+          disabled={saving}
+          className="glass-btn w-full py-3 flex items-center justify-center gap-2 text-sm font-medium cursor-pointer"
+        >
+          {saving ? (
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              Kaydediliyor...
+            </>
+          ) : (
+            <>
+              <Save size={18} />
+              Değişiklikleri Kaydet
+            </>
+          )}
+        </button>
+      </form>
+
+      {/* Divider */}
+      <div className="h-px bg-white/5" />
+
+      {/* Danger Zone */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-slate-500">
+          <Shield size={16} />
+          <h3 className="text-sm font-medium uppercase tracking-wider">
+            Tehlikeli Bölge
+          </h3>
+        </div>
+
+        <div className="rounded-xl border border-red-500/10 bg-red-500/5 p-5 space-y-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle
+              size={18}
+              className="text-red-400/70 shrink-0 mt-0.5"
+            />
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Hesabınızı sildiğinizde tüm denemeleriniz, gönderileriniz ve
+              profil bilgileriniz kalıcı olarak silinir.{" "}
+              <span className="text-red-400/80 font-medium">
+                Bu işlem geri alınamaz.
+              </span>
+            </p>
+          </div>
 
           {!showDeleteConfirm ? (
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="text-red-400 hover:text-red-300 text-sm font-medium flex items-center gap-2 transition-colors cursor-pointer"
+              className="text-red-400/70 hover:text-red-400 text-sm font-medium flex items-center gap-2 transition-colors cursor-pointer"
             >
-              <Trash2 size={16} />
-              <span>Hesabımı Silmek İstiyorum</span>
+              <Trash2 size={14} />
+              Hesabımı Sil
             </button>
           ) : (
-            <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300">
-                  Onaylamak için{" "}
-                  <span className="text-white font-bold italic">
-                    onaylıyorum
-                  </span>{" "}
-                  yazın
-                </label>
-                <input
-                  type="text"
-                  value={confirmText}
-                  onChange={(e) => setConfirmText(e.target.value)}
-                  placeholder="onaylıyorum"
-                  className="glass-input w-full border-red-500/30 focus:border-red-500"
-                />
-              </div>
-
+            <div className="space-y-3 pt-2 border-t border-red-500/10">
+              <label className="text-sm text-slate-400">
+                Onaylamak için{" "}
+                <span className="text-white font-semibold">onaylıyorum</span>{" "}
+                yazın
+              </label>
+              <input
+                type="text"
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                placeholder="onaylıyorum"
+                className="glass-input w-full border-red-500/20 focus:ring-red-500/30"
+              />
               <div className="flex gap-3">
                 <button
                   onClick={handleDeleteAccount}
                   disabled={confirmText !== "onaylıyorum" || deleting}
-                  className="bg-red-500 hover:bg-red-600 disabled:bg-slate-700 disabled:text-slate-500 text-white px-6 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer flex items-center gap-2"
+                  className="bg-red-500/80 hover:bg-red-500 disabled:bg-slate-700 disabled:text-slate-500 text-white px-5 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer flex items-center gap-2"
                 >
                   {deleting ? (
                     <>
-                      <Loader2 size={16} className="animate-spin" />
+                      <Loader2 size={14} className="animate-spin" />
                       Siliniyor...
                     </>
                   ) : (
                     <>
-                      <Trash2 size={16} />
-                      Hesabımı Kalıcı Olarak Sil
+                      <Trash2 size={14} />
+                      Hesabı Sil
                     </>
                   )}
                 </button>
@@ -404,7 +371,7 @@ const SettingsClient = () => {
                     setShowDeleteConfirm(false);
                     setConfirmText("");
                   }}
-                  className="text-slate-400 hover:text-white px-6 py-2 text-sm font-medium transition-colors cursor-pointer"
+                  className="text-slate-400 hover:text-white px-4 py-2 text-sm transition-colors cursor-pointer"
                 >
                   Vazgeç
                 </button>
