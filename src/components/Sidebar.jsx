@@ -39,7 +39,7 @@ const Sidebar = ({ isOpen, onClose, user, isCollapsed }) => {
   return (
     <>
       <div
-        className={`fixed top-0 left-0 h-screen glass-panel border-r border-white/10 flex flex-col p-4 transition-all duration-300 z-50 
+        className={`fixed top-0 left-0 h-dvh glass-panel border-r border-white/10 flex flex-col p-4 transition-all duration-300 z-50 
           ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
           ${isCollapsed ? "md:w-20 w-64" : "w-64"}`}
       >
@@ -68,7 +68,7 @@ const Sidebar = ({ isOpen, onClose, user, isCollapsed }) => {
           </button>
         </div>
 
-        <nav className="flex-1 space-y-2">
+        <nav className="flex-1 space-y-2 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = pathname === item.path;
 

@@ -23,7 +23,7 @@ input[type="number"] {
 
 @layer base {
   body {
-    @apply bg-slate-900 text-slate-100 antialiased min-h-screen font-sans;
+    @apply bg-slate-900 text-slate-100 antialiased min-h-dvh font-sans;
     background: radial-gradient(circle at 50% -20%, #2e1065, #0f172a);
   }
 }

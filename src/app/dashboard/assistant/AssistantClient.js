@@ -279,7 +279,7 @@ const AssistantClient = () => {
     <div className="flex h-full w-full relative">
       {/* Sidebar */}
       <div
-        className={`absolute md:relative inset-y-0 left-0 w-60 bg-slate-900/95 backdrop-blur-xl border-r border-white/5 z-30 transform transition-transform duration-300 ease-in-out md:translate-x-0 
+        className={`absolute lg:relative inset-y-0 left-0 w-60 bg-slate-900/95 backdrop-blur-xl border-r border-white/5 z-30 transform transition-transform duration-300 ease-in-out lg:translate-x-0 
         ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} flex flex-col h-full`}
       >
         <div className="p-3 flex items-center justify-between border-b border-white/5">
@@ -288,7 +288,7 @@ const AssistantClient = () => {
           </span>
           <button
             onClick={() => setIsSidebarOpen(false)}
-            className="md:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5 cursor-pointer"
+            className="lg:hidden text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5 cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -341,7 +341,7 @@ const AssistantClient = () => {
       {/* Backdrop */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-20 md:hidden"
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm z-20 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -349,7 +349,7 @@ const AssistantClient = () => {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col h-full min-w-0">
         {/* Mobile Header */}
-        <div className="md:hidden h-14 px-4 border-b border-white/5 flex items-center gap-3 bg-slate-900/80 backdrop-blur-xl sticky top-0 z-10">
+        <div className="lg:hidden shrink-0 h-14 px-4 border-b border-white/5 flex items-center gap-3 bg-slate-900/80 backdrop-blur-xl z-10">
           <button
             onClick={() => setIsSidebarOpen(true)}
             className="text-slate-400 hover:text-white p-1 cursor-pointer"
@@ -489,7 +489,7 @@ const AssistantClient = () => {
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-white/5 bg-slate-900/50 backdrop-blur-xl p-3 md:p-4 shrink-0">
+        <div className="border-t border-white/5 bg-slate-900/50 backdrop-blur-xl pb-[calc(1rem+env(safe-area-inset-bottom,0px))] pt-3 px-3 md:pt-4 md:px-4 shrink-0">
           <form onSubmit={handleSend} className="max-w-3xl mx-auto">
             <div className="relative flex items-end gap-2 bg-slate-800/80 rounded-2xl border border-white/5 px-4 py-1.5 focus-within:border-purple-500/30 transition-all">
               <textarea

@@ -16,10 +16,10 @@ const Layout = ({ children }) => {
 
   const isCommunityDetail = pathname.startsWith("/dashboard/community/") && pathname !== "/dashboard/community";
   const fluid = fluidRoutes.includes(pathname) || pathname === "/dashboard/community";
-  const fullWidth = ["/dashboard/assistant"].includes(pathname) || isCommunityDetail;
+  const fullWidth = pathname.startsWith("/dashboard/assistant") || isCommunityDetail;
 
   return (
-    <div className={`${fullWidth ? "h-screen overflow-hidden flex flex-col" : "min-h-screen"} bg-slate-900`}>
+    <div className={`${fullWidth ? "h-dvh overflow-hidden flex flex-col" : "min-h-dvh flex flex-col"} bg-slate-900`}>
       {/* Mobile Header */}
       <div className="md:hidden flex-none flex items-center p-4 border-b border-white/10 bg-slate-900 z-40">
         <button
@@ -48,7 +48,7 @@ const Layout = ({ children }) => {
 
       <main
         className={`transition-all duration-300 flex flex-col md:pl-20
-          ${fullWidth ? "flex-1 overflow-hidden" : "min-h-screen"}`}
+          ${fullWidth ? "flex-1 overflow-hidden" : "flex-1 overflow-y-auto"}`}
       >
         <div
           className={
