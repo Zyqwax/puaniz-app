@@ -10,7 +10,6 @@ const HistorySkeleton = () => {
         <div className="flex bg-slate-800/50 p-1 rounded-xl glass-panel self-start md:self-auto gap-1">
           <Skeleton className="h-9 w-9 rounded-lg" />
           <Skeleton className="h-9 w-9 rounded-lg" />
-          <Skeleton className="h-9 w-9 rounded-lg" />
         </div>
       </div>
 

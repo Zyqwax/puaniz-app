@@ -56,20 +56,24 @@ export const getTopicTracking = async (userId) => {
 export const updateTopicData = async (userId, topicKey, data) => {
   try {
     const docRef = doc(db, "users", userId);
-    const update = {};
+    const topicUpdate = {};
 
     if (data.completed !== undefined) {
-      update[`topicTracking.${topicKey}.completed`] = data.completed;
+      topicUpdate.completed = data.completed;
     }
     if (data.questionCount !== undefined) {
-      update[`topicTracking.${topicKey}.questionCount`] = data.questionCount;
+      topicUpdate.questionCount = data.questionCount;
     }
     if (data.repeatCount !== undefined) {
-      update[`topicTracking.${topicKey}.repeatCount`] = data.repeatCount;
+      topicUpdate.repeatCount = data.repeatCount;
     }
-    update[`topicTracking.${topicKey}.lastStudied`] = new Date().toISOString();
+    topicUpdate.lastStudied = new Date().toISOString();
 
-    await setDoc(docRef, update, { merge: true });
+    await setDoc(
+      docRef,
+      { topicTracking: { [topicKey]: topicUpdate } },
+      { merge: true },
+    );
     return { success: true };
   } catch (error) {
     console.error("Error updating topic data:", error);
@@ -90,8 +94,12 @@ export const incrementRepeat = async (userId, topicKey, currentCount) => {
     await setDoc(
       docRef,
       {
-        [`topicTracking.${topicKey}.repeatCount`]: newCount,
-        [`topicTracking.${topicKey}.lastStudied`]: new Date().toISOString(),
+        topicTracking: {
+          [topicKey]: {
+            repeatCount: newCount,
+            lastStudied: new Date().toISOString(),
+          },
+        },
       },
       { merge: true },
     );
@@ -114,8 +122,12 @@ export const updateQuestionCount = async (userId, topicKey, count) => {
     await setDoc(
       docRef,
       {
-        [`topicTracking.${topicKey}.questionCount`]: count,
-        [`topicTracking.${topicKey}.lastStudied`]: new Date().toISOString(),
+        topicTracking: {
+          [topicKey]: {
+            questionCount: count,
+            lastStudied: new Date().toISOString(),
+          },
+        },
       },
       { merge: true },
     );
@@ -135,15 +147,18 @@ export const updateQuestionCount = async (userId, topicKey, count) => {
 export const bulkUpdateTopics = async (userId, topicKeys, isCompleted) => {
   try {
     const docRef = doc(db, "users", userId);
-    const update = {};
+    const topicTrackingUpdate = {};
     topicKeys.forEach((key) => {
       if (isCompleted) {
-        update[`topicTracking.${key}.completed`] = true;
-        update[`topicTracking.${key}.lastStudied`] = new Date().toISOString();
-        // Preserve existing questionCount and repeatCount
+        topicTrackingUpdate[key] = {
+          completed: true,
+          lastStudied: new Date().toISOString(),
+        };
+        // Note: With merge:true, writing a nested object merges keys inside.
+        // So this will preserve existing questionCount and repeatCount if they exist.
       } else {
         // Reset everything
-        update[`topicTracking.${key}`] = {
+        topicTrackingUpdate[key] = {
           completed: false,
           questionCount: 0,
           repeatCount: 0,
@@ -151,7 +166,11 @@ export const bulkUpdateTopics = async (userId, topicKeys, isCompleted) => {
         };
       }
     });
-    await setDoc(docRef, update, { merge: true });
+    await setDoc(
+      docRef,
+      { topicTracking: topicTrackingUpdate },
+      { merge: true },
+    );
     return { success: true };
   } catch (error) {
     console.error("Error bulk updating topics:", error);

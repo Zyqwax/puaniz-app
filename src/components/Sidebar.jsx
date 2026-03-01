@@ -44,8 +44,11 @@ const Sidebar = ({ isOpen, onClose, user, isCollapsed }) => {
           ${isCollapsed ? "md:w-20 w-64" : "w-64"}`}
       >
         <div className={`flex items-center ${isCollapsed ? "md:justify-center justify-between" : "justify-between"} mb-10 px-2 mt-2`}>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center font-bold text-white shrink-0">
+          <Link 
+            href="/" 
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity group"
+          >
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center font-bold text-white shrink-0 group-hover:scale-105 transition-transform">
               Y
             </div>
             {!isCollapsed && (
@@ -58,7 +61,7 @@ const Sidebar = ({ isOpen, onClose, user, isCollapsed }) => {
                 YKS Takip
               </h1>
             )}
-          </div>
+          </Link>
 
           <button
             onClick={onClose}
