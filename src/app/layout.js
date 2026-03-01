@@ -16,7 +16,6 @@ export const metadata = {
     "YKS Takip",
     "Deneme Analizi",
     "YKS Puan Hesaplama",
-    "Öğrenci Koçluğu",
     "Sınav Takip",
   ],
   authors: [{ name: "Puaniz Team" }],
@@ -32,20 +31,6 @@ export const metadata = {
       "max-image-preview": "large",
       "max-snippet": -1,
     },
-  },
-  openGraph: {
-    title: "Puaniz | YKS Analiz ve Takip Platformu",
-    description: "YKS hazırlık sürecinde netlerinizi ve gelişiminizi profesyonel grafiklerle takip edin.",
-    url: "https://www.puaniz.com.tr",
-    siteName: "Puaniz",
-    locale: "tr_TR",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Puaniz | YKS Analiz ve Takip",
-    description: "YKS sürecinizi verilerle yönetin.",
-    creator: "@puaniz", // Varsayılan handle
   },
   icons: {
     icon: "/favicon.ico",

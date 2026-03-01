@@ -78,7 +78,7 @@ const ProfileCard = ({ user, isCollapsed, onClose }) => {
           <div className="p-1">
             <button
               onClick={() => {
-                router.push("/settings");
+                router.push("/dashboard/settings");
                 setIsOpen(false);
                 if (onClose) onClose();
               }}

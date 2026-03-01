@@ -1,17 +1,7 @@
 export default function sitemap() {
   const baseUrl = "https://www.puaniz.com.tr";
 
-  const routes = [
-    "",
-    "/auth",
-    "/add-exam",
-    "/analysis",
-    "/assistant",
-    "/changelog",
-    "/community",
-    "/history",
-    "/settings",
-  ].map((route) => ({
+  const routes = ["", "/about", "/contact", "/auth"].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: route === "" ? "daily" : "weekly",

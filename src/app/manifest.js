@@ -3,7 +3,7 @@ export default function manifest() {
     name: "Puaniz App",
     short_name: "Puaniz",
     description: "YKS Analiz ve Takip Uygulaması",
-    start_url: "/",
+    start_url: "/dashboard",
     display: "standalone",
     background_color: "#ffffff",
     theme_color: "#000000",

@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Mail, Lock, User, ArrowRight, ArrowLeft, RefreshCw, LogOut, CheckCircle } from "lucide-react";
+import {
+  Mail,
+  Lock,
+  User,
+  ArrowRight,
+  ArrowLeft,
+  RefreshCw,
+  LogOut,
+  CheckCircle,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import {
@@ -60,7 +69,11 @@ const AuthClient = () => {
 
     try {
       if (view === "login") {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password,
+        );
         const user = userCredential.user;
         const isWhitelisted = WHITELISTED_EMAILS.includes(user.email);
 
@@ -69,10 +82,14 @@ const AuthClient = () => {
           setView("verify-email");
           setMessage("Doğrulama maili gönderildi.");
         } else {
-          router.push("/");
+          router.push("/dashboard");
         }
       } else if (view === "register") {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password,
+        );
         const user = userCredential.user;
 
         await updateProfile(user, { displayName: name });
@@ -110,9 +127,11 @@ const AuthClient = () => {
         await auth.currentUser.reload();
         if (auth.currentUser.emailVerified) {
           setMessage("E-posta başarıyla doğrulandı! Yönlendiriliyorsunuz...");
-          setTimeout(() => router.push("/"), 1500);
+          setTimeout(() => router.push("/dashboard"), 1500);
         } else {
-          setError("E-posta henüz doğrulanmamış görünüyor. Lütfen gelen kutunuzu kontrol edin.");
+          setError(
+            "E-posta henüz doğrulanmamış görünüyor. Lütfen gelen kutunuzu kontrol edin.",
+          );
         }
       }
     } catch (err) {
@@ -153,7 +172,9 @@ const AuthClient = () => {
       if (err.code === "auth/too-many-requests") {
         setError("Çok fazla istek gönderildi. Lütfen biraz bekleyin.");
       } else {
-        setError("Mail gönderilemedi: " + err.message.replace("Firebase:", "").trim());
+        setError(
+          "Mail gönderilemedi: " + err.message.replace("Firebase:", "").trim(),
+        );
       }
     } finally {
       setLoading(false);
@@ -185,10 +206,13 @@ const AuthClient = () => {
                 E-postanı Doğrula
               </h2>
               <p className="text-slate-400 mb-8">
-                {email || (authUser && authUser.email)} adresine bir doğrulama bağlantısı gönderdik. Devam etmek için
-                lütfen mailindeki bağlantıya tıkla.
+                {email || (authUser && authUser.email)} adresine bir doğrulama
+                bağlantısı gönderdik. Devam etmek için lütfen mailindeki
+                bağlantıya tıkla.
               </p>
-              {message && <p className="text-green-400 text-sm mb-4">{message}</p>}
+              {message && (
+                <p className="text-green-400 text-sm mb-4">{message}</p>
+              )}
               {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
 
               <div className="space-y-3">
@@ -197,7 +221,11 @@ const AuthClient = () => {
                   disabled={loading}
                   className="glass-btn w-full flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  {loading ? <RefreshCw className="animate-spin" size={20} /> : <CheckCircle size={20} />}
+                  {loading ? (
+                    <RefreshCw className="animate-spin" size={20} />
+                  ) : (
+                    <CheckCircle size={20} />
+                  )}
                   Doğrulamayı Kontrol Et
                 </button>
 
@@ -207,7 +235,9 @@ const AuthClient = () => {
                   className="w-full py-2 bg-white/5 border border-white/10 rounded-lg text-slate-300 hover:bg-white/10 transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <Mail size={16} />
-                  {resendCooldown > 0 ? `Tekrar Gönder (${resendCooldown}s)` : "Doğrulama Mailini Tekrar Gönder"}
+                  {resendCooldown > 0
+                    ? `Tekrar Gönder (${resendCooldown}s)`
+                    : "Doğrulama Mailini Tekrar Gönder"}
                 </button>
 
                 <button
@@ -226,9 +256,12 @@ const AuthClient = () => {
                 {view === "forgot-password" && "Şifremi Unuttum"}
               </h2>
               <p className="text-center text-slate-400 mb-8">
-                {view === "login" && "Hesabına giriş yap ve netlerini takibe başla."}
-                {view === "register" && "YKS sürecini verilerle yönetmeye başla."}
-                {view === "forgot-password" && "E-posta adresini girerek şifreni sıfırlayabilirsin."}
+                {view === "login" &&
+                  "Hesabına giriş yap ve netlerini takibe başla."}
+                {view === "register" &&
+                  "YKS sürecini verilerle yönetmeye başla."}
+                {view === "forgot-password" &&
+                  "E-posta adresini girerek şifreni sıfırlayabilirsin."}
               </p>
 
               <form onSubmit={handleAuth} className="space-y-4">
@@ -293,8 +326,14 @@ const AuthClient = () => {
                   </div>
                 )}
 
-                {error && <p className="text-red-400 text-sm text-center">{error}</p>}
-                {message && <p className="text-green-400 text-sm text-center">{message}</p>}
+                {error && (
+                  <p className="text-red-400 text-sm text-center">{error}</p>
+                )}
+                {message && (
+                  <p className="text-green-400 text-sm text-center">
+                    {message}
+                  </p>
+                )}
 
                 <button
                   type="submit"
@@ -307,7 +346,8 @@ const AuthClient = () => {
                     <>
                       {view === "login" && "Giriş Yap"}
                       {view === "register" && "Kayıt Ol"}
-                      {view === "forgot-password" && "Sıfırlama Bağlantısı Gönder"}
+                      {view === "forgot-password" &&
+                        "Sıfırlama Bağlantısı Gönder"}
                       <ArrowRight size={20} />
                     </>
                   )}
@@ -324,10 +364,14 @@ const AuthClient = () => {
                   </button>
                 ) : (
                   <button
-                    onClick={() => setView(view === "login" ? "register" : "login")}
+                    onClick={() =>
+                      setView(view === "login" ? "register" : "login")
+                    }
                     className="text-slate-400 hover:text-white transition-colors text-sm cursor-pointer"
                   >
-                    {view === "login" ? "Hesabın yok mu? Kayıt Ol" : "Zaten hesabın var mı? Giriş Yap"}
+                    {view === "login"
+                      ? "Hesabın yok mu? Kayıt Ol"
+                      : "Zaten hesabın var mı? Giriş Yap"}
                   </button>
                 )}
               </div>

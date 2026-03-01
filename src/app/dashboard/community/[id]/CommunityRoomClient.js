@@ -36,7 +36,7 @@ export default function CommunityRoomClient({ id }) {
   }, [id]);
 
   const handlePostDeleted = () => {
-    router.push("/community");
+    router.push("/dashboard/community");
   };
 
   if (authLoading || loading) {
@@ -54,7 +54,7 @@ export default function CommunityRoomClient({ id }) {
         <h1 className="text-2xl font-bold text-white mb-2">Hata</h1>
         <p className="text-slate-400 mb-6">{error || "Gönderi bulunamadı."}</p>
         <Link
-          href="/community"
+          href="/dashboard/community"
           className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
         >
           Topluluğa Dön
@@ -69,7 +69,7 @@ export default function CommunityRoomClient({ id }) {
         {/* Simple Inline Header */}
         <div className="flex items-center gap-2 p-4 text-slate-400 shrink-0">
           <Link
-            href="/community"
+            href="/dashboard/community"
             className="p-2 -ml-2 rounded-full hover:bg-white/10 hover:text-white transition-colors"
           >
             <ArrowLeft size={20} />
@@ -79,7 +79,12 @@ export default function CommunityRoomClient({ id }) {
 
         {/* Post Content */}
         <div className="flex-1 pb-20 px-4 md:px-0">
-          <PostCard post={post} user={user} onPostDeleted={handlePostDeleted} isDetail={true} />
+          <PostCard
+            post={post}
+            user={user}
+            onPostDeleted={handlePostDeleted}
+            isDetail={true}
+          />
         </div>
       </div>
     </div>

@@ -13,7 +13,7 @@ const PublicRoute = ({ children }) => {
     if (!loading && user) {
       const isWhitelisted = WHITELISTED_EMAILS.includes(user.email);
       if (user.emailVerified || isWhitelisted) {
-        router.push("/");
+        router.push("/dashboard");
       }
     }
   }, [user, loading, router]);

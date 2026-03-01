@@ -24,13 +24,13 @@ const Sidebar = ({ isOpen, onClose, user, isCollapsed, toggleCollapse }) => {
   const pathname = usePathname();
 
   const baseNavItems = [
-    { path: "/", icon: LayoutDashboard, label: "Özet" },
-    { path: "/add-exam", icon: PlusCircle, label: "Deneme Ekle" },
-    { path: "/analysis", icon: PieChart, label: "Analizler" },
-    { path: "/community", icon: Users, label: "Soru-Cevap" },
-    { path: "/assistant", icon: Bot, label: "Asistana Sor" },
-    { path: "/history", icon: BookOpen, label: "Geçmiş" },
-    { path: "/changelog", icon: Sparkles, label: "Yenilikler" },
+    { path: "/dashboard", icon: LayoutDashboard, label: "Özet" },
+    { path: "/dashboard/add-exam", icon: PlusCircle, label: "Deneme Ekle" },
+    { path: "/dashboard/analysis", icon: PieChart, label: "Analizler" },
+    { path: "/dashboard/community", icon: Users, label: "Soru-Cevap" },
+    { path: "/dashboard/assistant", icon: Bot, label: "Asistana Sor" },
+    { path: "/dashboard/history", icon: BookOpen, label: "Geçmiş" },
+    { path: "/dashboard/changelog", icon: Sparkles, label: "Yenilikler" },
   ];
 
   // Add admin link if user is admin

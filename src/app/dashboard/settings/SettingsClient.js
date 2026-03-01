@@ -5,7 +5,11 @@ import { User, Link, BookOpen, Save, ArrowLeft, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
-import { getUserProfile, updateUserProfile, deleteUserAccountData } from "@/services/userService";
+import {
+  getUserProfile,
+  updateUserProfile,
+  deleteUserAccountData,
+} from "@/services/userService";
 import { updateProfile, deleteUser } from "firebase/auth";
 import { uploadProfileImage } from "@/services/cloudinaryService";
 import { Trash2, AlertTriangle } from "lucide-react";
@@ -64,11 +68,17 @@ const SettingsClient = () => {
           await updateProfile(user, { photoURL: formData.avatarUrl });
         }
 
-        setMessage({ type: "success", content: "Profil başarıyla güncellendi!" });
+        setMessage({
+          type: "success",
+          content: "Profil başarıyla güncellendi!",
+        });
       }
     } catch (error) {
       console.error(error);
-      setMessage({ type: "error", content: "Güncelleme sırasında bir hata oluştu." });
+      setMessage({
+        type: "error",
+        content: "Güncelleme sırasında bir hata oluştu.",
+      });
     } finally {
       setSaving(false);
     }
@@ -99,12 +109,15 @@ const SettingsClient = () => {
       if (error.code === "auth/requires-recent-login") {
         setMessage({
           type: "error",
-          content: "Güvenlik nedeniyle bu işlemi yapmadan önce tekrar giriş yapmalısınız.",
+          content:
+            "Güvenlik nedeniyle bu işlemi yapmadan önce tekrar giriş yapmalısınız.",
         });
       } else {
         setMessage({
           type: "error",
-          content: "Hesap silme sırasında bir hata oluştu: " + (error.message || "Bilinmeyen hata"),
+          content:
+            "Hesap silme sırasında bir hata oluştu: " +
+            (error.message || "Bilinmeyen hata"),
         });
       }
     } finally {
@@ -127,7 +140,7 @@ const SettingsClient = () => {
   return (
     <div className="space-y-6 pb-20">
       <button
-        onClick={() => router.push("/")}
+        onClick={() => router.push("/dashboard")}
         className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors cursor-pointer"
       >
         <ArrowLeft size={20} />
@@ -145,7 +158,12 @@ const SettingsClient = () => {
           <div className="flex flex-col items-center space-y-4">
             <div className="relative group">
               <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-purple-500/30 group-hover:border-purple-500 transition-colors bg-slate-800 relative">
-                <Image src={avatarPreview} alt="Profile Preview" fill className="object-cover" />
+                <Image
+                  src={avatarPreview}
+                  alt="Profile Preview"
+                  fill
+                  className="object-cover"
+                />
               </div>
             </div>
             <p className="text-sm text-slate-400">Profil Önizleme</p>
@@ -171,32 +189,61 @@ const SettingsClient = () => {
                 <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
                   <BookOpen size={16} /> Sınıfım / Bölümüm
                 </label>
-                <select name="grade" value={formData.grade} onChange={handleChange} className="glass-input w-full">
+                <select
+                  name="grade"
+                  value={formData.grade}
+                  onChange={handleChange}
+                  className="glass-input w-full"
+                >
                   <option value="" className="bg-slate-800 text-white">
                     Seçiniz...
                   </option>
-                  <option value="12. Sınıf - SAY" className="bg-slate-800 text-white">
+                  <option
+                    value="12. Sınıf - SAY"
+                    className="bg-slate-800 text-white"
+                  >
                     12. Sınıf - SAY
                   </option>
-                  <option value="12. Sınıf - EA" className="bg-slate-800 text-white">
+                  <option
+                    value="12. Sınıf - EA"
+                    className="bg-slate-800 text-white"
+                  >
                     12. Sınıf - EA
                   </option>
-                  <option value="12. Sınıf - SÖZ" className="bg-slate-800 text-white">
+                  <option
+                    value="12. Sınıf - SÖZ"
+                    className="bg-slate-800 text-white"
+                  >
                     12. Sınıf - SÖZ
                   </option>
-                  <option value="12. Sınıf - DİL" className="bg-slate-800 text-white">
+                  <option
+                    value="12. Sınıf - DİL"
+                    className="bg-slate-800 text-white"
+                  >
                     12. Sınıf - DİL
                   </option>
-                  <option value="Mezun - SAY" className="bg-slate-800 text-white">
+                  <option
+                    value="Mezun - SAY"
+                    className="bg-slate-800 text-white"
+                  >
                     Mezun - SAY
                   </option>
-                  <option value="Mezun - EA" className="bg-slate-800 text-white">
+                  <option
+                    value="Mezun - EA"
+                    className="bg-slate-800 text-white"
+                  >
                     Mezun - EA
                   </option>
-                  <option value="Mezun - SÖZ" className="bg-slate-800 text-white">
+                  <option
+                    value="Mezun - SÖZ"
+                    className="bg-slate-800 text-white"
+                  >
                     Mezun - SÖZ
                   </option>
-                  <option value="Mezun - DİL" className="bg-slate-800 text-white">
+                  <option
+                    value="Mezun - DİL"
+                    className="bg-slate-800 text-white"
+                  >
                     Mezun - DİL
                   </option>
                   <option value="11. Sınıf" className="bg-slate-800 text-white">
@@ -228,13 +275,26 @@ const SettingsClient = () => {
                         const file = e.target.files[0];
                         if (file) {
                           setSaving(true);
-                          setMessage({ type: "info", content: "Fotoğraf yükleniyor..." });
+                          setMessage({
+                            type: "info",
+                            content: "Fotoğraf yükleniyor...",
+                          });
                           try {
                             const url = await uploadProfileImage(file);
-                            setFormData((prev) => ({ ...prev, avatarUrl: url }));
-                            setMessage({ type: "success", content: "Fotoğraf yüklendi! Kaydetmeyi unutmayın." });
+                            setFormData((prev) => ({
+                              ...prev,
+                              avatarUrl: url,
+                            }));
+                            setMessage({
+                              type: "success",
+                              content:
+                                "Fotoğraf yüklendi! Kaydetmeyi unutmayın.",
+                            });
                           } catch {
-                            setMessage({ type: "error", content: "Fotoğraf yüklenemedi." });
+                            setMessage({
+                              type: "error",
+                              content: "Fotoğraf yüklenemedi.",
+                            });
                           } finally {
                             setSaving(false);
                           }
@@ -244,7 +304,9 @@ const SettingsClient = () => {
                   </label>
                 </div>
 
-                <p className="text-xs text-slate-500">Bilgisayarınızdan bir fotoğraf seçin.</p>
+                <p className="text-xs text-slate-500">
+                  Bilgisayarınızdan bir fotoğraf seçin.
+                </p>
               </div>
             </div>
 
@@ -288,8 +350,8 @@ const SettingsClient = () => {
 
         <div className="space-y-6">
           <p className="text-slate-400 text-sm">
-            Hesabınızı sildiğinizde tüm denemeleriniz, gönderileriniz ve profil bilgileriniz kalıcı olarak silinir. Bu
-            işlem geri alınamaz.
+            Hesabınızı sildiğinizde tüm denemeleriniz, gönderileriniz ve profil
+            bilgileriniz kalıcı olarak silinir. Bu işlem geri alınamaz.
           </p>
 
           {!showDeleteConfirm ? (
@@ -304,7 +366,11 @@ const SettingsClient = () => {
             <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-300">
-                  Onaylamak için <span className="text-white font-bold italic">onaylıyorum</span> yazın
+                  Onaylamak için{" "}
+                  <span className="text-white font-bold italic">
+                    onaylıyorum
+                  </span>{" "}
+                  yazın
                 </label>
                 <input
                   type="text"

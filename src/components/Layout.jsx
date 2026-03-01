@@ -13,13 +13,11 @@ const Layout = ({ children }) => {
   const pathname = usePathname();
 
   // Route-based layout configuration
-  const fluidRoutes = ["/history"];
-  // Community detail pages should be full width, but main community page is fluid?
-  // Let's make /community main page fluid, and /community/xyz fullWidth.
+  const fluidRoutes = ["/dashboard/history"];
 
-  const isCommunityDetail = pathname.startsWith("/community/") && pathname !== "/community";
-  const fluid = fluidRoutes.includes(pathname) || pathname === "/community";
-  const fullWidth = ["/assistant"].includes(pathname) || isCommunityDetail;
+  const isCommunityDetail = pathname.startsWith("/dashboard/community/") && pathname !== "/dashboard/community";
+  const fluid = fluidRoutes.includes(pathname) || pathname === "/dashboard/community";
+  const fullWidth = ["/dashboard/assistant"].includes(pathname) || isCommunityDetail;
 
   return (
     <div className={`${fullWidth ? "h-screen overflow-hidden flex flex-col" : "min-h-screen"} bg-slate-900`}>

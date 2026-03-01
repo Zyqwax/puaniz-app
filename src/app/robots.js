@@ -3,7 +3,7 @@ export default function robots() {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: "/private/", // Example: Disallow private routes if any
+      disallow: ["/dashboard/"],
     },
     sitemap: "https://www.puaniz.com.tr/sitemap.xml",
   };

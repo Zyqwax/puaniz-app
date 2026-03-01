@@ -12,10 +12,14 @@ const SubjectInput = ({ label, values, onChange, color, max = 40 }) => {
   const isInvalid = (values.d || 0) + (values.y || 0) > max;
 
   return (
-    <div className={`glass-card p-4 transition-all ${isInvalid ? "border-red-500/50 bg-red-500/10" : ""}`}>
+    <div
+      className={`glass-card p-4 transition-all ${isInvalid ? "border-red-500/50 bg-red-500/10" : ""}`}
+    >
       <div className="flex justify-between items-start mb-4">
         <h4 className={`text-lg font-bold text-${color}-400`}>{label}</h4>
-        <span className="text-xs text-slate-500 bg-slate-800/50 px-2 py-1 rounded">Max: {max}</span>
+        <span className="text-xs text-slate-500 bg-slate-800/50 px-2 py-1 rounded">
+          Max: {max}
+        </span>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -27,7 +31,9 @@ const SubjectInput = ({ label, values, onChange, color, max = 40 }) => {
             value={values.d || ""}
             onChange={(e) => onChange("d", parseInt(e.target.value) || 0)}
             className={`glass-input w-full ${
-              isInvalid ? "border-red-500 focus:border-red-500" : "border-green-500/30 focus:border-green-400"
+              isInvalid
+                ? "border-red-500 focus:border-red-500"
+                : "border-green-500/30 focus:border-green-400"
             }`}
           />
         </div>
@@ -39,7 +45,9 @@ const SubjectInput = ({ label, values, onChange, color, max = 40 }) => {
             value={values.y || ""}
             onChange={(e) => onChange("y", parseInt(e.target.value) || 0)}
             className={`glass-input w-full ${
-              isInvalid ? "border-red-500 focus:border-red-500" : "border-red-500/30 focus:border-red-400"
+              isInvalid
+                ? "border-red-500 focus:border-red-500"
+                : "border-red-500/30 focus:border-red-400"
             }`}
           />
         </div>
@@ -54,7 +62,9 @@ const SubjectInput = ({ label, values, onChange, color, max = 40 }) => {
 
       <div className="mt-3 text-right">
         <span className="text-sm text-slate-400">Net: </span>
-        <span className={`text-xl font-bold ${isInvalid ? "text-red-400" : "text-white"}`}>
+        <span
+          className={`text-xl font-bold ${isInvalid ? "text-red-400" : "text-white"}`}
+        >
           {calculateNet(values.d || 0, values.y || 0).toFixed(2)}
         </span>
       </div>
@@ -95,7 +105,18 @@ const AddExamClient = () => {
   // Subject mapping based on selected type
   const getActiveSubjects = useCallback(() => {
     if (examType === "TYT") {
-      return ["turkce", "tarih", "cografya", "felsefe", "din", "matematik", "geometri", "fizik", "kimya", "biyoloji"];
+      return [
+        "turkce",
+        "tarih",
+        "cografya",
+        "felsefe",
+        "din",
+        "matematik",
+        "geometri",
+        "fizik",
+        "kimya",
+        "biyoloji",
+      ];
     }
 
     // AYT Combinations
@@ -105,7 +126,15 @@ const AddExamClient = () => {
       case "EA":
         return ["matematik", "geometri", "edebiyat", "tarih1", "cografya1"];
       case "SOZ":
-        return ["edebiyat", "tarih1", "cografya1", "tarih2", "cografya2", "felsefe", "din"];
+        return [
+          "edebiyat",
+          "tarih1",
+          "cografya1",
+          "tarih2",
+          "cografya2",
+          "felsefe",
+          "din",
+        ];
       default:
         return [];
     }
@@ -139,7 +168,9 @@ const AddExamClient = () => {
       const limit = config[sub] || 40;
       const total = (scores[sub]?.d || 0) + (scores[sub]?.y || 0);
       if (total > limit) {
-        return alert(`${sub.toUpperCase()} alanında soru limitini aştınız! Lütfen düzeltiniz.`);
+        return alert(
+          `${sub.toUpperCase()} alanında soru limitini aştınız! Lütfen düzeltiniz.`,
+        );
       }
     }
 
@@ -166,7 +197,7 @@ const AddExamClient = () => {
 
     setLoading(false);
     if (result.success) {
-      router.push("/");
+      router.push("/dashboard");
     } else {
       alert("Hata oluştu: " + result.error);
     }
@@ -233,10 +264,12 @@ const AddExamClient = () => {
         }
 
         setLoading(false);
-        alert(`İşlem tamamlandı.\nBaşarılı: ${successCount}\nHatalı: ${failCount}`);
+        alert(
+          `İşlem tamamlandı.\nBaşarılı: ${successCount}\nHatalı: ${failCount}`,
+        );
 
         if (successCount > 0) {
-          router.push("/");
+          router.push("/dashboard");
         }
       } catch (error) {
         console.error("JSON parse hatası:", error);
@@ -254,8 +287,12 @@ const AddExamClient = () => {
       let color = "blue";
       if (["matematik", "geometri", "fizik"].includes(sub)) color = "red";
       if (["turkce", "edebiyat"].includes(sub)) color = "blue";
-      if (["sosyal", "tarih", "tarih1", "tarih2", "kimya"].includes(sub)) color = "yellow";
-      if (["fen", "biyoloji", "cografya", "cografya1", "cografya2"].includes(sub)) color = "green";
+      if (["sosyal", "tarih", "tarih1", "tarih2", "kimya"].includes(sub))
+        color = "yellow";
+      if (
+        ["fen", "biyoloji", "cografya", "cografya1", "cografya2"].includes(sub)
+      )
+        color = "green";
       if (["felsefe"].includes(sub)) color = "pink";
       if (["din"].includes(sub)) color = "indigo";
 
@@ -300,7 +337,13 @@ const AddExamClient = () => {
         </h1>
 
         <div className="relative">
-          <input type="file" accept=".json" onChange={handleJsonUpload} className="hidden" id="json-upload" />
+          <input
+            type="file"
+            accept=".json"
+            onChange={handleJsonUpload}
+            className="hidden"
+            id="json-upload"
+          />
           <label
             htmlFor="json-upload"
             className={`glass-btn px-4 py-2 flex items-center gap-2 text-sm cursor-pointer ${loading ? "opacity-50 pointer-events-none" : ""}`}
@@ -316,7 +359,9 @@ const AddExamClient = () => {
             <button
               onClick={() => setExamType("TYT")}
               className={`px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-bold transition-all ${
-                examType === "TYT" ? "bg-purple-600 text-white shadow-lg" : "text-slate-400 hover:text-white"
+                examType === "TYT"
+                  ? "bg-purple-600 text-white shadow-lg"
+                  : "text-slate-400 hover:text-white"
               }`}
             >
               TYT
@@ -324,7 +369,9 @@ const AddExamClient = () => {
             <button
               onClick={() => setExamType("AYT")}
               className={`px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-bold transition-all ${
-                examType === "AYT" ? "bg-pink-600 text-white shadow-lg" : "text-slate-400 hover:text-white"
+                examType === "AYT"
+                  ? "bg-pink-600 text-white shadow-lg"
+                  : "text-slate-400 hover:text-white"
               }`}
             >
               AYT
@@ -337,7 +384,9 @@ const AddExamClient = () => {
               <button
                 onClick={() => setAytSubtype("SAY")}
                 className={`px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-bold transition-all ${
-                  aytSubtype === "SAY" ? "bg-blue-600 text-white shadow-lg" : "text-slate-400 hover:text-white"
+                  aytSubtype === "SAY"
+                    ? "bg-blue-600 text-white shadow-lg"
+                    : "text-slate-400 hover:text-white"
                 }`}
               >
                 SAY
@@ -345,7 +394,9 @@ const AddExamClient = () => {
               <button
                 onClick={() => setAytSubtype("EA")}
                 className={`px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-bold transition-all ${
-                  aytSubtype === "EA" ? "bg-orange-600 text-white shadow-lg" : "text-slate-400 hover:text-white"
+                  aytSubtype === "EA"
+                    ? "bg-orange-600 text-white shadow-lg"
+                    : "text-slate-400 hover:text-white"
                 }`}
               >
                 EA
@@ -353,7 +404,9 @@ const AddExamClient = () => {
               <button
                 onClick={() => setAytSubtype("SOZ")}
                 className={`px-3 md:px-4 py-2 rounded-md text-xs md:text-sm font-bold transition-all ${
-                  aytSubtype === "SOZ" ? "bg-teal-600 text-white shadow-lg" : "text-slate-400 hover:text-white"
+                  aytSubtype === "SOZ"
+                    ? "bg-teal-600 text-white shadow-lg"
+                    : "text-slate-400 hover:text-white"
                 }`}
               >
                 SÖZ
@@ -366,7 +419,9 @@ const AddExamClient = () => {
       <div className="glass-panel p-6 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-slate-400 mb-2">Deneme Adı / Yayın</label>
+            <label className="block text-slate-400 mb-2">
+              Deneme Adı / Yayın
+            </label>
             <input
               type="text"
               placeholder="Örn: 3D Türkiye Geneli"
@@ -377,18 +432,29 @@ const AddExamClient = () => {
           </div>
           <div>
             <label className="block text-slate-400 mb-2">Tarih</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="glass-input w-full" />
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="glass-input w-full"
+            />
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">{renderSubjectInputs()}</div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {renderSubjectInputs()}
+      </div>
 
       <div className="fixed bottom-0 left-0 md:left-64 right-0 p-4 bg-slate-900/80 backdrop-blur-md border-t border-white/10 flex justify-between items-center z-30">
         <div className="flex items-center gap-2 md:gap-4">
           <div className="px-3 py-2 md:px-4 md:py-2 bg-slate-800 rounded-lg flex flex-col md:flex-row md:items-center">
-            <span className="text-slate-400 text-xs md:text-sm md:mr-2">Toplam Net:</span>
-            <span className="text-xl md:text-2xl font-bold text-white">{totalNet.toFixed(2)}</span>
+            <span className="text-slate-400 text-xs md:text-sm md:mr-2">
+              Toplam Net:
+            </span>
+            <span className="text-xl md:text-2xl font-bold text-white">
+              {totalNet.toFixed(2)}
+            </span>
           </div>
         </div>
         <button
@@ -400,7 +466,8 @@ const AddExamClient = () => {
             "Kaydediliyor..."
           ) : (
             <>
-              <Save size={20} /> <span className="hidden md:inline">Kaydet</span>
+              <Save size={20} />{" "}
+              <span className="hidden md:inline">Kaydet</span>
               <span className="md:hidden">Kaydet</span>
             </>
           )}
