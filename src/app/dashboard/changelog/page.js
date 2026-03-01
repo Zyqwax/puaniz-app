@@ -61,8 +61,8 @@ export default async function Changelog() {
   const updates = await getUpdates();
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-200">
-      <div className="max-w-4xl mx-auto px-4 py-12">
+    <div className="text-slate-200">
+      <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="mb-12 flex items-center justify-between">
           <div>

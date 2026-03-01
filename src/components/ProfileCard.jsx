@@ -50,7 +50,7 @@ const ProfileCard = ({ user, isCollapsed, onClose }) => {
     <div className="relative mt-auto" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center ${isCollapsed ? "justify-center px-0" : "gap-3 px-3"} py-3 rounded-xl hover:bg-white/5 transition-all text-left border border-transparent hover:border-white/10 group cursor-pointer`}
+        className={`w-full flex items-center ${isCollapsed ? "md:justify-center px-3 md:px-0" : "gap-3 px-3"} py-3 rounded-xl hover:bg-white/5 transition-all text-left border border-transparent hover:border-white/10 group cursor-pointer`}
       >
         <Image
           src={displayAvatar}
@@ -67,6 +67,15 @@ const ProfileCard = ({ user, isCollapsed, onClose }) => {
             </div>
             <ChevronDown size={16} className={`text-slate-500 transition-transform ${isOpen ? "rotate-180" : ""}`} />
           </>
+        )}
+        {isCollapsed && (
+          <div className="md:hidden flex-1 flex items-center gap-3 min-w-0 ml-3">
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-white truncate text-sm">{displayName}</p>
+              <p className="text-xs text-slate-400 truncate">{displayGrade || "Öğrenci"}</p>
+            </div>
+            <ChevronDown size={16} className={`text-slate-500 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+          </div>
         )}
       </button>
 

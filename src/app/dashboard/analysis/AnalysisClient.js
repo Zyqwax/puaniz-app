@@ -24,14 +24,29 @@ import { getUserExams } from "@/services/examService";
 import { generateAnalysis } from "@/services/aiService";
 import { getUserProfile, updateUserProfile } from "@/services/userService";
 import { useAuth } from "@/context/AuthContext";
-import { calculateSubjectStats, prepareRadarData, prepareTrendData } from "@/utils/analysisHelpers";
+import {
+  calculateSubjectStats,
+  prepareRadarData,
+  prepareTrendData,
+} from "@/utils/analysisHelpers";
 import { FileDown, CheckSquare, Square } from "lucide-react";
 import { generatePDF } from "@/utils/pdfGenerator";
 import AnalysisReport from "@/components/AnalysisReport";
 import AnalysisSkeleton from "@/components/analysis/AnalysisSkeleton";
 
 const SUBJECT_ORDER = {
-  TYT: ["turkce", "matematik", "geometri", "tarih", "cografya", "felsefe", "din", "fizik", "kimya", "biyoloji"],
+  TYT: [
+    "turkce",
+    "matematik",
+    "geometri",
+    "tarih",
+    "cografya",
+    "felsefe",
+    "din",
+    "fizik",
+    "kimya",
+    "biyoloji",
+  ],
   AYT: [
     "edebiyat",
     "tarih1",
@@ -82,7 +97,11 @@ const AnalysisClient = () => {
           // Check existing profile first
           const profile = await getUserProfile(user.uid);
 
-          if (profile && profile.lastAnalysisHash === dataHash && profile.analysisMessage) {
+          if (
+            profile &&
+            profile.lastAnalysisHash === dataHash &&
+            profile.analysisMessage
+          ) {
             setAiAnalysis(profile.analysisMessage);
           } else {
             // Generate new and save
@@ -101,7 +120,8 @@ const AnalysisClient = () => {
     if (user) fetchExams();
   }, [user]);
 
-  const currentType = activeTab === "REPORT" ? "TYT" : currentTabHelper(activeTab);
+  const currentType =
+    activeTab === "REPORT" ? "TYT" : currentTabHelper(activeTab);
 
   // Helper to safely determine type if strictly needed, though logic below seems fine.
   // Actually checking original code: const currentType = activeTab === "REPORT" ? "TYT" : activeTab;
@@ -109,9 +129,18 @@ const AnalysisClient = () => {
     return tab;
   }
 
-  const stats = useMemo(() => calculateSubjectStats(exams, currentType), [exams, currentType]);
-  const radarData = useMemo(() => prepareRadarData(stats, currentType), [stats, currentType]);
-  const trendData = useMemo(() => prepareTrendData(exams, currentType, "total"), [exams, currentType]);
+  const stats = useMemo(
+    () => calculateSubjectStats(exams, currentType),
+    [exams, currentType],
+  );
+  const radarData = useMemo(
+    () => prepareRadarData(stats, currentType),
+    [stats, currentType],
+  );
+  const trendData = useMemo(
+    () => prepareTrendData(exams, currentType, "total"),
+    [exams, currentType],
+  );
   const subjectTrendData = useMemo(
     () => prepareTrendData(exams, currentType, selectedChartSubject),
     [exams, currentType, selectedChartSubject],
@@ -131,7 +160,10 @@ const AnalysisClient = () => {
   }, [stats, currentType]);
 
   // Ensure selected subject is valid when data changes
-  if (sortedStatsKeys.length > 0 && !sortedStatsKeys.includes(selectedChartSubject)) {
+  if (
+    sortedStatsKeys.length > 0 &&
+    !sortedStatsKeys.includes(selectedChartSubject)
+  ) {
     setSelectedChartSubject(sortedStatsKeys[0]);
   }
 
@@ -165,11 +197,17 @@ const AnalysisClient = () => {
 
   const handleDownloadPDF = async () => {
     if (!reportRef.current) return;
-    await generatePDF(reportRef.current, `yks-analiz-raporu-${reportFilter.toLowerCase()}.pdf`);
+    await generatePDF(
+      reportRef.current,
+      `yks-analiz-raporu-${reportFilter.toLowerCase()}.pdf`,
+    );
   };
 
   const reportExams = useMemo(
-    () => exams.filter((e) => selectedExams.includes(e.id) && e.type === reportFilter),
+    () =>
+      exams.filter(
+        (e) => selectedExams.includes(e.id) && e.type === reportFilter,
+      ),
     [exams, selectedExams, reportFilter],
   );
 
@@ -185,7 +223,9 @@ const AnalysisClient = () => {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
-                activeTab === tab ? "bg-purple-600 text-white shadow-lg" : "text-slate-400 hover:text-white"
+                activeTab === tab
+                  ? "bg-purple-600 text-white shadow-lg"
+                  : "text-slate-400 hover:text-white"
               }`}
             >
               {tab === "REPORT" ? "Rapor Oluştur" : tab}
@@ -233,185 +273,268 @@ const AnalysisClient = () => {
               </svg>
             </div>
             <div>
-              <h3 className="text-lg font-bold text-blue-100 mb-2">Yapay Zeka Koç Görüşü</h3>
-              <p className="text-slate-300 leading-relaxed italic">&ldquo;{aiAnalysis}&rdquo;</p>
+              <h3 className="text-lg font-bold text-blue-100 mb-2">
+                Yapay Zeka Koç Görüşü
+              </h3>
+              <p className="text-slate-300 leading-relaxed italic">
+                &ldquo;{aiAnalysis}&rdquo;
+              </p>
             </div>
           </div>
         </div>
       )}
 
       {activeTab !== "REPORT" ? (
-        <>
-          {/* Charts Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Radar Chart */}
-            <div className="glass-card">
-              <h3 className="text-lg font-bold text-white mb-4">Ders Bazlı Başarı Dağılımı</h3>
+        exams.filter((e) => e.type === activeTab).length > 0 ? (
+          <>
+            {/* Charts Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Radar Chart */}
+              <div className="glass-card">
+                <h3 className="text-lg font-bold text-white mb-4">
+                  Ders Bazlı Başarı Dağılımı
+                </h3>
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart
+                      cx="50%"
+                      cy="50%"
+                      outerRadius="80%"
+                      data={radarData}
+                    >
+                      <PolarGrid stroke="#334155" />
+                      <PolarAngleAxis
+                        dataKey="subject"
+                        tick={{ fill: "#94a3b8", fontSize: 12 }}
+                      />
+                      <PolarRadiusAxis
+                        angle={30}
+                        domain={[0, 100]}
+                        tick={false}
+                        axisLine={false}
+                      />
+                      <Radar
+                        name="Başarı Oranı"
+                        dataKey="A"
+                        stroke="#8b5cf6"
+                        strokeWidth={2}
+                        fill="#8b5cf6"
+                        fillOpacity={0.3}
+                      />
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const data = payload[0].payload;
+                            return (
+                              <div className="bg-slate-800 border border-slate-700 p-3 rounded-lg shadow-xl">
+                                <p className="font-bold text-white mb-1">
+                                  {data.subject}
+                                </p>
+                                <div className="space-y-1">
+                                  <p className="text-purple-400 font-bold">
+                                    %{data.A} Başarı
+                                  </p>
+                                  <p className="text-slate-400 text-xs">
+                                    Net: {data.originalNet} / {data.fullMark}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Trend Chart */}
+              <div className="glass-card">
+                <h3 className="text-lg font-bold text-white mb-4">
+                  Genel Net Değişimi
+                </h3>
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={trendData}>
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="#334155"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="name"
+                        stroke="#94a3b8"
+                        fontSize={12}
+                        tickFormatter={(val) =>
+                          val.split("-").slice(1).join("/")
+                        }
+                      />
+                      <YAxis stroke="#94a3b8" />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#1e293b",
+                          borderColor: "#334155",
+                          color: "#f8fafc",
+                        }}
+                        labelStyle={{ color: "#94a3b8" }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="value"
+                        stroke="#ec4899"
+                        strokeWidth={3}
+                        dot={{ fill: "#ec4899" }}
+                        activeDot={{ r: 6 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+
+            {/* Subject Stats Grid */}
+            <h3 className="text-xl font-bold text-white mt-8 mb-4">
+              Ders İstatistikleri
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {sortedStatsKeys.map((subject) => (
+                <div key={subject} className="glass-card p-4">
+                  <h4 className="text-slate-300 font-medium capitalize mb-2">
+                    {subject}
+                  </h4>
+                  <div className="flex items-end gap-2">
+                    <span className="text-2xl font-bold text-white">
+                      {stats[subject].avg}
+                    </span>
+                    <span className="text-xs text-slate-500 mb-1">
+                      Ort. Net
+                    </span>
+                  </div>
+                  <div className="flex justify-between mt-3 text-xs text-slate-400 border-t border-white/5 pt-2">
+                    <span>
+                      Max:{" "}
+                      <span className="text-green-400">
+                        {stats[subject].max}
+                      </span>
+                    </span>
+                    <span>
+                      Min:{" "}
+                      <span className="text-red-400">{stats[subject].min}</span>
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Subject Analysis Chart */}
+            <div className="glass-card mt-6">
+              <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
+                <h3 className="text-lg font-bold text-white">
+                  Ders Bazlı Net Değişimi
+                </h3>
+
+                <div className="flex flex-wrap justify-center gap-2">
+                  {sortedStatsKeys.map((subject) => (
+                    <button
+                      key={subject}
+                      onClick={() => setSelectedChartSubject(subject)}
+                      className={`px-3 py-1 rounded-md text-xs font-bold transition-all capitalize ${
+                        selectedChartSubject === subject
+                          ? "bg-blue-600 text-white shadow-lg"
+                          : "bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700"
+                      }`}
+                    >
+                      {subject}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-                    <PolarGrid stroke="#334155" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: "#94a3b8", fontSize: 12 }} />
-                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                    <Radar
-                      name="Başarı Oranı"
-                      dataKey="A"
-                      stroke="#8b5cf6"
-                      strokeWidth={2}
-                      fill="#8b5cf6"
-                      fillOpacity={0.3}
+                  <AreaChart data={subjectTrendData} margin={{ bottom: 50 }}>
+                    <defs>
+                      <linearGradient
+                        id="colorSubjectNet"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="#3b82f6"
+                          stopOpacity={0.3}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#3b82f6"
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="#334155"
+                      vertical={false}
                     />
+                    <XAxis
+                      dataKey="name"
+                      stroke="#94a3b8"
+                      tick={{ angle: -90, textAnchor: "end", fontSize: 12 }}
+                      tickFormatter={(value) => {
+                        if (!value) return "";
+                        const date = new Date(value);
+                        return date.toLocaleDateString("tr-TR", {
+                          day: "numeric",
+                          month: "long",
+                        });
+                      }}
+                      height={60}
+                    />
+                    <YAxis stroke="#94a3b8" />
                     <Tooltip
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
-                          const data = payload[0].payload;
                           return (
                             <div className="bg-slate-800 border border-slate-700 p-3 rounded-lg shadow-xl">
-                              <p className="font-bold text-white mb-1">{data.subject}</p>
-                              <div className="space-y-1">
-                                <p className="text-purple-400 font-bold">%{data.A} Başarı</p>
-                                <p className="text-slate-400 text-xs">
-                                  Net: {data.originalNet} / {data.fullMark}
-                                </p>
-                              </div>
+                              <p className="font-medium text-slate-200 mb-1">
+                                {payload[0].payload.examName}
+                              </p>
+                              <p className="text-blue-400 font-bold capitalize">
+                                {selectedChartSubject}: {payload[0].value} Net
+                              </p>
                             </div>
                           );
                         }
                         return null;
                       }}
                     />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Trend Chart */}
-            <div className="glass-card">
-              <h3 className="text-lg font-bold text-white mb-4">Genel Net Değişimi</h3>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={trendData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                    <XAxis
-                      dataKey="name"
-                      stroke="#94a3b8"
-                      fontSize={12}
-                      tickFormatter={(val) => val.split("-").slice(1).join("/")}
-                    />
-                    <YAxis stroke="#94a3b8" />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: "#1e293b", borderColor: "#334155", color: "#f8fafc" }}
-                      labelStyle={{ color: "#94a3b8" }}
-                    />
-                    <Line
+                    <Area
                       type="monotone"
                       dataKey="value"
-                      stroke="#ec4899"
+                      stroke="#3b82f6"
+                      fillOpacity={1}
+                      fill="url(#colorSubjectNet)"
                       strokeWidth={3}
-                      dot={{ fill: "#ec4899" }}
-                      activeDot={{ r: 6 }}
+                      name="Net"
                     />
-                  </LineChart>
+                  </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
+          </>
+        ) : (
+          <div className="glass-card text-center py-16">
+            <p className="text-slate-400 text-lg">
+              Henüz {activeTab} deneme verisi bulunamadı.
+            </p>
+            <p className="text-slate-500 text-sm mt-2">
+              Deneme ekledikten sonra analizler burada görünecek.
+            </p>
           </div>
-
-          {/* Subject Stats Grid */}
-          <h3 className="text-xl font-bold text-white mt-8 mb-4">Ders İstatistikleri</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {sortedStatsKeys.map((subject) => (
-              <div key={subject} className="glass-card p-4">
-                <h4 className="text-slate-300 font-medium capitalize mb-2">{subject}</h4>
-                <div className="flex items-end gap-2">
-                  <span className="text-2xl font-bold text-white">{stats[subject].avg}</span>
-                  <span className="text-xs text-slate-500 mb-1">Ort. Net</span>
-                </div>
-                <div className="flex justify-between mt-3 text-xs text-slate-400 border-t border-white/5 pt-2">
-                  <span>
-                    Max: <span className="text-green-400">{stats[subject].max}</span>
-                  </span>
-                  <span>
-                    Min: <span className="text-red-400">{stats[subject].min}</span>
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Subject Analysis Chart */}
-          <div className="glass-card mt-6">
-            <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
-              <h3 className="text-lg font-bold text-white">Ders Bazlı Net Değişimi</h3>
-
-              <div className="flex flex-wrap justify-center gap-2">
-                {sortedStatsKeys.map((subject) => (
-                  <button
-                    key={subject}
-                    onClick={() => setSelectedChartSubject(subject)}
-                    className={`px-3 py-1 rounded-md text-xs font-bold transition-all capitalize ${
-                      selectedChartSubject === subject
-                        ? "bg-blue-600 text-white shadow-lg"
-                        : "bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700"
-                    }`}
-                  >
-                    {subject}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={subjectTrendData} margin={{ bottom: 50 }}>
-                  <defs>
-                    <linearGradient id="colorSubjectNet" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                  <XAxis
-                    dataKey="name"
-                    stroke="#94a3b8"
-                    tick={{ angle: -90, textAnchor: "end", fontSize: 12 }}
-                    tickFormatter={(value) => {
-                      if (!value) return "";
-                      const date = new Date(value);
-                      return date.toLocaleDateString("tr-TR", { day: "numeric", month: "long" });
-                    }}
-                    height={60}
-                  />
-                  <YAxis stroke="#94a3b8" />
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        return (
-                          <div className="bg-slate-800 border border-slate-700 p-3 rounded-lg shadow-xl">
-                            <p className="font-medium text-slate-200 mb-1">{payload[0].payload.examName}</p>
-                            <p className="text-blue-400 font-bold capitalize">
-                              {selectedChartSubject}: {payload[0].value} Net
-                            </p>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#3b82f6"
-                    fillOpacity={1}
-                    fill="url(#colorSubjectNet)"
-                    strokeWidth={3}
-                    name="Net"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </>
+        )
       ) : (
         /* Report Generation View */
         <div className="glass-card">
@@ -422,7 +545,9 @@ const AnalysisClient = () => {
                 <button
                   onClick={() => handleReportFilterChange("TYT")}
                   className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
-                    reportFilter === "TYT" ? "bg-purple-600 text-white shadow" : "text-slate-400 hover:text-white"
+                    reportFilter === "TYT"
+                      ? "bg-purple-600 text-white shadow"
+                      : "text-slate-400 hover:text-white"
                   }`}
                 >
                   TYT
@@ -430,7 +555,9 @@ const AnalysisClient = () => {
                 <button
                   onClick={() => handleReportFilterChange("AYT")}
                   className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${
-                    reportFilter === "AYT" ? "bg-pink-600 text-white shadow" : "text-slate-400 hover:text-white"
+                    reportFilter === "AYT"
+                      ? "bg-pink-600 text-white shadow"
+                      : "text-slate-400 hover:text-white"
                   }`}
                 >
                   AYT
@@ -445,7 +572,10 @@ const AnalysisClient = () => {
               >
                 Tümünü Seç
               </button>
-              <button onClick={handleDownloadPDF} className="glass-btn flex items-center gap-2">
+              <button
+                onClick={handleDownloadPDF}
+                className="glass-btn flex items-center gap-2"
+              >
                 <FileDown size={18} />
                 PDF Olarak İndir
               </button>
@@ -480,7 +610,9 @@ const AnalysisClient = () => {
                         )}
                       </td>
                       <td className="px-4 py-3">{exam.date}</td>
-                      <td className="px-4 py-3 font-medium text-white">{exam.name}</td>
+                      <td className="px-4 py-3 font-medium text-white">
+                        {exam.name}
+                      </td>
                       <td className="px-4 py-3">
                         <span
                           className={`px-2 py-1 rounded text-xs ${exam.type === "TYT" ? "bg-purple-500/20 text-purple-300" : "bg-pink-500/20 text-pink-300"}`}
@@ -488,7 +620,9 @@ const AnalysisClient = () => {
                           {exam.type} {exam.subtype && `(${exam.subtype})`}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right font-bold text-white">{exam.totalNet.toFixed(2)}</td>
+                      <td className="px-4 py-3 text-right font-bold text-white">
+                        {exam.totalNet.toFixed(2)}
+                      </td>
                     </tr>
                   ))}
               </tbody>

@@ -330,7 +330,7 @@ const AddExamClient = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto pb-20">
+    <div className="w-full pb-20">
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
         <h1 className="text-2xl md:text-3xl font-bold text-white w-full md:w-auto text-center md:text-left">
           Deneme Ekle
@@ -442,11 +442,11 @@ const AddExamClient = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
         {renderSubjectInputs()}
       </div>
 
-      <div className="fixed bottom-0 left-0 md:left-64 right-0 p-4 bg-slate-900/80 backdrop-blur-md border-t border-white/10 flex justify-between items-center z-30">
+      <div className="fixed bottom-0 left-0 md:left-20 right-0 p-4 bg-slate-900/80 backdrop-blur-md border-t border-white/10 flex justify-between items-center z-30">
         <div className="flex items-center gap-2 md:gap-4">
           <div className="px-3 py-2 md:px-4 md:py-2 bg-slate-800 rounded-lg flex flex-col md:flex-row md:items-center">
             <span className="text-slate-400 text-xs md:text-sm md:mr-2">

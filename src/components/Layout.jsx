@@ -8,7 +8,6 @@ import { useAuth } from "@/context/AuthContext";
 
 const Layout = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const { user } = useAuth();
   const pathname = usePathname();
 
@@ -35,8 +34,7 @@ const Layout = ({ children }) => {
       <Sidebar
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
-        isCollapsed={isCollapsed}
-        toggleCollapse={() => setIsCollapsed(!isCollapsed)}
+        isCollapsed={true}
         user={user}
       />
 
@@ -49,13 +47,12 @@ const Layout = ({ children }) => {
       )}
 
       <main
-        className={`transition-all duration-300 flex flex-col 
-          ${isCollapsed ? "md:pl-20" : "md:pl-64"}
+        className={`transition-all duration-300 flex flex-col md:pl-20
           ${fullWidth ? "flex-1 overflow-hidden" : "min-h-screen"}`}
       >
         <div
           className={
-            fullWidth ? "flex-1 flex flex-col h-full" : fluid ? "p-4 md:p-8 w-full" : "p-4 md:p-8 max-w-7xl mx-auto"
+            fullWidth ? "flex-1 flex flex-col h-full" : fluid ? "p-4 md:p-6 lg:p-8 w-full" : "p-4 md:p-6 lg:p-8 max-w-7xl mx-auto w-full"
           }
         >
           {children}
