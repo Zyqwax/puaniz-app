@@ -665,102 +665,35 @@ const HistoryClient = () => {
       );
     }
 
-    if (viewMode === "grid") {
-      return (
-        <div
-          key={exam.id}
-          onClick={() => setSelectedExam(exam)}
-          className="p-3.5 rounded-xl border border-white/5 bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/10 transition-all cursor-pointer flex flex-col gap-2"
-        >
-          <div className="flex items-center gap-2">
-            <div
-              className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-[10px] shrink-0 ${
-                exam.type === "TYT"
-                  ? "bg-purple-600/15 text-purple-400"
-                  : "bg-pink-600/15 text-pink-400"
-              }`}
-            >
-              {exam.subtype || exam.type}
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-white truncate">
-                {exam.name}
-              </h3>
-              <span className="text-[10px] text-slate-500">{exam.date}</span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between mt-auto pt-2 border-t border-white/5">
-            <div className="flex items-center gap-1">
-              {netChange !== null && (
-                <span
-                  className={`text-[10px] font-semibold flex items-center gap-0.5 ${
-                    netChange > 0
-                      ? "text-green-400"
-                      : netChange < 0
-                        ? "text-red-400"
-                        : "text-slate-500"
-                  }`}
-                >
-                  {netChange > 0 ? (
-                    <TrendingUp size={9} />
-                  ) : netChange < 0 ? (
-                    <TrendingDown size={9} />
-                  ) : (
-                    <Minus size={9} />
-                  )}
-                  {netChange > 0 ? "+" : ""}
-                  {netChange.toFixed(1)}
-                </span>
-              )}
-            </div>
-            <span className="text-sm font-bold text-white">
-              {exam.totalNet.toFixed(2)}
-            </span>
-          </div>
-        </div>
-      );
-    }
-
-    // Card view
+    // Grid view (fallback)
     return (
       <div
         key={exam.id}
         onClick={() => setSelectedExam(exam)}
-        className="relative overflow-hidden p-5 rounded-xl border border-white/5 bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/10 transition-all cursor-pointer"
+        className="p-3.5 rounded-xl border border-white/5 bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/10 transition-all cursor-pointer flex flex-col gap-2"
       >
-        <div
-          className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-10 pointer-events-none -translate-y-1/2 translate-x-1/2 ${
-            exam.type === "TYT" ? "bg-purple-500" : "bg-pink-500"
-          }`}
-        />
-
-        <div className="relative flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div
-              className={`w-11 h-11 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
-                exam.type === "TYT"
-                  ? "bg-purple-600/15 text-purple-400"
-                  : "bg-pink-600/15 text-pink-400"
-              }`}
-            >
-              {exam.subtype || exam.type}
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-white">{exam.name}</h3>
-              <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
-                <Calendar size={11} />
-                <span>{exam.date}</span>
-              </div>
-            </div>
+        <div className="flex items-center gap-2">
+          <div
+            className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-[10px] shrink-0 ${
+              exam.type === "TYT"
+                ? "bg-purple-600/15 text-purple-400"
+                : "bg-pink-600/15 text-pink-400"
+            }`}
+          >
+            {exam.subtype || exam.type}
           </div>
-          <div className="text-right">
-            <p className="text-xs text-slate-400">Toplam Net</p>
-            <p className="text-2xl font-bold text-white">
-              {exam.totalNet.toFixed(2)}
-            </p>
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-white truncate">
+              {exam.name}
+            </h3>
+            <span className="text-[10px] text-slate-500">{exam.date}</span>
+          </div>
+        </div>
+        <div className="flex items-center justify-between mt-auto pt-2 border-t border-white/5">
+          <div className="flex items-center gap-1">
             {netChange !== null && (
               <span
-                className={`text-[10px] font-semibold flex items-center gap-0.5 justify-end mt-0.5 ${
+                className={`text-[10px] font-semibold flex items-center gap-0.5 ${
                   netChange > 0
                     ? "text-green-400"
                     : netChange < 0
@@ -769,73 +702,20 @@ const HistoryClient = () => {
                 }`}
               >
                 {netChange > 0 ? (
-                  <TrendingUp size={10} />
+                  <TrendingUp size={9} />
                 ) : netChange < 0 ? (
-                  <TrendingDown size={10} />
+                  <TrendingDown size={9} />
                 ) : (
-                  <Minus size={10} />
+                  <Minus size={9} />
                 )}
                 {netChange > 0 ? "+" : ""}
                 {netChange.toFixed(1)}
               </span>
             )}
           </div>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {exam.type === "TYT" ? (
-            <>
-              <div className="bg-white/5 rounded-lg p-2 text-center">
-                <p className="text-[10px] text-slate-400">Türkçe</p>
-                <p className="font-bold text-white text-sm">
-                  {exam.scores?.turkce?.net?.toFixed(2) || "—"}
-                </p>
-              </div>
-              <div className="bg-white/5 rounded-lg p-2 text-center">
-                <p className="text-[10px] text-slate-400">Matematik</p>
-                <p className="font-bold text-white text-sm">
-                  {exam.scores?.matematik?.net?.toFixed(2) || "—"}
-                </p>
-              </div>
-              <div className="bg-white/5 rounded-lg p-2 text-center">
-                <p className="text-[10px] text-slate-400">Fen</p>
-                <p className="font-bold text-white text-sm">
-                  {(
-                    (exam.scores?.fizik?.net || 0) +
-                    (exam.scores?.kimya?.net || 0) +
-                    (exam.scores?.biyoloji?.net || 0)
-                  ).toFixed(2)}
-                </p>
-              </div>
-              <div className="bg-white/5 rounded-lg p-2 text-center">
-                <p className="text-[10px] text-slate-400">Sosyal</p>
-                <p className="font-bold text-white text-sm">
-                  {(
-                    (exam.scores?.tarih?.net || 0) +
-                    (exam.scores?.cografya?.net || 0) +
-                    (exam.scores?.felsefe?.net || 0) +
-                    (exam.scores?.din?.net || 0)
-                  ).toFixed(2)}
-                </p>
-              </div>
-            </>
-          ) : (
-            Object.entries(exam.scores || {})
-              .slice(0, 4)
-              .map(([sub, val]) => (
-                <div
-                  key={sub}
-                  className="bg-white/5 rounded-lg p-2 text-center"
-                >
-                  <p className="text-[10px] text-slate-400">
-                    {SUBJECT_LABELS[sub] || sub}
-                  </p>
-                  <p className="font-bold text-white text-sm">
-                    {val.net?.toFixed(2) || "—"}
-                  </p>
-                </div>
-              ))
-          )}
+          <span className="text-sm font-bold text-white">
+            {exam.totalNet.toFixed(2)}
+          </span>
         </div>
       </div>
     );
