@@ -102,7 +102,7 @@ export default async function Changelog() {
                 </div>
 
                 {/* Card */}
-                <div className="bg-slate-800/50 border border-white/5 rounded-xl p-4 md:p-5">
+                <div className="glass-card p-4 md:p-5 border-none">
                   {/* Title */}
                   <h2 className="text-base font-semibold text-white mb-2">
                     {update.title}

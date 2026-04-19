@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { User, MessageCircle, Heart, Clock, Image as ImageIcon } from "lucide-react";
+import { User, MessageCircle, Heart, Clock, Image as ImageIcon, Sparkles } from "lucide-react";
 
 const ForumRow = ({ post }) => {
   const roomLink = `/dashboard/community/${post.id}`;
@@ -19,59 +19,66 @@ const ForumRow = ({ post }) => {
   };
 
   return (
-    <Link href={roomLink} className="block group">
-      <div className="bg-slate-800/50 hover:bg-slate-800 border border-white/5 hover:border-white/10 rounded-xl p-4 transition-all duration-200">
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+    <Link href={roomLink} className="block group outline-none">
+      <div className="glass-card p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-900/20 hover:border-white/10 hover:bg-white/[0.04] relative overflow-hidden border-none group-focus-visible:ring-2 group-focus-visible:ring-purple-500">
+        
+        {/* Subtle side glow for hover */}
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500 to-violet-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+        <div className="flex flex-col sm:flex-row gap-5 items-start relative z-10">
           
-          {/* User Avatar */}
+          {/* User Avatar & Basic Info (Mobile) */}
           <div className="shrink-0 flex items-center gap-3 w-full sm:w-auto sm:block">
-            <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center overflow-hidden border border-slate-600 shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center overflow-hidden border border-white/10 shrink-0 shadow-lg relative group-hover:border-purple-500/30 transition-colors">
               {post.userPhoto ? (
-                <div className="relative w-full h-full">
-                  <Image src={post.userPhoto} alt={post.userName} fill className="object-cover" sizes="40px" />
-                </div>
+                <Image src={post.userPhoto} alt={post.userName} fill className="object-cover" sizes="48px" />
               ) : (
-                <User size={20} className="text-slate-400" />
+                <User size={22} className="text-slate-400" />
               )}
             </div>
+            
             <div className="sm:hidden flex-1 overflow-hidden">
-                <p className="text-white text-sm font-medium truncate">{post.userName}</p>
-                <div className="flex items-center text-xs text-slate-400 gap-1">
-                  <Clock size={10} />
+                <p className="text-white text-sm font-semibold truncate">{post.userName}</p>
+                <div className="flex items-center text-xs text-slate-400 gap-1.5 mt-0.5">
+                  <Clock size={11} className="text-slate-500" />
                   {formatTime(post.createdAt)}
                 </div>
             </div>
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-base font-semibold text-white group-hover:text-purple-400 transition-colors truncate">
+          <div className="flex-1 min-w-0 w-full mt-1 sm:mt-0">
+            <div className="flex items-center gap-2 mb-1.5">
+              <h3 className="text-lg font-bold text-white group-hover:text-purple-300 transition-colors truncate">
                 {post.title || "İsimsiz Konu"}
               </h3>
               {post.imageUrl && (
-                <ImageIcon size={14} className="text-slate-400 shrink-0" />
+                <div className="px-1.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 shrink-0 flex items-center gap-1">
+                  <ImageIcon size={12} />
+                  <span className="text-[9px] font-bold uppercase tracking-wider hidden sm:inline">Görsel</span>
+                </div>
               )}
             </div>
             
-            <p className="text-sm text-slate-400 line-clamp-1 mb-2">
+            <p className="text-sm text-slate-400 line-clamp-2 mb-3 leading-relaxed group-hover:text-slate-300 transition-colors">
               {post.text}
             </p>
 
             {/* Tags */}
             {post.tags && post.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 hidden sm:flex">
-                {post.tags.slice(0, 3).map((tag) => (
+              <div className="flex flex-wrap gap-1.5">
+                {post.tags.slice(0, 4).map((tag) => (
                   <span
                     key={tag}
-                    className="text-[10px] font-medium px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20"
+                    className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-white/5 text-slate-300 border border-white/5 group-hover:border-white/10 group-hover:bg-white/10 transition-colors"
                   >
                     #{tag}
                   </span>
                 ))}
-                {post.tags.length > 3 && (
-                  <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-slate-700 text-slate-400">
-                    +{post.tags.length - 3}
+                {post.tags.length > 4 && (
+                  <span className="text-[11px] font-semibold px-2 py-1 rounded-lg bg-slate-800 text-slate-500">
+                    +{post.tags.length - 4}
                   </span>
                 )}
               </div>
@@ -79,42 +86,37 @@ const ForumRow = ({ post }) => {
           </div>
 
           {/* Stats & Meta (Desktop) */}
-          <div className="hidden sm:flex flex-col items-end gap-1 shrink-0 ml-4">
-             <div className="flex items-center gap-4">
-               <div className="flex items-center gap-1.5 text-slate-400">
-                 <Heart size={14} className={post.likes?.length > 0 ? "fill-pink-500/20 text-pink-500" : ""} />
-                 <span className="text-xs font-medium">{post.likes?.length || 0}</span>
+          <div className="hidden sm:flex flex-col items-end gap-3 shrink-0 ml-4 border-l border-white/5 pl-5 py-1">
+             <div className="flex items-center gap-3">
+               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pink-500/5 border border-pink-500/10 text-pink-400">
+                 <Heart size={14} className={post.likes?.length > 0 ? "fill-pink-500/40" : ""} />
+                 <span className="text-xs font-bold">{post.likes?.length || 0}</span>
                </div>
-               <div className="flex items-center gap-1.5 text-slate-400">
+               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/5 border border-blue-500/10 text-blue-400">
                  <MessageCircle size={14} />
-                 <span className="text-xs font-medium">{post.commentsCount || 0}</span>
+                 <span className="text-xs font-bold">{post.commentsCount || 0}</span>
                </div>
              </div>
-             <div className="flex items-center gap-1 text-xs text-slate-500 mt-1">
-               <span className="truncate max-w-[80px]">{post.userName}</span>
-               <span className="mx-1">•</span>
-               <span>{formatTime(post.createdAt)}</span>
+             
+             <div className="flex flex-col items-end gap-0.5 text-xs">
+               <span className="text-slate-300 font-medium truncate max-w-[120px]">{post.userName}</span>
+               <div className="flex items-center gap-1.5 text-slate-500">
+                 <Clock size={11} />
+                 <span>{formatTime(post.createdAt)}</span>
+               </div>
              </div>
           </div>
 
           {/* Mobile Stats */}
-           <div className="sm:hidden flex items-center justify-between w-full mt-2 pt-3 border-t border-white/5">
-             {post.tags && post.tags.length > 0 ? (
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20">
-                    #{post.tags[0]}
-                  </span>
-                </div>
-              ) : <div/>}
-
-              <div className="flex items-center gap-3">
-               <div className="flex items-center gap-1 text-slate-400">
-                 <Heart size={12} className={post.likes?.length > 0 ? "fill-pink-500/20 text-pink-500" : ""} />
-                 <span className="text-xs">{post.likes?.length || 0}</span>
+           <div className="sm:hidden flex items-center justify-end w-full mt-3 pt-3 border-t border-white/5">
+              <div className="flex items-center gap-2">
+               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pink-500/5 border border-pink-500/10 text-pink-400">
+                 <Heart size={12} className={post.likes?.length > 0 ? "fill-pink-500/40" : ""} />
+                 <span className="text-xs font-bold">{post.likes?.length || 0}</span>
                </div>
-               <div className="flex items-center gap-1 text-slate-400">
+               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/5 border border-blue-500/10 text-blue-400">
                  <MessageCircle size={12} />
-                 <span className="text-xs">{post.commentsCount || 0}</span>
+                 <span className="text-xs font-bold">{post.commentsCount || 0}</span>
                </div>
              </div>
            </div>

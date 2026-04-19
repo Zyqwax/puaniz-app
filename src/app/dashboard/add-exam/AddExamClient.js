@@ -37,7 +37,7 @@ const SubjectInput = ({ label, values, onChange, color, max = 40 }) => {
       className={`rounded-xl border p-4 transition-all ${
         isInvalid
           ? "border-red-500/40 bg-red-500/5"
-          : "border-white/5 bg-slate-800/30 hover:bg-slate-800/50"
+          : "border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent hover:bg-white/[0.05] hover:border-white/10 backdrop-blur-md shadow-lg"
       }`}
     >
       <div className="flex items-center justify-between mb-3">
@@ -145,40 +145,39 @@ const AddExamClient = () => {
     cografya2: { d: 0, y: 0 },
   });
 
-  const getActiveSubjects = useCallback(() => {
+  const getGroupedSubjects = useCallback(() => {
     if (examType === "TYT") {
       return [
-        "turkce",
-        "tarih",
-        "cografya",
-        "felsefe",
-        "din",
-        "matematik",
-        "geometri",
-        "fizik",
-        "kimya",
-        "biyoloji",
+        { title: "Türkçe Testi", subjects: ["turkce"] },
+        { title: "Sosyal Bilimler Testi", subjects: ["tarih", "cografya", "felsefe", "din"] },
+        { title: "Temel Matematik Testi", subjects: ["matematik", "geometri"] },
+        { title: "Fen Bilimleri Testi", subjects: ["fizik", "kimya", "biyoloji"] },
       ];
     }
     switch (aytSubtype) {
       case "SAY":
-        return ["matematik", "geometri", "fizik", "kimya", "biyoloji"];
+        return [
+          { title: "Matematik Testi", subjects: ["matematik", "geometri"] },
+          { title: "Fen Bilimleri Testi", subjects: ["fizik", "kimya", "biyoloji"] },
+        ];
       case "EA":
-        return ["matematik", "geometri", "edebiyat", "tarih1", "cografya1"];
+        return [
+          { title: "Matematik Testi", subjects: ["matematik", "geometri"] },
+          { title: "Edebiyat - Sosyal Bilimler-1", subjects: ["edebiyat", "tarih1", "cografya1"] },
+        ];
       case "SOZ":
         return [
-          "edebiyat",
-          "tarih1",
-          "cografya1",
-          "tarih2",
-          "cografya2",
-          "felsefe",
-          "din",
+          { title: "Edebiyat - Sosyal Bilimler-1", subjects: ["edebiyat", "tarih1", "cografya1"] },
+          { title: "Sosyal Bilimler-2 Testi", subjects: ["tarih2", "cografya2", "felsefe", "din"] },
         ];
       default:
         return [];
     }
   }, [examType, aytSubtype]);
+
+  const getActiveSubjects = useCallback(() => {
+    return getGroupedSubjects().flatMap((g) => g.subjects);
+  }, [getGroupedSubjects]);
 
   const totalNet = useMemo(() => {
     let total = 0;
@@ -458,16 +457,26 @@ const AddExamClient = () => {
       </div>
 
       {/* Subject Inputs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
-        {getActiveSubjects().map((sub) => (
-          <SubjectInput
-            key={sub}
-            label={labels[sub] || sub}
-            color={getColor(sub)}
-            values={scores[sub]}
-            max={EXAM_CONFIG[examType][sub]}
-            onChange={(f, v) => handleScoreChange(sub, f, v)}
-          />
+      <div className="space-y-6 mb-8">
+        {getGroupedSubjects().map((group) => (
+          <div key={group.title} className="glass-card p-5 md:p-6 border-none">
+            <h3 className="text-sm md:text-base font-bold text-white mb-5 flex items-center gap-2.5">
+              <div className="w-1.5 h-5 bg-gradient-to-b from-purple-400 to-violet-600 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
+              {group.title}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {group.subjects.map((sub) => (
+                <SubjectInput
+                  key={sub}
+                  label={labels[sub] || sub}
+                  color={getColor(sub)}
+                  values={scores[sub]}
+                  max={EXAM_CONFIG[examType][sub]}
+                  onChange={(f, v) => handleScoreChange(sub, f, v)}
+                />
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 

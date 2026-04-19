@@ -70,6 +70,7 @@ export const prepareRadarData = (stats, type = "TYT") => {
     const percentage = fullMark > 0 ? (avg / fullMark) * 100 : 0;
 
     return {
+      subjectId: subject,
       subject: subject.charAt(0).toUpperCase() + subject.slice(1),
       A: parseFloat(percentage.toFixed(1)),
       fullMark,

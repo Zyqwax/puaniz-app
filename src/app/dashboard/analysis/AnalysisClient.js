@@ -2,6 +2,7 @@
 
 import { EXAM_CONFIG } from "@/constants";
 import React, { useEffect, useState, useMemo } from "react";
+import Markdown from "react-markdown";
 import {
   AreaChart,
   Area,
@@ -127,9 +128,9 @@ const AIAnalysisCard = ({ analysis }) => {
           <h3 className="text-base font-bold text-blue-100 mb-2">
             Yapay Zeka Koç Görüşü
           </h3>
-          <p className="text-sm text-slate-300 leading-relaxed">
-            &ldquo;{analysis}&rdquo;
-          </p>
+          <div className="text-sm text-slate-300 leading-relaxed [&_p]:mb-2 [&_a]:text-blue-400 [&_strong]:text-blue-200 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:my-0.5 [&_h1]:text-lg [&_h1]:font-bold [&_h1]:text-white [&_h1]:mb-2 [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-blue-100 [&_h2]:mb-2 [&_h3]:text-sm [&_h3]:font-bold [&_h3]:text-blue-200 [&_h3]:mb-1">
+            <Markdown>{analysis}</Markdown>
+          </div>
         </div>
       </div>
     </div>
@@ -234,7 +235,7 @@ const SubjectStatsGrid = ({ stats, sortedKeys }) => {
   }));
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-5 md:p-6">
+    <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent backdrop-blur-xl p-6 md:p-8 shadow-2xl">
       <h3 className="text-lg font-bold text-white mb-5">
         Ders Bazlı Ortalama Karşılaştırma
       </h3>
@@ -287,7 +288,7 @@ const SubjectStatsGrid = ({ stats, sortedKeys }) => {
                 return null;
               }}
             />
-            <Bar dataKey="avg" radius={[6, 6, 0, 0]} maxBarSize={36}>
+            <Bar dataKey="avg" radius={[6, 6, 0, 0]} maxBarSize={36} isAnimationActive={false}>
               {barData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
@@ -404,10 +405,24 @@ const AnalysisClient = () => {
     () => calculateSubjectStats(exams, currentType),
     [exams, currentType],
   );
-  const radarData = useMemo(
-    () => prepareRadarData(stats, currentType),
-    [stats, currentType],
-  );
+  const radarData = useMemo(() => {
+    const data = prepareRadarData(stats, currentType);
+    const order = SUBJECT_ORDER[currentType] || [];
+
+    return data
+      .map((item) => ({
+        ...item,
+        subject: SUBJECT_LABELS[item.subjectId] || item.subject,
+      }))
+      .sort((a, b) => {
+        const indexA = order.indexOf(a.subjectId);
+        const indexB = order.indexOf(b.subjectId);
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+        if (indexA !== -1) return -1;
+        if (indexB !== -1) return 1;
+        return 0;
+      });
+  }, [stats, currentType]);
   const trendData = useMemo(
     () => prepareTrendData(exams, currentType, "total"),
     [exams, currentType],
@@ -524,7 +539,7 @@ const AnalysisClient = () => {
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Radar Chart */}
-              <div className="rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-5">
+              <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent backdrop-blur-xl p-6 shadow-2xl">
                 <h3 className="text-base font-bold text-white mb-4">
                   Ders Başarı Dağılımı
                 </h3>
@@ -554,6 +569,7 @@ const AnalysisClient = () => {
                         strokeWidth={2}
                         fill="#8b5cf6"
                         fillOpacity={0.25}
+                        isAnimationActive={false}
                       />
                       <Tooltip
                         content={({ active, payload }) => {
@@ -582,7 +598,7 @@ const AnalysisClient = () => {
               </div>
 
               {/* Trend Chart */}
-              <div className="rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-5">
+              <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent backdrop-blur-xl p-6 shadow-2xl">
                 <h3 className="text-base font-bold text-white mb-4">
                   Genel Net Değişimi
                 </h3>
@@ -629,6 +645,7 @@ const AnalysisClient = () => {
                         dataKey="value"
                         stroke="#ec4899"
                         strokeWidth={3}
+                        isAnimationActive={false}
                         dot={{ fill: "#ec4899", r: 4, strokeWidth: 0 }}
                         activeDot={{
                           r: 6,
@@ -647,7 +664,7 @@ const AnalysisClient = () => {
             <SubjectStatsGrid stats={stats} sortedKeys={sortedStatsKeys} />
 
             {/* Subject Analysis Chart */}
-            <div className="rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-5 md:p-6">
+            <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent backdrop-blur-xl p-6 md:p-8 shadow-2xl">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-5 gap-3">
                 <h3 className="text-base font-bold text-white">
                   Ders Bazlı Net Değişimi
@@ -766,6 +783,7 @@ const AnalysisClient = () => {
                       fillOpacity={1}
                       fill="url(#colorSubjectNet)"
                       strokeWidth={3}
+                      isAnimationActive={false}
                       dot={{
                         fill: SUBJECT_COLORS[selectedChartSubject] || "#3b82f6",
                         r: 4,
@@ -799,7 +817,7 @@ const AnalysisClient = () => {
         )
       ) : (
         /* Report Generation View */
-        <div className="rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-5 md:p-6">
+        <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent backdrop-blur-xl p-6 md:p-8 shadow-2xl">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-4">
               <h3 className="text-lg font-bold text-white">Rapor Oluştur</h3>

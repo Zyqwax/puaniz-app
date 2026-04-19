@@ -7,73 +7,118 @@ import {
   LayoutDashboard,
   PlusCircle,
   PieChart,
-  LogOut,
   BookOpen,
   Bot,
   X,
   Sparkles,
   Users,
-  Shield,
   ClipboardList,
 } from "lucide-react";
-
 import ProfileCard from "./ProfileCard";
+
+const NAV_ITEMS = [
+  {
+    path: "/dashboard",
+    icon: LayoutDashboard,
+    label: "Özet",
+    exact: true,
+  },
+  {
+    path: "/dashboard/add-exam",
+    icon: PlusCircle,
+    label: "Deneme Ekle",
+    accent: "from-purple-500 to-violet-500",
+  },
+  {
+    path: "/dashboard/subjects",
+    icon: ClipboardList,
+    label: "Konu Takip",
+  },
+  {
+    path: "/dashboard/analysis",
+    icon: PieChart,
+    label: "Analizler",
+  },
+  {
+    path: "/dashboard/community",
+    icon: Users,
+    label: "Topluluk",
+  },
+  {
+    path: "/dashboard/assistant",
+    icon: Bot,
+    label: "YZ Asistan",
+    badge: "AI",
+  },
+  {
+    path: "/dashboard/history",
+    icon: BookOpen,
+    label: "Geçmiş",
+  },
+  {
+    path: "/dashboard/changelog",
+    icon: Sparkles,
+    label: "Yenilikler",
+  },
+];
 
 const Sidebar = ({ isOpen, onClose, user, isCollapsed }) => {
   const pathname = usePathname();
 
-  const baseNavItems = [
-    { path: "/dashboard", icon: LayoutDashboard, label: "Özet" },
-    { path: "/dashboard/add-exam", icon: PlusCircle, label: "Deneme Ekle" },
-    { path: "/dashboard/subjects", icon: ClipboardList, label: "Konu Takip" },
-    { path: "/dashboard/analysis", icon: PieChart, label: "Analizler" },
-    { path: "/dashboard/community", icon: Users, label: "Soru-Cevap" },
-    { path: "/dashboard/assistant", icon: Bot, label: "Asistana Sor" },
-    { path: "/dashboard/history", icon: BookOpen, label: "Geçmiş" },
-    { path: "/dashboard/changelog", icon: Sparkles, label: "Yenilikler" },
-  ];
-
-  // Add navigation items
-  const navItems = baseNavItems;
+  const isActive = (item) =>
+    item.exact ? pathname === item.path : pathname.startsWith(item.path);
 
   return (
     <>
       <div
-        className={`fixed top-0 left-0 h-dvh glass-panel border-r border-white/10 flex flex-col p-4 transition-all duration-300 z-50 
+        className={`fixed top-0 left-0 h-dvh flex flex-col z-50
+          bg-slate-950/95 backdrop-blur-xl border-r border-white/5
+          transition-all duration-300 ease-in-out
           ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
           ${isCollapsed ? "md:w-20 w-64" : "w-64"}`}
       >
-        <div className={`flex items-center ${isCollapsed ? "md:justify-center justify-between" : "justify-between"} mb-10 px-2 mt-2`}>
-          <Link 
-            href="/" 
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity group"
+        {/* ── Logo ── */}
+        <div
+          className={`flex items-center px-4 h-16 border-b border-white/5 shrink-0
+            ${isCollapsed ? "md:justify-center md:px-0" : ""}`}
+        >
+          <Link
+            href="/"
+            className="flex items-center gap-3 group"
+            onClick={() => onClose && onClose()}
           >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center font-bold text-white shrink-0 group-hover:scale-105 transition-transform">
-              Y
+            {/* Logo mark */}
+            <div className="relative shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center font-black text-white text-base shadow-lg shadow-purple-900/30 group-hover:shadow-purple-900/50 transition-all duration-300 group-hover:scale-105">
+                P
+              </div>
+              <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-slate-950 shadow" />
             </div>
-            {!isCollapsed && (
-              <h1 className="text-xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent whitespace-nowrap">
+
+            {/* Logo text — hidden in collapsed desktop mode */}
+            <div className={`overflow-hidden transition-all duration-300 ${isCollapsed ? "md:hidden" : ""}`}>
+              <span className="font-black text-lg text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 whitespace-nowrap leading-none block">
+                PuanIz
+              </span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">
                 YKS Takip
-              </h1>
-            )}
-            {isCollapsed && (
-              <h1 className="text-xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent whitespace-nowrap md:hidden">
-                YKS Takip
-              </h1>
-            )}
+              </span>
+            </div>
           </Link>
 
+          {/* Mobile close */}
           <button
             onClick={onClose}
-            className="md:hidden p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 ml-auto"
+            className="md:hidden ml-auto p-2 text-slate-400 hover:text-white rounded-xl hover:bg-white/5 transition-colors cursor-pointer"
           >
             <X size={20} />
           </button>
         </div>
 
-        <nav className="flex-1 space-y-2 overflow-y-auto">
-          {navItems.map((item) => {
-            const isActive = pathname === item.path;
+        {/* ── Navigation ── */}
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+          {NAV_ITEMS.map((item) => {
+            const active = isActive(item);
 
             return (
               <Link
@@ -81,23 +126,50 @@ const Sidebar = ({ isOpen, onClose, user, isCollapsed }) => {
                 href={item.path}
                 onClick={() => onClose && onClose()}
                 title={isCollapsed ? item.label : ""}
-                className={`flex items-center ${isCollapsed ? "md:justify-center px-4 md:px-2 gap-3 md:gap-0" : "gap-3 px-4"} py-3 rounded-xl transition-all ${
-                  isActive
-                    ? "bg-purple-600 shadow-lg shadow-purple-900/20 text-white"
-                    : "text-slate-400 hover:bg-white/5 hover:text-white"
-                }`}
+                className={`relative flex items-center gap-3 py-2.5 rounded-xl transition-all duration-200 group
+                  ${isCollapsed ? "md:justify-center md:px-0 md:py-3 px-3" : "px-3"}
+                  ${
+                    active
+                      ? "bg-purple-600/20 text-white border border-purple-500/30 shadow-sm shadow-purple-900/20"
+                      : "text-slate-400 hover:text-white hover:bg-white/5 border border-transparent"
+                  }`}
               >
-                <item.icon size={20} className="shrink-0" />
-                {isCollapsed ? (
-                  <span className="font-medium whitespace-nowrap md:hidden ml-3">{item.label}</span>
-                ) : (
-                  <span className="font-medium whitespace-nowrap">{item.label}</span>
+                {/* Active left accent */}
+                {active && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-gradient-to-b from-purple-400 to-pink-500 rounded-r-full" />
+                )}
+
+                <item.icon
+                  size={19}
+                  className={`shrink-0 transition-colors ${
+                    active ? "text-purple-400" : "text-slate-500 group-hover:text-slate-300"
+                  }`}
+                />
+
+                <span
+                  className={`font-semibold text-[13px] whitespace-nowrap flex-1 transition-all duration-200
+                    ${isCollapsed ? "md:hidden" : ""}`}
+                >
+                  {item.label}
+                </span>
+
+                {/* Badge */}
+                {item.badge && !isCollapsed && (
+                  <span className="text-[9px] font-black px-1.5 py-0.5 rounded-md bg-gradient-to-r from-purple-500 to-pink-500 text-white tracking-wider md:inline hidden">
+                    {item.badge}
+                  </span>
+                )}
+                {item.badge && (
+                  <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-md bg-gradient-to-r from-purple-500 to-pink-500 text-white tracking-wider md:hidden`}>
+                    {item.badge}
+                  </span>
                 )}
               </Link>
             );
           })}
         </nav>
 
+        {/* ── Profile Card ── */}
         <ProfileCard user={user} isCollapsed={isCollapsed} onClose={onClose} />
       </div>
     </>

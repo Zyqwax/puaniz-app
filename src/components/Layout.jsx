@@ -12,11 +12,18 @@ const Layout = ({ children }) => {
   const pathname = usePathname();
 
   // Route-based layout configuration
-  const fluidRoutes = ["/dashboard/history"];
+  const fluidRoutes = ["/dashboard/history", "/dashboard/community/new"];
 
-  const isCommunityDetail = pathname.startsWith("/dashboard/community/") && pathname !== "/dashboard/community";
-  const fluid = fluidRoutes.includes(pathname) || pathname === "/dashboard/community";
-  const fullWidth = pathname.startsWith("/dashboard/assistant") || isCommunityDetail;
+  const isCommunityDetail =
+    pathname.startsWith("/dashboard/community/") &&
+    pathname !== "/dashboard/community" &&
+    pathname !== "/dashboard/community/new";
+  const fluid =
+    fluidRoutes.includes(pathname) ||
+    pathname === "/dashboard/community" ||
+    isCommunityDetail;
+  const fullWidth = pathname.startsWith("/dashboard/assistant");
+
 
   return (
     <div className={`${fullWidth ? "h-dvh overflow-hidden flex flex-col" : "min-h-dvh flex flex-col"} bg-slate-900`}>

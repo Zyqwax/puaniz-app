@@ -48,71 +48,93 @@ const SUBJECT_LABELS = {
   cografya2: "Coğrafya-2",
 };
 
-// ---------- Subject Input ----------
+// Subject color dots
+const colorDot = {
+  blue: "bg-blue-400",
+  red: "bg-red-400",
+  yellow: "bg-yellow-400",
+  green: "bg-green-400",
+  pink: "bg-pink-400",
+  indigo: "bg-indigo-400",
+};
+
+// ---------- Compact Subject Input ----------
 const SubjectInput = ({ label, values, onChange, color, max = 40 }) => {
-  const isInvalid = (values.d || 0) + (values.y || 0) > max;
+  const total = (values.d || 0) + (values.y || 0);
+  const isInvalid = total > max;
+  const net = calculateNet(values.d || 0, values.y || 0);
 
   return (
     <div
-      className={`rounded-xl border bg-white/5 p-3 transition-all ${
-        isInvalid ? "border-red-500/50 bg-red-500/10" : "border-white/5"
+      className={`rounded-xl border p-4 transition-all ${
+        isInvalid
+          ? "border-red-500/40 bg-red-500/5"
+          : "border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent hover:bg-white/[0.05] hover:border-white/10 backdrop-blur-md shadow-lg"
       }`}
     >
-      <div className="flex justify-between items-start mb-2">
-        <h4 className={`text-sm font-bold text-${color}-400`}>{label}</h4>
-        <span className="text-[10px] text-slate-500 bg-slate-800/50 px-2 py-1 rounded">
-          Max: {max}
-        </span>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div
+            className={`w-2 h-2 rounded-full ${colorDot[color] || colorDot.blue}`}
+          />
+          <span className="text-sm font-medium text-white">{label}</span>
+        </div>
+        <span className="text-[11px] text-slate-500">{max} soru</span>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label className="block text-[10px] text-slate-400 mb-1">Doğru</label>
+      <div className="flex items-center gap-2">
+        <div className="flex-1">
           <input
             type="number"
             min="0"
+            max={max}
             value={values.d || ""}
             onChange={(e) => onChange("d", parseInt(e.target.value) || 0)}
-            className={`glass-input w-full text-xs p-1 ${
+            placeholder="D"
+            className={`w-full bg-white/5 border rounded-lg px-3 py-2 text-center text-sm text-white placeholder-slate-600 focus:outline-none transition-all ${
               isInvalid
-                ? "border-red-500 focus:border-red-500"
-                : "border-green-500/30 focus:border-green-400"
+                ? "border-red-500/50 focus:border-red-400"
+                : "border-white/5 focus:border-green-500/40"
             }`}
           />
+          <span className="block text-[10px] text-slate-500 text-center mt-1">Doğru</span>
         </div>
-        <div>
-          <label className="block text-[10px] text-slate-400 mb-1">
-            Yanlış
-          </label>
+
+        <div className="flex-1">
           <input
             type="number"
             min="0"
+            max={max}
             value={values.y || ""}
             onChange={(e) => onChange("y", parseInt(e.target.value) || 0)}
-            className={`glass-input w-full text-xs p-1 ${
+            placeholder="Y"
+            className={`w-full bg-white/5 border rounded-lg px-3 py-2 text-center text-sm text-white placeholder-slate-600 focus:outline-none transition-all ${
               isInvalid
-                ? "border-red-500 focus:border-red-500"
-                : "border-red-500/30 focus:border-red-400"
+                ? "border-red-500/50 focus:border-red-400"
+                : "border-white/5 focus:border-red-500/40"
             }`}
           />
+          <span className="block text-[10px] text-slate-500 text-center mt-1">Yanlış</span>
+        </div>
+
+        <div className="w-14 text-center">
+          <div
+            className={`text-base font-bold tabular-nums ${
+              isInvalid ? "text-red-400" : net > 0 ? "text-white" : "text-slate-600"
+            }`}
+          >
+            {net.toFixed(1)}
+          </div>
+          <span className="block text-[10px] text-slate-500">Net</span>
         </div>
       </div>
 
       {isInvalid && (
-        <div className="mt-2 flex items-center gap-1 text-red-400 text-[10px] animate-pulse">
-          <AlertCircle size={10} />
-          <span>Soru limiti aşıldı!</span>
+        <div className="mt-2 flex items-center gap-1.5 text-red-400 text-[11px]">
+          <AlertCircle size={12} />
+          <span>Limit aşıldı ({total}/{max})</span>
         </div>
       )}
-
-      <div className="mt-2 text-right">
-        <span className="text-xs text-slate-400">Net: </span>
-        <span
-          className={`text-sm font-bold ${isInvalid ? "text-red-400" : "text-white"}`}
-        >
-          {calculateNet(values.d || 0, values.y || 0).toFixed(2)}
-        </span>
-      </div>
     </div>
   );
 };
@@ -183,85 +205,88 @@ const ExamDetailModal = ({ exam, onClose, onDelete, onUpdate }) => {
     }));
   };
 
-  const getActiveSubjects = () => {
+  const getGroupedSubjects = () => {
     const type = exam.type;
     const subtype = exam.subtype;
 
     if (type === "TYT") {
       return [
-        "turkce",
-        "matematik",
-        "geometri",
-        "tarih",
-        "cografya",
-        "felsefe",
-        "din",
-        "fizik",
-        "kimya",
-        "biyoloji",
+        { title: "Türkçe Testi", subjects: ["turkce"] },
+        { title: "Sosyal Bilimler Testi", subjects: ["tarih", "cografya", "felsefe", "din"] },
+        { title: "Temel Matematik Testi", subjects: ["matematik", "geometri"] },
+        { title: "Fen Bilimleri Testi", subjects: ["fizik", "kimya", "biyoloji"] },
       ];
     }
 
     switch (subtype) {
       case "SAY":
-        return ["matematik", "geometri", "fizik", "kimya", "biyoloji"];
+        return [
+          { title: "Matematik Testi", subjects: ["matematik", "geometri"] },
+          { title: "Fen Bilimleri Testi", subjects: ["fizik", "kimya", "biyoloji"] },
+        ];
       case "EA":
-        return ["matematik", "geometri", "edebiyat", "tarih1", "cografya1"];
+        return [
+          { title: "Matematik Testi", subjects: ["matematik", "geometri"] },
+          { title: "Edebiyat - Sosyal Bilimler-1", subjects: ["edebiyat", "tarih1", "cografya1"] },
+        ];
       case "SOZ":
         return [
-          "edebiyat",
-          "tarih1",
-          "cografya1",
-          "tarih2",
-          "cografya2",
-          "felsefe",
-          "din",
+          { title: "Edebiyat - Sosyal Bilimler-1", subjects: ["edebiyat", "tarih1", "cografya1"] },
+          { title: "Sosyal Bilimler-2 Testi", subjects: ["tarih2", "cografya2", "felsefe", "din"] },
         ];
       default:
-        return Object.keys(editData.scores).includes("geometri")
-          ? Object.keys(editData.scores)
-          : [...Object.keys(editData.scores), "geometri"];
+        return [{ title: "Dersler", subjects: Object.keys(editData?.scores || {}) }];
     }
   };
 
   const renderEditInputs = () => {
-    const subjects = getActiveSubjects();
+    const grouped = getGroupedSubjects();
     const config = EXAM_CONFIG[exam.type] || {};
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {subjects.map((sub) => {
-          if (!editData.scores[sub]) {
-            editData.scores[sub] = { d: 0, y: 0, net: 0 };
-          }
+      <div className="space-y-6">
+        {grouped.map((group) => (
+          <div key={group.title} className="glass-card p-5 border-none">
+            <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+              <div className="w-1.5 h-5 bg-gradient-to-b from-purple-400 to-violet-600 rounded-full" />
+              {group.title}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1.5">
+              {group.subjects.map((sub) => {
+                if (!editData.scores[sub]) {
+                  editData.scores[sub] = { d: 0, y: 0, net: 0 };
+                }
 
-          let color = "blue";
-          if (["matematik", "geometri", "fizik"].includes(sub)) color = "red";
-          if (["turkce", "edebiyat"].includes(sub)) color = "blue";
-          if (["sosyal", "tarih", "tarih1", "tarih2", "kimya"].includes(sub))
-            color = "yellow";
-          if (
-            ["fen", "biyoloji", "cografya", "cografya1", "cografya2"].includes(
-              sub,
-            )
-          )
-            color = "green";
-          if (["felsefe"].includes(sub)) color = "pink";
-          if (["din"].includes(sub)) color = "indigo";
+                let color = "blue";
+                if (["matematik", "geometri", "fizik"].includes(sub)) color = "red";
+                if (["turkce", "edebiyat"].includes(sub)) color = "blue";
+                if (["sosyal", "tarih", "tarih1", "tarih2", "kimya"].includes(sub))
+                  color = "yellow";
+                if (
+                  ["fen", "biyoloji", "cografya", "cografya1", "cografya2"].includes(
+                    sub,
+                  )
+                )
+                  color = "green";
+                if (["felsefe"].includes(sub)) color = "pink";
+                if (["din"].includes(sub)) color = "indigo";
 
-          const max = config[sub] || 40;
+                const max = config[sub] || 40;
 
-          return (
-            <SubjectInput
-              key={sub}
-              label={SUBJECT_LABELS[sub] || sub}
-              values={editData.scores[sub]}
-              onChange={(f, v) => handleScoreChange(sub, f, v)}
-              color={color}
-              max={max}
-            />
-          );
-        })}
+                return (
+                  <SubjectInput
+                    key={sub}
+                    label={SUBJECT_LABELS[sub] || sub}
+                    values={editData.scores[sub]}
+                    onChange={(f, v) => handleScoreChange(sub, f, v)}
+                    color={color}
+                    max={max}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
     );
   };
@@ -272,7 +297,7 @@ const ExamDetailModal = ({ exam, onClose, onDelete, onUpdate }) => {
       onClick={onClose}
     >
       <div
-        className="glass-panel w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 relative rounded-2xl"
+        className="w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 md:p-8 relative rounded-3xl bg-slate-900/95 backdrop-blur-xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -378,36 +403,43 @@ const ExamDetailModal = ({ exam, onClose, onDelete, onUpdate }) => {
         ) : (
           <>
             {/* Total Net */}
-            <div className="rounded-xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-white/10 p-4 mb-6 text-center">
-              <p className="text-sm text-slate-400 mb-1">Toplam Net</p>
-              <p className="text-4xl font-bold text-white">
+            <div className="rounded-xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-white/10 p-3 mb-5 text-center flex items-center justify-center gap-3">
+              <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">Toplam Net:</p>
+              <p className="text-2xl font-bold text-white">
                 {exam.totalNet.toFixed(2)}
               </p>
             </div>
 
             {/* Subject Scores */}
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
-              Ders Bazlı Sonuçlar
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {Object.entries(exam.scores || {}).map(([subject, stats]) => (
-                <div
-                  key={subject}
-                  className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5"
-                >
-                  <span className="text-sm text-slate-200 font-medium">
-                    {SUBJECT_LABELS[subject] || subject}
-                  </span>
-                  <div className="flex items-center gap-4 text-sm">
-                    <span className="text-green-400 text-xs">{stats.d}D</span>
-                    <span className="text-red-400 text-xs">{stats.y}Y</span>
-                    <span className="font-bold text-white w-14 text-right">
-                      {stats.net.toFixed(2)}
-                    </span>
+            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Ders Bazlı Sonuçlar</h3>
+            <div className="space-y-4">
+              {getGroupedSubjects().map((group) => {
+                const groupSubjects = group.subjects.filter(sub => exam.scores[sub]);
+                if (groupSubjects.length === 0) return null;
+                
+                return (
+                  <div key={group.title} className="glass-card p-4 border-none bg-white/[0.02]">
+                    <h4 className="text-xs font-bold text-slate-300 mb-3">{group.title}</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
+                      {groupSubjects.map((subject) => {
+                        const stats = exam.scores[subject] || { d: 0, y: 0, net: 0 };
+                        return (
+                          <div key={subject} className="flex items-center justify-between p-2 px-3 rounded-xl bg-white/5 border border-white/5">
+                            <span className="text-xs text-slate-200 font-medium">{SUBJECT_LABELS[subject] || subject}</span>
+                            <div className="flex items-center gap-3 text-xs">
+                              <span className="text-green-400 font-semibold">{stats.d}D</span>
+                              <span className="text-red-400 font-semibold">{stats.y}Y</span>
+                              <span className="font-bold text-white w-10 text-right">{stats.net.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
+
           </>
         )}
       </div>
@@ -438,33 +470,23 @@ const MiniStats = ({ exams }) => {
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <div className="rounded-xl bg-white/5 border border-white/5 p-3">
-        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
-          Toplam
-        </p>
-        <p className="text-xl font-bold text-white">{exams.length}</p>
+      <div className="glass-card p-4 border-none">
+        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Toplam</p>
+        <p className="text-2xl font-bold text-white">{exams.length}</p>
       </div>
-      <div className="rounded-xl bg-white/5 border border-white/5 p-3">
-        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
-          Son Deneme
-        </p>
-        <p className="text-sm font-bold text-white">{lastExamDate}</p>
+      <div className="glass-card p-4 border-none">
+        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Son Deneme</p>
+        <p className="text-sm font-bold text-white mt-1">{lastExamDate}</p>
       </div>
-      <div className="rounded-xl bg-white/5 border border-white/5 p-3">
-        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
-          En Yüksek TYT
-        </p>
-        <p className="text-xl font-bold text-purple-400">
-          {bestTyt !== null ? bestTyt.toFixed(1) : "—"}
-        </p>
+      <div className="glass-card p-4 border-none relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-16 h-16 bg-purple-500/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150" />
+        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">En Yüksek TYT</p>
+        <p className="text-2xl font-bold text-purple-400 relative z-10">{bestTyt !== null ? bestTyt.toFixed(1) : "—"}</p>
       </div>
-      <div className="rounded-xl bg-white/5 border border-white/5 p-3">
-        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
-          En Yüksek AYT
-        </p>
-        <p className="text-xl font-bold text-pink-400">
-          {bestAyt !== null ? bestAyt.toFixed(1) : "—"}
-        </p>
+      <div className="glass-card p-4 border-none relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-16 h-16 bg-pink-500/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150" />
+        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">En Yüksek AYT</p>
+        <p className="text-2xl font-bold text-pink-400 relative z-10">{bestAyt !== null ? bestAyt.toFixed(1) : "—"}</p>
       </div>
     </div>
   );
@@ -606,7 +628,7 @@ const HistoryClient = () => {
         <div
           key={exam.id}
           onClick={() => setSelectedExam(exam)}
-          className="flex items-center justify-between p-3.5 rounded-xl border border-white/5 bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/10 transition-all cursor-pointer group"
+          className="glass-card p-4 flex items-center justify-between border-none transition-all cursor-pointer group"
         >
           <div className="flex items-center gap-3 min-w-0">
             <div
@@ -670,7 +692,7 @@ const HistoryClient = () => {
       <div
         key={exam.id}
         onClick={() => setSelectedExam(exam)}
-        className="p-3.5 rounded-xl border border-white/5 bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/10 transition-all cursor-pointer flex flex-col gap-2"
+        className="glass-card p-4 border-none transition-all cursor-pointer flex flex-col gap-3 group"
       >
         <div className="flex items-center gap-2">
           <div
@@ -818,7 +840,7 @@ const HistoryClient = () => {
 
       {/* Exam List */}
       {filteredExams.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-white/10 bg-slate-800/30 text-center py-16">
+        <div className="glass-card border-dashed text-center py-16">
           <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-5">
             <ClipboardList size={28} className="text-purple-400" />
           </div>

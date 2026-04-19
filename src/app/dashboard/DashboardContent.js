@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Markdown from "react-markdown";
 import {
   TrendingUp,
   TrendingDown,
@@ -44,37 +45,41 @@ const StatCard = ({
 }) => {
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-5 transition-all duration-300 hover:border-white/20 hover:shadow-lg hover:shadow-purple-500/5 ${onClick ? "cursor-pointer" : ""}`}
+      className={`relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-b from-white/[0.05] to-transparent backdrop-blur-xl p-6 transition-all duration-500 hover:-translate-y-1 hover:border-white/15 hover:shadow-2xl hover:shadow-${gradient.split('-')[1] || 'purple'}-500/10 ${onClick ? "cursor-pointer group" : ""}`}
       onClick={onClick}
     >
-      {/* Background glow */}
+      {/* Refined Background glow */}
       <div
-        className={`absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl opacity-20 ${gradient}`}
+        className={`absolute -top-12 -right-12 w-32 h-32 rounded-full blur-[40px] opacity-20 transition-opacity duration-500 group-hover:opacity-40 ${gradient}`}
       />
 
-      <div className="relative flex items-start justify-between">
+      <div className="relative flex items-start justify-between z-10">
         <div>
-          <p className="text-slate-400 text-sm font-medium mb-1.5">{title}</p>
-          <h3 className="text-3xl font-bold text-white mb-1">{value}</h3>
+          <p className="text-slate-400/90 text-sm font-medium tracking-wide mb-2 uppercase">{title}</p>
+          <h3 className="text-4xl font-extrabold text-white mb-2 tracking-tight">{value}</h3>
           <p
-            className={`text-xs font-medium ${
+            className={`text-xs font-medium px-2 py-1 inline-flex items-center rounded-lg ${
               subtext && subtext.includes("+")
-                ? "text-green-400"
+                ? "bg-green-500/10 text-green-400"
                 : subtext && subtext.includes("ulaşıldı")
-                  ? "text-green-400"
+                  ? "bg-green-500/10 text-green-400"
                   : subtext && subtext.includes("kaldı")
-                    ? "text-amber-400"
-                    : "text-slate-500"
+                    ? "bg-amber-500/10 text-amber-400"
+                    : "bg-slate-500/10 text-slate-400"
             }`}
           >
             {subtext}
           </p>
         </div>
         <div
-          className={`p-3 rounded-xl bg-gradient-to-br ${gradient} flex items-center gap-2`}
+          className={`p-3.5 rounded-2xl bg-gradient-to-br ${gradient} shadow-lg flex items-center justify-center relative`}
         >
-          <Icon size={22} className="text-white" />
-          {ActionIcon && <ActionIcon size={14} className="text-white/60" />}
+          <Icon size={24} className="text-white drop-shadow-md" />
+          {ActionIcon && (
+            <div className="absolute -bottom-1 -right-1 bg-slate-800 rounded-full p-1 border border-white/10">
+               <ActionIcon size={12} className="text-white" />
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -173,75 +178,88 @@ const LastExamCard = ({ exam }) => {
   };
 
   const subjectColors = {
-    turkce: "from-red-500 to-rose-600",
+    turkce: "from-rose-500 to-red-600",
     matematik: "from-blue-500 to-indigo-600",
-    geometri: "from-cyan-500 to-blue-600",
-    fizik: "from-yellow-500 to-amber-600",
-    kimya: "from-green-500 to-emerald-600",
-    biyoloji: "from-emerald-500 to-teal-600",
-    tarih: "from-amber-500 to-orange-600",
-    cografya: "from-teal-500 to-cyan-600",
-    felsefe: "from-indigo-500 to-violet-600",
-    din: "from-orange-500 to-red-600",
-    edebiyat: "from-rose-500 to-pink-600",
-    tarih1: "from-amber-500 to-orange-600",
-    cografya1: "from-teal-500 to-cyan-600",
-    tarih2: "from-amber-400 to-orange-500",
-    cografya2: "from-teal-400 to-cyan-500",
+    geometri: "from-cyan-400 to-blue-500",
+    fizik: "from-amber-400 to-orange-500",
+    kimya: "from-emerald-400 to-teal-500",
+    biyoloji: "from-teal-400 to-emerald-600",
+    tarih: "from-orange-400 to-amber-600",
+    cografya: "from-cyan-500 to-teal-500",
+    felsefe: "from-indigo-400 to-violet-500",
+    din: "from-red-400 to-rose-500",
+    edebiyat: "from-pink-500 to-rose-500",
+    tarih1: "from-orange-400 to-amber-600",
+    cografya1: "from-cyan-500 to-teal-500",
+    tarih2: "from-amber-500 to-orange-500",
+    cografya2: "from-teal-500 to-cyan-500",
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-5 md:p-6">
-      <div className="flex items-center justify-between mb-5">
+    <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent backdrop-blur-xl p-6 md:p-8 shadow-2xl">
+      {/* Refined Background Elements */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-purple-500/10 to-transparent blur-3xl rounded-full pointer-events-none" />
+      
+      <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
         <div>
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <Clock size={18} className="text-purple-400" />
-            Son Deneme
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 mb-4 shadow-inner">
+            <Clock size={14} className="text-purple-400" />
+            <span className="text-xs font-medium text-slate-300">En Son Çözülen Deneme</span>
+          </div>
+          <h3 className="text-2xl md:text-3xl font-extrabold text-white mb-2 tracking-tight">
+            {exam.name}
           </h3>
-          <p className="text-xs text-slate-500 mt-0.5">
-            {exam.name} · {exam.date}
+          <p className="text-sm text-slate-400">
+            {exam.date} tarihinde çözüldü
           </p>
         </div>
-        <div className="text-right">
-          <span
-            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
-              exam.type === "TYT"
-                ? "bg-purple-500/20 text-purple-300"
-                : "bg-pink-500/20 text-pink-300"
-            }`}
-          >
-            {exam.subtype || exam.type}
-          </span>
-          <p className="text-2xl font-bold text-white mt-1">
-            {exam.totalNet.toFixed(2)}{" "}
-            <span className="text-sm text-slate-400 font-normal">Net</span>
-          </p>
+        
+        <div className="flex items-center gap-6 md:text-right">
+          <div>
+            <p className="text-sm text-slate-500 mb-1">Deneme Türü</p>
+            <span
+              className={`inline-flex items-center px-4 py-1.5 rounded-xl text-sm font-bold shadow-sm ${
+                exam.type === "TYT"
+                  ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                  : "bg-pink-500/20 text-pink-300 border border-pink-500/30"
+              }`}
+            >
+              {exam.subtype || exam.type}
+            </span>
+          </div>
+          <div className="w-px h-12 bg-white/10 hidden md:block"></div>
+          <div>
+            <p className="text-sm text-slate-500 mb-1">Toplam Net</p>
+            <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
+              {exam.totalNet.toFixed(2)}
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+      <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
         {Object.entries(exam.scores || {}).map(([sub, stats]) => (
           <div
             key={sub}
-            className="bg-white/5 rounded-xl p-2.5 border border-white/5"
+            className="group relative overflow-hidden bg-white/[0.02] hover:bg-white/[0.04] rounded-2xl p-4 border border-white/5 hover:border-white/10 transition-all duration-300"
           >
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <div
-                className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${subjectColors[sub] || "from-slate-400 to-slate-500"}`}
-              />
-              <span className="text-[10px] text-slate-400 truncate">
+            <div
+              className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${subjectColors[sub] || "from-slate-400 to-slate-500"} opacity-60 group-hover:opacity-100 transition-opacity`}
+            />
+            <div className="flex items-center gap-2 mb-3 mt-1">
+              <span className="text-xs font-semibold text-slate-300 truncate tracking-wide">
                 {subjectLabels[sub] || sub}
               </span>
             </div>
-            <p className="text-sm font-bold text-white">
+            <p className="text-2xl font-bold text-white mb-2">
               {(stats.net || 0).toFixed(1)}
             </p>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-[9px] text-green-400/70">
-                {stats.d || 0}D
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400/90 bg-emerald-400/10 px-2 py-0.5 rounded-md">
+                {stats.d || 0} D
               </span>
-              <span className="text-[9px] text-red-400/70">
-                {stats.y || 0}Y
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-rose-400/90 bg-rose-400/10 px-2 py-0.5 rounded-md">
+                {stats.y || 0} Y
               </span>
             </div>
           </div>
@@ -253,53 +271,56 @@ const LastExamCard = ({ exam }) => {
 
 // ---------- Quick Links ----------
 const QuickLinks = () => (
-  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
     {[
       {
         label: "Deneme Ekle",
         desc: "Yeni deneme sonuçlarını gir",
         href: "/dashboard/add-exam",
         icon: Zap,
-        gradient: "from-purple-500/20 to-pink-500/20",
-        iconColor: "text-purple-400",
+        gradient: "from-purple-600 to-violet-600",
+        shadow: "shadow-purple-500/20",
       },
       {
         label: "Detaylı Analiz",
         desc: "Ders bazlı analiz ve grafikler",
         href: "/dashboard/analysis",
         icon: BarChart3,
-        gradient: "from-blue-500/20 to-cyan-500/20",
-        iconColor: "text-blue-400",
+        gradient: "from-blue-600 to-cyan-600",
+        shadow: "shadow-blue-500/20",
       },
       {
         label: "Konu Takip",
         desc: "Konuları, soruları ve tekrarları izle",
         href: "/dashboard/subjects",
         icon: BookOpen,
-        gradient: "from-green-500/20 to-emerald-500/20",
-        iconColor: "text-green-400",
+        gradient: "from-emerald-600 to-teal-600",
+        shadow: "shadow-emerald-500/20",
       },
     ].map((link) => (
       <Link
         key={link.href}
         href={link.href}
-        className="group flex items-center gap-4 p-4 rounded-xl border border-white/5 bg-white/5 hover:border-white/15 hover:bg-white/[0.07] transition-all"
+        className={`group relative flex items-center gap-5 p-5 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.04] hover:border-white/10 hover:-translate-y-1 hover:shadow-2xl ${link.shadow}`}
       >
+        <div className={`absolute inset-0 bg-gradient-to-br ${link.gradient} opacity-0 group-hover:opacity-[0.03] rounded-3xl transition-opacity duration-300`} />
         <div
-          className={`w-10 h-10 rounded-xl bg-gradient-to-br ${link.gradient} flex items-center justify-center shrink-0`}
+          className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${link.gradient} flex items-center justify-center shrink-0 shadow-lg`}
         >
-          <link.icon size={20} className={link.iconColor} />
+          <link.icon size={24} className="text-white drop-shadow-md" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-white group-hover:text-purple-300 transition-colors">
+          <p className="text-[16px] font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-slate-300 transition-all">
             {link.label}
           </p>
-          <p className="text-[11px] text-slate-500">{link.desc}</p>
+          <p className="text-xs text-slate-400 mt-1">{link.desc}</p>
         </div>
-        <ArrowRight
-          size={16}
-          className="text-slate-600 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0"
-        />
+        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
+          <ArrowRight
+            size={16}
+            className="text-slate-400 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0"
+          />
+        </div>
       </Link>
     ))}
   </div>
@@ -450,9 +471,19 @@ const DashboardContent = () => {
       ) : (
         <>
           {/* Welcome Header */}
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Genel Bakış</h1>
-            <p className="text-slate-400">{welcomeMessage}</p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-slate-400 mb-2 tracking-tight">
+                Genel Bakış
+              </h1>
+              <div className="text-sm font-medium text-slate-400 [&_p]:mb-1 [&_strong]:text-slate-200 [&_a]:text-purple-400 [&_ul]:list-disc [&_ul]:pl-4 [&_li]:my-0.5">
+                <Markdown>{welcomeMessage}</Markdown>
+              </div>
+            </div>
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm shadow-inner">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+              <span className="text-xs font-medium text-slate-300">Sistem Aktif</span>
+            </div>
           </div>
 
           {/* Stats Grid */}
@@ -509,12 +540,15 @@ const DashboardContent = () => {
 
           {/* Chart with Tab Switcher */}
           {(tytData.length > 0 || aytData.length > 0) && (
-            <div className="rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-5 md:p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold text-white">
-                  Net Değişim Grafiği
-                </h3>
-                <div className="flex gap-1 p-1 bg-white/5 rounded-xl">
+            <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-b from-white/[0.02] to-transparent backdrop-blur-xl p-6 md:p-8 shadow-2xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+                <div>
+                  <h3 className="text-xl font-bold text-white tracking-tight">
+                    Net Değişim Grafiği
+                  </h3>
+                  <p className="text-sm text-slate-400 mt-1">Son denemelerindeki net artışını takip et</p>
+                </div>
+                <div className="flex gap-1.5 p-1.5 bg-slate-900/50 border border-white/5 rounded-2xl backdrop-blur-md">
                   {["TYT", "AYT"].map((tab) => {
                     const hasData =
                       tab === "TYT" ? tytData.length > 0 : aytData.length > 0;
@@ -523,11 +557,11 @@ const DashboardContent = () => {
                         key={tab}
                         onClick={() => hasData && setChartTab(tab)}
                         disabled={!hasData}
-                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                        className={`px-5 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${
                           chartTab === tab
                             ? tab === "TYT"
-                              ? "bg-purple-600 text-white shadow-lg shadow-purple-900/30"
-                              : "bg-pink-600 text-white shadow-lg shadow-pink-900/30"
+                              ? "bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg shadow-purple-900/40"
+                              : "bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg shadow-pink-900/40"
                             : hasData
                               ? "text-slate-400 hover:text-white hover:bg-white/5"
                               : "text-slate-600 cursor-not-allowed"
@@ -624,17 +658,18 @@ const DashboardContent = () => {
                         stroke={chartColor}
                         fillOpacity={1}
                         fill={`url(#${chartGradientId})`}
-                        strokeWidth={3}
+                        strokeWidth={4}
+                        isAnimationActive={false}
                         dot={{
                           fill: chartColor,
                           r: 4,
                           strokeWidth: 0,
                         }}
                         activeDot={{
-                          r: 6,
+                          r: 8,
                           fill: chartColor,
                           stroke: "#fff",
-                          strokeWidth: 2,
+                          strokeWidth: 3,
                         }}
                         name="Net"
                       />
