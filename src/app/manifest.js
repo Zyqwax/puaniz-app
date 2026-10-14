@@ -5,8 +5,8 @@ export default function manifest() {
     description: "YKS Analiz ve Takip Uygulaması",
     start_url: "/dashboard",
     display: "standalone",
-    background_color: "#ffffff",
-    theme_color: "#000000",
+    background_color: "#F4F7FC",
+    theme_color: "#0F2A5C",
     icons: [
       {
         src: "icons/icon-48x48.png",

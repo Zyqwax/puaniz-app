@@ -26,16 +26,16 @@ const Layout = ({ children }) => {
 
 
   return (
-    <div className={`${fullWidth ? "h-dvh overflow-hidden flex flex-col" : "min-h-dvh flex flex-col"} bg-slate-900`}>
+    <div className={`${fullWidth ? "h-dvh overflow-hidden flex flex-col" : "min-h-dvh flex flex-col"} bg-[#F4F7FC]`}>
       {/* Mobile Header */}
-      <div className="md:hidden flex-none flex items-center p-4 border-b border-white/10 bg-slate-900 z-40">
+      <div className="md:hidden flex-none flex items-center p-4 border-b border-[#0F2A5C]/[0.08] bg-white z-40">
         <button
           onClick={() => setIsMobileMenuOpen(true)}
-          className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 mr-4"
+          className="p-2 text-[#0F2A5C] hover:bg-[#F4F7FC] rounded-lg mr-4 transition-colors"
         >
           <Menu size={24} />
         </button>
-        <span className="text-lg font-bold text-white">YKS Takip</span>
+        <span className="text-lg font-black text-[#0F2A5C] tracking-tight">puaniz</span>
       </div>
 
       <Sidebar

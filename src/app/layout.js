@@ -1,5 +1,12 @@
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { Outfit } from "next/font/google";
+
+const outfit = Outfit({
+  subsets: ["latin", "latin-ext"],
+  display: "swap",
+  variable: "--font-outfit",
+});
 
 export const metadata = {
   metadataBase: new URL("https://www.puaniz.com.tr"),
@@ -33,18 +40,25 @@ export const metadata = {
     },
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    images: ["/puaniz-og-image-1200x630.png"],
   },
 };
 
 export const viewport = {
-  themeColor: "#000000",
+  themeColor: "#0F2A5C",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="tr" suppressHydrationWarning>
-      <body suppressHydrationWarning>
+    <html lang="tr" className={outfit.variable} suppressHydrationWarning>
+      <body className="font-sans antialiased" suppressHydrationWarning>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

@@ -16,38 +16,36 @@ import { EXAM_CONFIG } from "@/constants";
 import { addExam, calculateNet } from "@/services/examService";
 import { useRouter } from "next/navigation";
 
-// Subject color dots
+// Subject color dots based on brand and subject
 const colorDot = {
-  blue: "bg-blue-400",
-  red: "bg-red-400",
-  yellow: "bg-yellow-400",
-  green: "bg-green-400",
-  pink: "bg-pink-400",
-  indigo: "bg-indigo-400",
+  blue: "bg-[#2F6BFF]",
+  navy: "bg-[#0F2A5C]",
+  amber: "bg-[#FFB020]",
+  lightblue: "bg-[#7FB0FF]",
 };
 
-// Compact Subject Input
-const SubjectInput = ({ label, values, onChange, color, max = 40 }) => {
+// Compact Subject Input matching PDF page 9
+const SubjectInput = ({ label, values, onChange, color = "blue", max = 40 }) => {
   const total = (values.d || 0) + (values.y || 0);
   const isInvalid = total > max;
   const net = calculateNet(values.d || 0, values.y || 0);
 
   return (
     <div
-      className={`rounded-xl border p-4 transition-all ${
+      className={`rounded-2xl border p-4 transition-all ${
         isInvalid
-          ? "border-red-500/40 bg-red-500/5"
-          : "border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent hover:bg-white/[0.05] hover:border-white/10 backdrop-blur-md shadow-lg"
+          ? "border-rose-400 bg-rose-50/50"
+          : "border-[#0F2A5C]/[0.06] bg-[#F4F7FC]/70 hover:bg-[#F4F7FC]"
       }`}
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div
-            className={`w-2 h-2 rounded-full ${colorDot[color] || colorDot.blue}`}
+            className={`w-2.5 h-2.5 rounded-full ${colorDot[color] || colorDot.blue}`}
           />
-          <span className="text-sm font-medium text-white">{label}</span>
+          <span className="text-sm font-bold text-[#0F2A5C]">{label}</span>
         </div>
-        <span className="text-[11px] text-slate-500">{max} soru</span>
+        <span className="text-[11px] font-medium text-[#4A5B7A]">{max} soru</span>
       </div>
 
       <div className="flex items-center gap-2">
@@ -59,13 +57,13 @@ const SubjectInput = ({ label, values, onChange, color, max = 40 }) => {
             value={values.d || ""}
             onChange={(e) => onChange("d", parseInt(e.target.value) || 0)}
             placeholder="D"
-            className={`w-full bg-white/5 border rounded-lg px-3 py-2 text-center text-sm text-white placeholder-slate-600 focus:outline-none transition-all ${
+            className={`w-full bg-white border rounded-xl px-2.5 py-2 text-center text-sm font-bold text-[#0F2A5C] placeholder-[#4A5B7A]/40 focus:outline-none transition-all ${
               isInvalid
-                ? "border-red-500/50 focus:border-red-400"
-                : "border-white/5 focus:border-green-500/40"
+                ? "border-rose-400 focus:border-rose-500"
+                : "border-[#0F2A5C]/10 focus:border-[#2F6BFF]"
             }`}
           />
-          <span className="block text-[10px] text-slate-500 text-center mt-1">
+          <span className="block text-[10px] font-semibold text-[#4A5B7A] text-center mt-1">
             Doğru
           </span>
         </div>
@@ -78,35 +76,35 @@ const SubjectInput = ({ label, values, onChange, color, max = 40 }) => {
             value={values.y || ""}
             onChange={(e) => onChange("y", parseInt(e.target.value) || 0)}
             placeholder="Y"
-            className={`w-full bg-white/5 border rounded-lg px-3 py-2 text-center text-sm text-white placeholder-slate-600 focus:outline-none transition-all ${
+            className={`w-full bg-white border rounded-xl px-2.5 py-2 text-center text-sm font-bold text-[#0F2A5C] placeholder-[#4A5B7A]/40 focus:outline-none transition-all ${
               isInvalid
-                ? "border-red-500/50 focus:border-red-400"
-                : "border-white/5 focus:border-red-500/40"
+                ? "border-rose-400 focus:border-rose-500"
+                : "border-[#0F2A5C]/10 focus:border-[#2F6BFF]"
             }`}
           />
-          <span className="block text-[10px] text-slate-500 text-center mt-1">
+          <span className="block text-[10px] font-semibold text-[#4A5B7A] text-center mt-1">
             Yanlış
           </span>
         </div>
 
         <div className="w-16 text-center">
           <div
-            className={`text-lg font-bold tabular-nums ${
+            className={`text-lg font-black tabular-nums ${
               isInvalid
-                ? "text-red-400"
+                ? "text-rose-500"
                 : net > 0
-                  ? "text-white"
-                  : "text-slate-600"
+                  ? "text-[#0F2A5C]"
+                  : "text-[#4A5B7A]"
             }`}
           >
             {net.toFixed(1)}
           </div>
-          <span className="block text-[10px] text-slate-500">Net</span>
+          <span className="block text-[10px] font-semibold text-[#4A5B7A]">Net</span>
         </div>
       </div>
 
       {isInvalid && (
-        <div className="mt-2 flex items-center gap-1.5 text-red-400 text-[11px]">
+        <div className="mt-2 flex items-center gap-1.5 text-rose-500 text-[11px] font-bold">
           <AlertCircle size={12} />
           <span>
             Limit aşıldı ({total}/{max})
@@ -332,14 +330,9 @@ const AddExamClient = () => {
   };
 
   const getColor = (sub) => {
-    if (["matematik", "geometri"].includes(sub)) return "red";
-    if (["turkce", "edebiyat"].includes(sub)) return "blue";
-    if (["tarih", "tarih1", "tarih2", "kimya"].includes(sub)) return "yellow";
-    if (["biyoloji", "cografya", "cografya1", "cografya2"].includes(sub))
-      return "green";
-    if (["felsefe"].includes(sub)) return "pink";
-    if (["din"].includes(sub)) return "indigo";
-    if (["fizik"].includes(sub)) return "red";
+    if (["matematik", "geometri", "tarih"].includes(sub)) return "amber";
+    if (["turkce", "cografya", "din"].includes(sub)) return "navy";
+    if (["felsefe", "fizik"].includes(sub)) return "lightblue";
     return "blue";
   };
 
@@ -353,36 +346,36 @@ const AddExamClient = () => {
     <div className="max-w-4xl mx-auto pb-28">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-1 flex items-center gap-3">
-          <PlusCircle className="text-purple-400" size={28} />
+        <h1 className="text-3xl font-black text-[#0F2A5C] mb-1 flex items-center gap-3 tracking-tight">
+          <PlusCircle className="text-[#2F6BFF]" size={28} />
           Deneme Ekle
         </h1>
-        <p className="text-slate-400 text-sm">
+        <p className="text-[#4A5B7A] text-sm font-medium">
           Deneme sonuçlarını girerek gelişimini takip et
         </p>
       </div>
 
       {/* Exam Type & Info */}
-      <div className="space-y-5 mb-8">
+      <div className="space-y-6 mb-8">
         {/* Type Selector */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex gap-1 p-1 bg-white/5 rounded-xl">
+          <div className="flex gap-1.5 p-1 bg-white border border-[#0F2A5C]/[0.08] rounded-2xl shadow-xs">
             <button
               onClick={() => setExamType("TYT")}
-              className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+              className={`px-6 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
                 examType === "TYT"
-                  ? "bg-purple-600 text-white shadow-lg shadow-purple-900/30"
-                  : "text-slate-400 hover:text-white hover:bg-white/5"
+                  ? "bg-[#0F2A5C] text-white shadow-sm"
+                  : "text-[#4A5B7A] hover:text-[#0F2A5C]"
               }`}
             >
               TYT
             </button>
             <button
               onClick={() => setExamType("AYT")}
-              className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+              className={`px-6 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
                 examType === "AYT"
-                  ? "bg-pink-600 text-white shadow-lg shadow-pink-900/30"
-                  : "text-slate-400 hover:text-white hover:bg-white/5"
+                  ? "bg-[#0F2A5C] text-white shadow-sm"
+                  : "text-[#4A5B7A] hover:text-[#0F2A5C]"
               }`}
             >
               AYT
@@ -390,15 +383,15 @@ const AddExamClient = () => {
           </div>
 
           {examType === "AYT" && (
-            <div className="flex gap-1 p-1 bg-white/5 rounded-xl">
+            <div className="flex gap-1 p-1 bg-white border border-[#0F2A5C]/[0.08] rounded-2xl shadow-xs">
               {aytOptions.map((opt) => (
                 <button
                   key={opt.value}
                   onClick={() => setAytSubtype(opt.value)}
-                  className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     aytSubtype === opt.value
-                      ? "bg-slate-700 text-white"
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                      ? "bg-[#2F6BFF] text-white"
+                      : "text-[#4A5B7A] hover:text-[#0F2A5C]"
                   }`}
                 >
                   {opt.label}
@@ -418,7 +411,7 @@ const AddExamClient = () => {
             />
             <label
               htmlFor="json-upload"
-              className={`flex items-center gap-2 text-xs text-slate-400 hover:text-white px-3 py-2 rounded-lg border border-white/5 hover:border-white/10 transition-all cursor-pointer ${
+              className={`flex items-center gap-2 text-xs font-bold text-[#0F2A5C] bg-white hover:bg-[#F4F7FC] px-4 py-2.5 rounded-xl border border-[#0F2A5C]/[0.08] shadow-xs transition-all cursor-pointer ${
                 loading ? "opacity-50 pointer-events-none" : ""
               }`}
             >
@@ -429,9 +422,9 @@ const AddExamClient = () => {
         </div>
 
         {/* Name & Date */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs text-slate-500 mb-1.5 font-medium">
+            <label className="block text-xs font-bold text-[#4A5B7A] uppercase mb-1.5">
               Deneme Adı
             </label>
             <input
@@ -439,18 +432,18 @@ const AddExamClient = () => {
               placeholder="Örn: 3D Türkiye Geneli"
               value={examName}
               onChange={(e) => setExamName(e.target.value)}
-              className="glass-input w-full text-sm"
+              className="w-full bg-white border border-[#0F2A5C]/15 rounded-2xl px-4 py-3 text-[#0F2A5C] placeholder-[#4A5B7A]/40 font-semibold focus:outline-none focus:ring-2 focus:ring-[#2F6BFF]/30 text-sm shadow-xs"
             />
           </div>
           <div>
-            <label className="block text-xs text-slate-500 mb-1.5 font-medium">
+            <label className="block text-xs font-bold text-[#4A5B7A] uppercase mb-1.5">
               Tarih
             </label>
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="glass-input w-full text-sm"
+              className="w-full bg-white border border-[#0F2A5C]/15 rounded-2xl px-4 py-3 text-[#0F2A5C] font-semibold focus:outline-none focus:ring-2 focus:ring-[#2F6BFF]/30 text-sm shadow-xs"
             />
           </div>
         </div>
@@ -459,12 +452,12 @@ const AddExamClient = () => {
       {/* Subject Inputs */}
       <div className="space-y-6 mb-8">
         {getGroupedSubjects().map((group) => (
-          <div key={group.title} className="glass-card p-5 md:p-6 border-none">
-            <h3 className="text-sm md:text-base font-bold text-white mb-5 flex items-center gap-2.5">
-              <div className="w-1.5 h-5 bg-gradient-to-b from-purple-400 to-violet-600 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
+          <div key={group.title} className="p-6 md:p-8 rounded-3xl bg-white border border-[#0F2A5C]/[0.08] shadow-sm">
+            <h3 className="text-base font-black text-[#0F2A5C] mb-6 flex items-center gap-2.5">
+              <div className="w-1.5 h-5 bg-[#2F6BFF] rounded-full" />
               {group.title}
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {group.subjects.map((sub) => (
                 <SubjectInput
                   key={sub}
@@ -480,46 +473,46 @@ const AddExamClient = () => {
         ))}
       </div>
 
-      {/* Bottom Bar */}
-      <div className="fixed bottom-0 left-0 md:left-20 right-0 z-30">
-        <div className="bg-slate-900/90 backdrop-blur-xl border-t border-white/5 px-4 py-3">
-          <div className="max-w-4xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Calculator size={18} className="text-slate-500" />
-              <div>
-                <span className="text-xs text-slate-500 block">Toplam Net</span>
-                <span className="text-xl font-bold text-white tabular-nums">
-                  {totalNet.toFixed(2)}
-                </span>
-              </div>
+      {/* Bottom Bar (Navy floating bar with Amber Save button as in PDF page 9) */}
+      <div className="fixed bottom-0 left-0 md:left-20 right-0 z-30 p-4">
+        <div className="bg-[#0F2A5C] text-white rounded-3xl shadow-2xl px-6 py-4 max-w-4xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
+              <Calculator size={20} />
             </div>
-            <button
-              onClick={handleSave}
-              disabled={loading || saved}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer ${
-                saved
-                  ? "bg-green-600 text-white"
-                  : "bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-900/20"
-              } disabled:opacity-70`}
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  Kaydediliyor...
-                </>
-              ) : saved ? (
-                <>
-                  <Check size={16} />
-                  Kaydedildi
-                </>
-              ) : (
-                <>
-                  <Save size={16} />
-                  Kaydet
-                </>
-              )}
-            </button>
+            <div>
+              <span className="text-[11px] font-semibold text-white/70 block uppercase tracking-wider">Toplam Net</span>
+              <span className="text-2xl font-black text-white tabular-nums tracking-tight">
+                {totalNet.toFixed(2)}
+              </span>
+            </div>
           </div>
+          <button
+            onClick={handleSave}
+            disabled={loading || saved}
+            className={`flex items-center gap-2 px-7 py-3 rounded-2xl text-sm font-black transition-all cursor-pointer ${
+              saved
+                ? "bg-emerald-500 text-white"
+                : "bg-[#FFB020] hover:bg-[#f5a71a] text-[#0F2A5C] shadow-lg shadow-[#FFB020]/25"
+            } disabled:opacity-70`}
+          >
+            {loading ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Kaydediliyor...
+              </>
+            ) : saved ? (
+              <>
+                <Check size={16} />
+                Kaydedildi
+              </>
+            ) : (
+              <>
+                <Save size={16} />
+                Kaydet
+              </>
+            )}
+          </button>
         </div>
       </div>
     </div>

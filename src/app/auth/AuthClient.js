@@ -25,6 +25,8 @@ import { updateUserProfile } from "@/services/userService";
 import PublicRoute from "@/components/PublicRoute";
 import { useAuth } from "@/context/AuthContext";
 import { WHITELISTED_EMAILS } from "@/constants";
+import PuanizLogo from "@/components/PuanizLogo";
+import Link from "next/link";
 
 const AuthClient = () => {
   const { user: authUser, loading: authLoading } = useAuth();
@@ -99,7 +101,7 @@ const AuthClient = () => {
           name: name,
           email: email,
           createdAt: new Date(),
-          avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`,
+          avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2F6BFF&color=fff&bold=true`,
           grade: "",
         });
 
@@ -134,7 +136,7 @@ const AuthClient = () => {
           );
         }
       }
-    } catch (err) {
+    } catch {
       setError("Doğrulama durumu kontrol edilemedi.");
     } finally {
       setLoading(false);
@@ -147,7 +149,7 @@ const AuthClient = () => {
       setView("login");
       setEmail("");
       setPassword("");
-    } catch (err) {
+    } catch {
       setError("Çıkış yapılamadı.");
     }
   };
@@ -183,48 +185,53 @@ const AuthClient = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
-        <RefreshCw className="animate-spin text-purple-500" size={32} />
+      <div className="min-h-screen flex items-center justify-center bg-[#F4F7FC]">
+        <RefreshCw className="animate-spin text-[#2F6BFF]" size={32} />
       </div>
     );
   }
 
   return (
     <PublicRoute>
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="glass-panel w-full max-w-md p-8 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-2 bg-linear-to-r from-purple-500 to-pink-500" />
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-pink-500/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#F4F7FC]">
+        {/* Brand Logo Header */}
+        <div className="mb-6">
+          <Link href="/" className="inline-block hover:opacity-90 transition-opacity">
+            <PuanizLogo variant="horizontal-navy" height={40} />
+          </Link>
+        </div>
+
+        <div className="w-full max-w-md bg-white rounded-3xl border border-[#0F2A5C]/[0.08] p-8 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-[#0F2A5C]" />
 
           {view === "verify-email" ? (
             <div className="text-center">
-              <div className="w-16 h-16 bg-purple-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Mail className="text-purple-400" size={32} />
+              <div className="w-16 h-16 bg-[#2F6BFF]/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-[#2F6BFF]">
+                <Mail size={32} />
               </div>
-              <h2 className="text-3xl font-bold mb-4 bg-linear-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <h2 className="text-2xl font-bold mb-2 text-[#0F2A5C]">
                 E-postanı Doğrula
               </h2>
-              <p className="text-slate-400 mb-8">
-                {email || (authUser && authUser.email)} adresine bir doğrulama
+              <p className="text-[#4A5B7A] text-sm mb-6 leading-relaxed">
+                <span className="font-semibold text-[#0F2A5C]">{email || (authUser && authUser.email)}</span> adresine bir doğrulama
                 bağlantısı gönderdik. Devam etmek için lütfen mailindeki
                 bağlantıya tıkla.
               </p>
               {message && (
-                <p className="text-green-400 text-sm mb-4">{message}</p>
+                <p className="text-emerald-600 font-semibold text-sm mb-4">{message}</p>
               )}
-              {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+              {error && <p className="text-red-500 font-semibold text-sm mb-4">{error}</p>}
 
               <div className="space-y-3">
                 <button
                   onClick={handleCheckVerification}
                   disabled={loading}
-                  className="glass-btn w-full flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-[#0F2A5C] hover:bg-[#1a3a78] text-white font-bold rounded-2xl shadow-xs transition-colors cursor-pointer disabled:opacity-50"
                 >
                   {loading ? (
-                    <RefreshCw className="animate-spin" size={20} />
+                    <RefreshCw className="animate-spin" size={18} />
                   ) : (
-                    <CheckCircle size={20} />
+                    <CheckCircle size={18} />
                   )}
                   Doğrulamayı Kontrol Et
                 </button>
@@ -232,9 +239,9 @@ const AuthClient = () => {
                 <button
                   onClick={handleResendEmail}
                   disabled={loading || resendCooldown > 0}
-                  className="w-full py-2 bg-white/5 border border-white/10 rounded-lg text-slate-300 hover:bg-white/10 transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-2.5 bg-[#F4F7FC] border border-[#0F2A5C]/[0.08] rounded-xl text-[#0F2A5C] hover:bg-[#e8edf7] font-semibold transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
-                  <Mail size={16} />
+                  <Mail size={16} className="text-[#2F6BFF]" />
                   {resendCooldown > 0
                     ? `Tekrar Gönder (${resendCooldown}s)`
                     : "Doğrulama Mailini Tekrar Gönder"}
@@ -242,7 +249,7 @@ const AuthClient = () => {
 
                 <button
                   onClick={handleSignOut}
-                  className="w-full py-2 text-slate-400 hover:text-white transition-colors text-sm flex items-center justify-center gap-2"
+                  className="w-full py-2 text-[#4A5B7A] hover:text-[#0F2A5C] font-medium transition-colors text-sm flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <LogOut size={16} /> Farklı Hesapla Giriş Yap
                 </button>
@@ -250,65 +257,65 @@ const AuthClient = () => {
             </div>
           ) : (
             <>
-              <h2 className="text-3xl font-bold text-center mb-2 bg-linear-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                {view === "login" && "Tekrar Hoşgeldin!"}
+              <h2 className="text-2xl font-extrabold text-center mb-1 text-[#0F2A5C]">
+                {view === "login" && "Tekrar Hoş Geldin!"}
                 {view === "register" && "Hemen Başla"}
                 {view === "forgot-password" && "Şifremi Unuttum"}
               </h2>
-              <p className="text-center text-slate-400 mb-8">
+              <p className="text-center text-[#4A5B7A] text-sm mb-6">
                 {view === "login" &&
                   "Hesabına giriş yap ve netlerini takibe başla."}
                 {view === "register" &&
-                  "YKS sürecini verilerle yönetmeye başla."}
+                  "YKS sürecini veriler ve yapay zeka ile yönetmeye başla."}
                 {view === "forgot-password" &&
                   "E-posta adresini girerek şifreni sıfırlayabilirsin."}
               </p>
 
               <form onSubmit={handleAuth} className="space-y-4">
                 {view === "register" && (
-                  <div className="relative group">
+                  <div className="relative">
                     <User
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-purple-400 transition-colors"
-                      size={20}
+                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#4A5B7A]"
+                      size={18}
                     />
                     <input
                       type="text"
                       placeholder="Adın Soyadın"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="glass-input w-full pl-10"
+                      className="w-full pl-10 pr-4 py-3 bg-[#F4F7FC] border border-[#0F2A5C]/[0.1] rounded-2xl text-[#0F2A5C] text-sm font-medium placeholder:text-[#4A5B7A]/60 focus:outline-none focus:bg-white focus:border-[#2F6BFF] transition-all"
                       required
                     />
                   </div>
                 )}
 
-                <div className="relative group">
+                <div className="relative">
                   <Mail
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-purple-400 transition-colors"
-                    size={20}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#4A5B7A]"
+                    size={18}
                   />
                   <input
                     type="email"
                     placeholder="E-posta Adresi"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="glass-input w-full pl-10"
+                    className="w-full pl-10 pr-4 py-3 bg-[#F4F7FC] border border-[#0F2A5C]/[0.1] rounded-2xl text-[#0F2A5C] text-sm font-medium placeholder:text-[#4A5B7A]/60 focus:outline-none focus:bg-white focus:border-[#2F6BFF] transition-all"
                     required
                   />
                 </div>
 
                 {view !== "forgot-password" && (
-                  <div className="relative group">
+                  <div className="relative">
                     <Lock
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-purple-400 transition-colors"
-                      size={20}
+                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#4A5B7A]"
+                      size={18}
                     />
                     <input
                       type="password"
                       placeholder="Şifre"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="glass-input w-full pl-10"
+                      className="w-full pl-10 pr-4 py-3 bg-[#F4F7FC] border border-[#0F2A5C]/[0.1] rounded-2xl text-[#0F2A5C] text-sm font-medium placeholder:text-[#4A5B7A]/60 focus:outline-none focus:bg-white focus:border-[#2F6BFF] transition-all"
                       required
                     />
                   </div>
@@ -319,7 +326,7 @@ const AuthClient = () => {
                     <button
                       type="button"
                       onClick={() => setView("forgot-password")}
-                      className="text-xs text-slate-400 hover:text-purple-400 transition-colors"
+                      className="text-xs text-[#4A5B7A] hover:text-[#2F6BFF] font-semibold transition-colors cursor-pointer"
                     >
                       Şifremi Unuttum
                     </button>
@@ -327,10 +334,10 @@ const AuthClient = () => {
                 )}
 
                 {error && (
-                  <p className="text-red-400 text-sm text-center">{error}</p>
+                  <p className="text-red-500 font-semibold text-xs text-center">{error}</p>
                 )}
                 {message && (
-                  <p className="text-green-400 text-sm text-center">
+                  <p className="text-emerald-600 font-semibold text-xs text-center">
                     {message}
                   </p>
                 )}
@@ -338,17 +345,17 @@ const AuthClient = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="glass-btn w-full flex items-center justify-center gap-2 mt-6 disabled:opacity-50"
+                  className="w-full py-3.5 bg-[#0F2A5C] hover:bg-[#1a3a78] text-white font-bold rounded-2xl shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {loading ? (
-                    <RefreshCw className="animate-spin" size={20} />
+                    <RefreshCw className="animate-spin" size={18} />
                   ) : (
                     <>
                       {view === "login" && "Giriş Yap"}
-                      {view === "register" && "Kayıt Ol"}
+                      {view === "register" && "Hesap Oluştur"}
                       {view === "forgot-password" &&
                         "Sıfırlama Bağlantısı Gönder"}
-                      <ArrowRight size={20} />
+                      <ArrowRight size={18} />
                     </>
                   )}
                 </button>
@@ -358,7 +365,7 @@ const AuthClient = () => {
                 {view === "forgot-password" ? (
                   <button
                     onClick={() => setView("login")}
-                    className="text-slate-400 hover:text-white transition-colors text-sm cursor-pointer flex items-center justify-center gap-1 mx-auto"
+                    className="text-[#4A5B7A] hover:text-[#0F2A5C] font-semibold transition-colors text-sm cursor-pointer flex items-center justify-center gap-1 mx-auto"
                   >
                     <ArrowLeft size={14} /> Giriş Ekranına Dön
                   </button>
@@ -367,10 +374,10 @@ const AuthClient = () => {
                     onClick={() =>
                       setView(view === "login" ? "register" : "login")
                     }
-                    className="text-slate-400 hover:text-white transition-colors text-sm cursor-pointer"
+                    className="text-[#4A5B7A] hover:text-[#2F6BFF] font-semibold transition-colors text-sm cursor-pointer"
                   >
                     {view === "login"
-                      ? "Hesabın yok mu? Kayıt Ol"
+                      ? "Hesabın yok mu? Hemen Kayıt Ol"
                       : "Zaten hesabın var mı? Giriş Yap"}
                   </button>
                 )}

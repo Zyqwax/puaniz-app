@@ -51,20 +51,19 @@ const CommunityClient = () => {
     <div className="h-full flex flex-col pb-20">
 
       {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-purple-900/40 via-slate-900 to-slate-900 p-8 md:p-10 mb-8 shadow-2xl">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+      <div className="relative overflow-hidden rounded-3xl bg-[#0F2A5C] text-white p-8 md:p-10 mb-8 shadow-sm">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-[#2F6BFF]/15 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-bold uppercase tracking-wider mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 text-[#FFB020] text-xs font-bold uppercase tracking-wider mb-3">
               <Users size={14} />
               Birlikte Başaralım
             </div>
-            <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 mb-3 tracking-tight">
+            <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-3 tracking-tight">
               Topluluk & Forum
             </h1>
-            <p className="text-slate-400 text-base md:text-lg max-w-xl leading-relaxed">
+            <p className="text-white/80 text-base md:text-lg max-w-xl leading-relaxed">
               Sorularını sor, netlerini paylaş, çalışma taktiklerini tartış ve hedefine giden yolda yalnız yürüme.
             </p>
           </div>
@@ -72,42 +71,38 @@ const CommunityClient = () => {
           <div className="shrink-0">
             <Link
               href="/dashboard/community/new"
-              className="group relative flex items-center gap-2 px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl font-bold text-white shadow-xl shadow-purple-900/30 transition-all hover:-translate-y-1 hover:shadow-purple-900/50 overflow-hidden w-full md:w-auto justify-center"
+              className="flex items-center gap-2 px-6 py-3.5 bg-[#2F6BFF] hover:bg-[#2558d6] text-white font-bold rounded-2xl shadow-sm transition-all hover:-translate-y-0.5 justify-center"
             >
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-              <PenSquare size={20} className="relative z-10" />
-              <span className="relative z-10">Yeni Konu Aç</span>
+              <PenSquare size={18} />
+              <span>Yeni Konu Aç</span>
             </Link>
           </div>
         </div>
 
         {/* Search Bar */}
-        <div className="relative z-10 mt-8 max-w-2xl">
-          <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity" />
-            <div className="relative flex items-center bg-slate-900 border border-white/10 rounded-2xl overflow-hidden focus-within:border-purple-500/50 focus-within:bg-slate-800 transition-all">
-              <div className="pl-4 pr-3 text-slate-500">
-                <Search size={20} />
-              </div>
-              <input
-                type="text"
-                placeholder="Konu, etiket veya kullanıcı ara..."
-                className="w-full bg-transparent py-4 text-white placeholder:text-slate-500 focus:outline-none"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  if (e.target.value === "") setActiveTag(null);
-                }}
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="px-4 text-slate-500 hover:text-white transition-colors cursor-pointer"
-                >
-                  <X size={18} />
-                </button>
-              )}
+        <div className="relative z-10 mt-6 max-w-2xl">
+          <div className="relative flex items-center bg-white rounded-2xl overflow-hidden border border-white/20 shadow-xs focus-within:ring-2 focus-within:ring-[#2F6BFF]">
+            <div className="pl-4 pr-2 text-[#4A5B7A]">
+              <Search size={20} />
             </div>
+            <input
+              type="text"
+              placeholder="Konu, etiket veya kullanıcı ara..."
+              className="w-full bg-transparent py-3.5 text-[#0F2A5C] placeholder:text-[#4A5B7A]/60 font-medium focus:outline-none"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (e.target.value === "") setActiveTag(null);
+              }}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="px-4 text-[#4A5B7A] hover:text-[#0F2A5C] transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -121,54 +116,52 @@ const CommunityClient = () => {
             {/* New Post CTA */}
             <Link
               href="/dashboard/community/new"
-              className="group flex items-center gap-3 p-4 rounded-2xl border border-dashed border-white/10 hover:border-purple-500/40 hover:bg-purple-500/5 transition-all"
+              className="group flex items-center gap-3 p-4 rounded-3xl bg-white border border-[#0F2A5C]/[0.08] hover:border-[#2F6BFF]/40 shadow-xs hover:shadow-md transition-all"
             >
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors shrink-0">
-                <Plus size={20} className="text-purple-400" />
+              <div className="w-10 h-10 rounded-2xl bg-[#2F6BFF]/10 flex items-center justify-center group-hover:bg-[#2F6BFF]/20 transition-colors shrink-0 text-[#2F6BFF]">
+                <Plus size={20} />
               </div>
               <div>
-                <p className="text-sm font-bold text-white">Yeni Konu Aç</p>
-                <p className="text-xs text-slate-500">Topluluğa katkı sağla</p>
+                <p className="text-sm font-bold text-[#0F2A5C]">Yeni Konu Aç</p>
+                <p className="text-xs text-[#4A5B7A]">Topluluğa katkı sağla</p>
               </div>
             </Link>
 
             {/* Rules Card */}
-            <div className="glass-card p-5 border-none relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500/10 rounded-full blur-xl -translate-y-1/2 translate-x-1/2" />
-              <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                <div className="w-1.5 h-4 bg-gradient-to-b from-blue-400 to-indigo-500 rounded-full" />
+            <div className="bg-white rounded-3xl border border-[#0F2A5C]/[0.08] p-6 shadow-xs">
+              <h3 className="font-bold text-[#0F2A5C] text-sm mb-4 flex items-center gap-2">
+                <div className="w-1.5 h-4 bg-[#2F6BFF] rounded-full" />
                 Topluluk Kuralları
               </h3>
-              <ul className="text-[13px] text-slate-400 space-y-3">
-                <li className="flex gap-2">
-                  <AlertCircle size={14} className="text-blue-400 shrink-0 mt-0.5" />
+              <ul className="text-xs text-[#4A5B7A] space-y-3 font-medium">
+                <li className="flex gap-2.5">
+                  <AlertCircle size={15} className="text-[#2F6BFF] shrink-0 mt-0.5" />
                   <span>Saygılı ve yapıcı bir dil kullanın.</span>
                 </li>
-                <li className="flex gap-2">
-                  <HelpCircle size={14} className="text-blue-400 shrink-0 mt-0.5" />
+                <li className="flex gap-2.5">
+                  <HelpCircle size={15} className="text-[#2F6BFF] shrink-0 mt-0.5" />
                   <span>Soru sorarken detay verin, net olun.</span>
                 </li>
-                <li className="flex gap-2">
-                  <MessageSquare size={14} className="text-blue-400 shrink-0 mt-0.5" />
+                <li className="flex gap-2.5">
+                  <MessageSquare size={15} className="text-[#2F6BFF] shrink-0 mt-0.5" />
                   <span>Tekrar konudan kaçının, önce arama yapın.</span>
                 </li>
               </ul>
             </div>
 
             {/* Popular Tags */}
-            <div className="glass-card p-5 border-none relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-purple-500/10 rounded-full blur-xl -translate-y-1/2 translate-x-1/2" />
-              <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                <div className="w-1.5 h-4 bg-gradient-to-b from-purple-400 to-pink-500 rounded-full" />
+            <div className="bg-white rounded-3xl border border-[#0F2A5C]/[0.08] p-6 shadow-xs">
+              <h3 className="font-bold text-[#0F2A5C] text-sm mb-4 flex items-center gap-2">
+                <div className="w-1.5 h-4 bg-[#FFB020] rounded-full" />
                 Popüler Etiketler
               </h3>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 <button
                   onClick={() => setActiveTag(null)}
-                  className={`text-[11px] font-bold px-3 py-1.5 rounded-lg cursor-pointer transition-all ${
+                  className={`text-xs font-bold px-3 py-1.5 rounded-xl cursor-pointer transition-all ${
                     !activeTag
-                      ? "bg-slate-700 text-white shadow-md border border-slate-600"
-                      : "bg-white/5 text-slate-400 hover:bg-white/10 border border-transparent"
+                      ? "bg-[#0F2A5C] text-white shadow-xs"
+                      : "bg-[#F4F7FC] text-[#4A5B7A] hover:text-[#0F2A5C]"
                   }`}
                 >
                   Tümü
@@ -177,13 +170,13 @@ const CommunityClient = () => {
                   <button
                     key={tag}
                     onClick={() => setActiveTag(tag)}
-                    className={`text-[11px] font-bold px-3 py-1.5 rounded-lg cursor-pointer transition-all flex items-center gap-1 ${
+                    className={`text-xs font-bold px-3 py-1.5 rounded-xl cursor-pointer transition-all flex items-center gap-1 ${
                       activeTag === tag
-                        ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-900/20 border-none"
-                        : "bg-white/5 text-slate-300 hover:bg-white/10 border border-white/5 hover:border-white/10"
+                        ? "bg-[#0F2A5C] text-white shadow-xs"
+                        : "bg-[#F4F7FC] text-[#4A5B7A] hover:text-[#0F2A5C]"
                     }`}
                   >
-                    <Hash size={10} className={activeTag === tag ? "text-purple-200" : "text-slate-500"} />
+                    <Hash size={11} className={activeTag === tag ? "text-[#FFB020]" : "text-[#4A5B7A]/50"} />
                     {tag}
                   </button>
                 ))}
@@ -197,17 +190,17 @@ const CommunityClient = () => {
 
           {/* Active Tag Indicator */}
           {activeTag && (
-            <div className="mb-6 flex items-center gap-3 bg-purple-500/10 border border-purple-500/20 p-4 rounded-2xl">
-              <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
-                <Hash size={16} className="text-purple-400" />
+            <div className="mb-6 flex items-center gap-3 bg-white border border-[#0F2A5C]/[0.08] p-4 rounded-3xl shadow-xs">
+              <div className="w-8 h-8 rounded-xl bg-[#2F6BFF]/10 flex items-center justify-center shrink-0 text-[#2F6BFF]">
+                <Hash size={16} />
               </div>
               <div className="flex-1">
-                <p className="text-sm text-slate-400">Filtrelenen etiket:</p>
-                <p className="text-base font-bold text-purple-300">{activeTag}</p>
+                <p className="text-xs text-[#4A5B7A]">Filtrelenen etiket:</p>
+                <p className="text-base font-bold text-[#0F2A5C]">{activeTag}</p>
               </div>
               <button
                 onClick={() => setActiveTag(null)}
-                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-xs font-bold rounded-xl transition-colors flex items-center gap-2 cursor-pointer"
+                className="px-3.5 py-1.5 bg-[#F4F7FC] hover:bg-[#e8edf7] text-[#0F2A5C] text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <X size={14} /> Kaldır
               </button>
@@ -221,8 +214,8 @@ const CommunityClient = () => {
                 onClick={() => setActiveTag(null)}
                 className={`text-xs font-bold px-4 py-2 rounded-xl cursor-pointer transition-all ${
                   !activeTag
-                    ? "bg-slate-700 text-white shadow-md border border-slate-600"
-                    : "bg-slate-800 text-slate-400 hover:bg-slate-700 border border-transparent"
+                    ? "bg-[#0F2A5C] text-white shadow-xs"
+                    : "bg-white text-[#4A5B7A] border border-[#0F2A5C]/[0.08]"
                 }`}
               >
                 Tümü
@@ -233,11 +226,11 @@ const CommunityClient = () => {
                   onClick={() => setActiveTag(tag)}
                   className={`text-xs font-bold px-4 py-2 rounded-xl cursor-pointer transition-all flex items-center gap-1.5 ${
                     activeTag === tag
-                      ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-900/20 border-none"
-                      : "bg-slate-800 text-slate-300 hover:bg-slate-700 border border-white/5"
+                      ? "bg-[#0F2A5C] text-white shadow-xs"
+                      : "bg-white text-[#4A5B7A] border border-[#0F2A5C]/[0.08]"
                   }`}
                 >
-                  <Hash size={12} className={activeTag === tag ? "text-purple-200" : "text-slate-500"} />
+                  <Hash size={12} className={activeTag === tag ? "text-[#FFB020]" : "text-[#4A5B7A]/50"} />
                   {tag}
                 </button>
               ))}
@@ -245,13 +238,13 @@ const CommunityClient = () => {
           </div>
 
           {/* Feed Container */}
-          <div className="bg-slate-900/30 border border-white/5 rounded-3xl p-1 sm:p-2 backdrop-blur-sm">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 mb-2">
-              <div className="flex items-center gap-2 text-sm font-semibold text-slate-300">
-                <TrendingUp size={16} className="text-purple-400" />
+          <div className="bg-white border border-[#0F2A5C]/[0.08] rounded-3xl p-3 sm:p-5 shadow-xs">
+            <div className="flex items-center justify-between px-3 py-3 border-b border-[#0F2A5C]/[0.06] mb-4">
+              <div className="flex items-center gap-2 text-sm font-bold text-[#0F2A5C]">
+                <TrendingUp size={16} className="text-[#2F6BFF]" />
                 En Son Konular
               </div>
-              <div className="text-xs text-slate-500">
+              <div className="text-xs text-[#4A5B7A] font-medium">
                 {posts.length} Gönderi
               </div>
             </div>

@@ -1,0 +1,18 @@
+PUANIZ LOGO KİTİ v1.0
+
+svg/      Vektör dosyalar (yazılar eğriye çevrilmiştir, font gerekmez)
+          puaniz-icon            Uygulama/site simgesi (lacivert)
+          puaniz-icon-blue       Koyu zeminler için mavi simge
+          puaniz-icon-circle     Profil fotoğrafı / sosyal medya (yuvarlak)
+          puaniz-icon-mono-*     Tek renkli simge (lacivert / beyaz)
+          puaniz-glyph-*         Yalnızca çubuklar (zemin yok)
+          puaniz-logo-horizontal Ana logo (+ -dark, -mono-navy, -mono-white)
+          puaniz-logo-stacked    Dikey logo (+ -dark)
+          puaniz-wordmark        Yalnızca yazı (+ -white)
+          puaniz-og-image        Sosyal medya paylaşım görseli
+png/      Hazır PNG boyutları (simge 16-1024, yuvarlak 400-1024, logolar 2400 px, OG 1200x630)
+favicon/  favicon.ico, favicon.svg, apple-touch-icon, 192/512, maskable ve html-head-snippet.txt
+puaniz-marka-kilavuzu.pdf  Renkler, yazı tipi, koruma alanı, minimum boyut, kullanım kuralları
+
+Renkler: Lacivert #0F2A5C  Mavi #2F6BFF  Amber #FFB020  Açık mavi #7FB0FF  Yüzey #F4F7FC
+Yazı tipi: Outfit (Google Fonts, SIL OFL)

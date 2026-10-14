@@ -39,48 +39,43 @@ const StatCard = ({
   value,
   subtext,
   icon: Icon,
-  gradient,
+  iconBg = "bg-[#0F2A5C]",
+  iconColor = "text-white",
   onClick,
-  actionIcon: ActionIcon,
 }) => {
+  const isPositive = subtext && subtext.includes("+");
+  const isNegative = subtext && subtext.includes("-");
+
   return (
     <div
-      className={`relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-b from-white/[0.05] to-transparent backdrop-blur-xl p-6 transition-all duration-500 hover:-translate-y-1 hover:border-white/15 hover:shadow-2xl hover:shadow-${gradient.split('-')[1] || 'purple'}-500/10 ${onClick ? "cursor-pointer group" : ""}`}
+      className={`p-6 rounded-3xl bg-white border border-[#0F2A5C]/[0.08] shadow-sm hover:shadow-md transition-all duration-300 flex items-start justify-between ${
+        onClick ? "cursor-pointer" : ""
+      }`}
       onClick={onClick}
     >
-      {/* Refined Background glow */}
-      <div
-        className={`absolute -top-12 -right-12 w-32 h-32 rounded-full blur-[40px] opacity-20 transition-opacity duration-500 group-hover:opacity-40 ${gradient}`}
-      />
-
-      <div className="relative flex items-start justify-between z-10">
-        <div>
-          <p className="text-slate-400/90 text-sm font-medium tracking-wide mb-2 uppercase">{title}</p>
-          <h3 className="text-4xl font-extrabold text-white mb-2 tracking-tight">{value}</h3>
-          <p
-            className={`text-xs font-medium px-2 py-1 inline-flex items-center rounded-lg ${
-              subtext && subtext.includes("+")
-                ? "bg-green-500/10 text-green-400"
-                : subtext && subtext.includes("ulaşıldı")
-                  ? "bg-green-500/10 text-green-400"
-                  : subtext && subtext.includes("kaldı")
-                    ? "bg-amber-500/10 text-amber-400"
-                    : "bg-slate-500/10 text-slate-400"
-            }`}
-          >
-            {subtext}
-          </p>
-        </div>
-        <div
-          className={`p-3.5 rounded-2xl bg-gradient-to-br ${gradient} shadow-lg flex items-center justify-center relative`}
+      <div>
+        <p className="text-[#4A5B7A] text-[11px] font-bold tracking-wider mb-2 uppercase">
+          {title}
+        </p>
+        <h3 className="text-4xl font-black text-[#0F2A5C] mb-3 tracking-tight">
+          {value}
+        </h3>
+        <span
+          className={`text-xs font-bold px-2.5 py-1 rounded-lg inline-flex items-center ${
+            isPositive
+              ? "bg-emerald-50 text-emerald-600"
+              : isNegative
+                ? "bg-rose-50 text-rose-500"
+                : "bg-[#F4F7FC] text-[#4A5B7A]"
+          }`}
         >
-          <Icon size={24} className="text-white drop-shadow-md" />
-          {ActionIcon && (
-            <div className="absolute -bottom-1 -right-1 bg-slate-800 rounded-full p-1 border border-white/10">
-               <ActionIcon size={12} className="text-white" />
-            </div>
-          )}
-        </div>
+          {subtext}
+        </span>
+      </div>
+      <div
+        className={`w-12 h-12 rounded-2xl ${iconBg} ${iconColor} flex items-center justify-center shrink-0 shadow-sm`}
+      >
+        <Icon size={22} />
       </div>
     </div>
   );
@@ -92,26 +87,26 @@ const GoalModal = ({ currentGoals, onClose, onSave }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0F2A5C]/40 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="glass-panel w-full max-w-sm p-6 relative"
+        className="bg-white rounded-3xl border border-[#0F2A5C]/10 shadow-2xl w-full max-w-sm p-6 relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-all cursor-pointer"
+          className="absolute top-4 right-4 p-2 text-[#4A5B7A] hover:text-[#0F2A5C] hover:bg-[#F4F7FC] rounded-full transition-all cursor-pointer"
         >
           <X size={20} />
         </button>
-        <h3 className="text-xl font-bold text-white mb-6">
+        <h3 className="text-xl font-black text-[#0F2A5C] mb-6">
           Hedeflerini Belirle
         </h3>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-slate-400 mb-2">
+            <label className="block text-xs font-bold text-[#4A5B7A] uppercase mb-2">
               TYT Hedef Net
             </label>
             <input
@@ -123,11 +118,11 @@ const GoalModal = ({ currentGoals, onClose, onSave }) => {
                   tyt: e.target.value === "" ? 0 : Number(e.target.value),
                 })
               }
-              className="glass-input w-full"
+              className="w-full bg-[#F4F7FC] border border-[#0F2A5C]/10 rounded-xl px-4 py-3 text-[#0F2A5C] font-bold focus:outline-none focus:ring-2 focus:ring-[#2F6BFF]/40"
             />
           </div>
           <div>
-            <label className="block text-sm text-slate-400 mb-2">
+            <label className="block text-xs font-bold text-[#4A5B7A] uppercase mb-2">
               AYT Hedef Net
             </label>
             <input
@@ -139,13 +134,13 @@ const GoalModal = ({ currentGoals, onClose, onSave }) => {
                   ayt: e.target.value === "" ? 0 : Number(e.target.value),
                 })
               }
-              className="glass-input w-full"
+              className="w-full bg-[#F4F7FC] border border-[#0F2A5C]/10 rounded-xl px-4 py-3 text-[#0F2A5C] font-bold focus:outline-none focus:ring-2 focus:ring-[#2F6BFF]/40"
             />
           </div>
 
           <button
             onClick={() => onSave(goals)}
-            className="glass-btn w-full flex items-center justify-center gap-2 mt-4 cursor-pointer"
+            className="w-full py-3.5 rounded-xl bg-[#2F6BFF] hover:bg-[#2558d4] text-white font-bold flex items-center justify-center gap-2 mt-4 cursor-pointer shadow-md shadow-[#2F6BFF]/25 transition-all"
           >
             <Save size={18} /> Kaydet
           </button>
@@ -155,7 +150,7 @@ const GoalModal = ({ currentGoals, onClose, onSave }) => {
   );
 };
 
-// ---------- Last Exam Summary ----------
+// ---------- Last Exam Summary (Matching PDF page 8) ----------
 const LastExamCard = ({ exam }) => {
   if (!exam) return null;
 
@@ -177,164 +172,149 @@ const LastExamCard = ({ exam }) => {
     cografya2: "Coğrafya-2",
   };
 
-  const subjectColors = {
-    turkce: "from-rose-500 to-red-600",
-    matematik: "from-blue-500 to-indigo-600",
-    geometri: "from-cyan-400 to-blue-500",
-    fizik: "from-amber-400 to-orange-500",
-    kimya: "from-emerald-400 to-teal-500",
-    biyoloji: "from-teal-400 to-emerald-600",
-    tarih: "from-orange-400 to-amber-600",
-    cografya: "from-cyan-500 to-teal-500",
-    felsefe: "from-indigo-400 to-violet-500",
-    din: "from-red-400 to-rose-500",
-    edebiyat: "from-pink-500 to-rose-500",
-    tarih1: "from-orange-400 to-amber-600",
-    cografya1: "from-cyan-500 to-teal-500",
-    tarih2: "from-amber-500 to-orange-500",
-    cografya2: "from-teal-500 to-cyan-500",
-  };
-
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent backdrop-blur-xl p-6 md:p-8 shadow-2xl">
-      {/* Refined Background Elements */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-purple-500/10 to-transparent blur-3xl rounded-full pointer-events-none" />
-      
-      <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+    <div className="rounded-3xl border border-[#0F2A5C]/[0.08] bg-white p-6 md:p-8 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 mb-4 shadow-inner">
-            <Clock size={14} className="text-purple-400" />
-            <span className="text-xs font-medium text-slate-300">En Son Çözülen Deneme</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#2F6BFF]/10 text-[#2F6BFF] text-xs font-bold mb-3">
+            En Son Çözülen Deneme
           </div>
-          <h3 className="text-2xl md:text-3xl font-extrabold text-white mb-2 tracking-tight">
+          <h3 className="text-2xl md:text-3xl font-black text-[#0F2A5C] mb-1.5 tracking-tight">
             {exam.name}
           </h3>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-[#4A5B7A] font-medium">
             {exam.date} tarihinde çözüldü
           </p>
         </div>
-        
+
         <div className="flex items-center gap-6 md:text-right">
           <div>
-            <p className="text-sm text-slate-500 mb-1">Deneme Türü</p>
-            <span
-              className={`inline-flex items-center px-4 py-1.5 rounded-xl text-sm font-bold shadow-sm ${
-                exam.type === "TYT"
-                  ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
-                  : "bg-pink-500/20 text-pink-300 border border-pink-500/30"
-              }`}
-            >
+            <p className="text-xs font-semibold text-[#4A5B7A] mb-1">Deneme Türü</p>
+            <span className="inline-flex items-center px-3.5 py-1 rounded-xl text-xs font-black bg-[#0F2A5C] text-white">
               {exam.subtype || exam.type}
             </span>
           </div>
-          <div className="w-px h-12 bg-white/10 hidden md:block"></div>
+          <div className="w-px h-10 bg-[#0F2A5C]/10 hidden md:block"></div>
           <div>
-            <p className="text-sm text-slate-500 mb-1">Toplam Net</p>
-            <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400">
+            <p className="text-xs font-semibold text-[#4A5B7A] mb-1">Toplam Net</p>
+            <p className="text-4xl font-black text-[#0F2A5C] tracking-tight">
               {exam.totalNet.toFixed(2)}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
-        {Object.entries(exam.scores || {}).map(([sub, stats]) => (
-          <div
-            key={sub}
-            className="group relative overflow-hidden bg-white/[0.02] hover:bg-white/[0.04] rounded-2xl p-4 border border-white/5 hover:border-white/10 transition-all duration-300"
-          >
+      {/* Subject cards with blue/amber underline accent as in PDF */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4">
+        {Object.entries(exam.scores || {}).map(([sub, stats]) => {
+          const isWeak = (stats.net || 0) <= 2.0 && (stats.d || 0) <= 2;
+          return (
             <div
-              className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${subjectColors[sub] || "from-slate-400 to-slate-500"} opacity-60 group-hover:opacity-100 transition-opacity`}
-            />
-            <div className="flex items-center gap-2 mb-3 mt-1">
-              <span className="text-xs font-semibold text-slate-300 truncate tracking-wide">
-                {subjectLabels[sub] || sub}
-              </span>
+              key={sub}
+              className="bg-[#F4F7FC]/70 hover:bg-[#F4F7FC] rounded-2xl p-4 border border-[#0F2A5C]/[0.05] transition-all flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between gap-1 mb-2">
+                  <span className="text-xs font-bold text-[#0F2A5C] truncate">
+                    {subjectLabels[sub] || sub}
+                  </span>
+                  {isWeak && (
+                    <span className="text-[9px] font-bold bg-[#FFB020]/25 text-[#0F2A5C] px-1.5 py-0.5 rounded-md">
+                      Eksik
+                    </span>
+                  )}
+                </div>
+                <p className="text-2xl font-black text-[#0F2A5C] mb-2 tracking-tight">
+                  {(stats.net || 0).toFixed(1)}
+                </p>
+              </div>
+
+              {/* Progress Bar line: Amber for weak, Blue for regular */}
+              <div className="w-full h-1 bg-[#0F2A5C]/10 rounded-full overflow-hidden mb-3">
+                <div
+                  className={`h-full rounded-full ${isWeak ? "bg-[#FFB020] w-1/3" : "bg-[#2F6BFF] w-3/4"}`}
+                />
+              </div>
+
+              <div className="flex items-center gap-2 text-[11px] font-bold">
+                <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+                  {stats.d || 0} D
+                </span>
+                <span className="text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">
+                  {stats.y || 0} Y
+                </span>
+              </div>
             </div>
-            <p className="text-2xl font-bold text-white mb-2">
-              {(stats.net || 0).toFixed(1)}
-            </p>
-            <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400/90 bg-emerald-400/10 px-2 py-0.5 rounded-md">
-                {stats.d || 0} D
-              </span>
-              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-rose-400/90 bg-rose-400/10 px-2 py-0.5 rounded-md">
-                {stats.y || 0} Y
-              </span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 };
 
-// ---------- Quick Links ----------
+// ---------- Quick Links (Matching PDF page 8) ----------
 const QuickLinks = () => (
-  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
     {[
       {
         label: "Deneme Ekle",
         desc: "Yeni deneme sonuçlarını gir",
         href: "/dashboard/add-exam",
         icon: Zap,
-        gradient: "from-purple-600 to-violet-600",
-        shadow: "shadow-purple-500/20",
+        iconBg: "bg-[#2F6BFF]",
+        iconColor: "text-white",
       },
       {
         label: "Detaylı Analiz",
         desc: "Ders bazlı analiz ve grafikler",
         href: "/dashboard/analysis",
         icon: BarChart3,
-        gradient: "from-blue-600 to-cyan-600",
-        shadow: "shadow-blue-500/20",
+        iconBg: "bg-[#FFB020]",
+        iconColor: "text-[#0F2A5C]",
       },
       {
         label: "Konu Takip",
         desc: "Konuları, soruları ve tekrarları izle",
         href: "/dashboard/subjects",
         icon: BookOpen,
-        gradient: "from-emerald-600 to-teal-600",
-        shadow: "shadow-emerald-500/20",
+        iconBg: "bg-[#0F2A5C]",
+        iconColor: "text-white",
       },
     ].map((link) => (
       <Link
         key={link.href}
         href={link.href}
-        className={`group relative flex items-center gap-5 p-5 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.04] hover:border-white/10 hover:-translate-y-1 hover:shadow-2xl ${link.shadow}`}
+        className="group flex items-center gap-4 p-5 rounded-3xl bg-white border border-[#0F2A5C]/[0.08] shadow-sm hover:shadow-md transition-all duration-300"
       >
-        <div className={`absolute inset-0 bg-gradient-to-br ${link.gradient} opacity-0 group-hover:opacity-[0.03] rounded-3xl transition-opacity duration-300`} />
         <div
-          className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${link.gradient} flex items-center justify-center shrink-0 shadow-lg`}
+          className={`w-12 h-12 rounded-2xl ${link.iconBg} ${link.iconColor} flex items-center justify-center shrink-0 shadow-sm`}
         >
-          <link.icon size={24} className="text-white drop-shadow-md" />
+          <link.icon size={22} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[16px] font-bold text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-slate-300 transition-all">
+          <p className="text-base font-black text-[#0F2A5C] group-hover:text-[#2F6BFF] transition-colors">
             {link.label}
           </p>
-          <p className="text-xs text-slate-400 mt-1">{link.desc}</p>
+          <p className="text-xs text-[#4A5B7A] mt-0.5 font-medium">{link.desc}</p>
         </div>
-        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
-          <ArrowRight
-            size={16}
-            className="text-slate-400 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0"
-          />
-        </div>
+        <ArrowRight
+          size={16}
+          className="text-[#4A5B7A] group-hover:text-[#2F6BFF] group-hover:translate-x-1 transition-all shrink-0"
+        />
       </Link>
     ))}
   </div>
 );
 
 // ---------- Custom Tooltip ----------
-const ChartTooltip = ({ active, payload, color = "purple" }) => {
+const ChartTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-slate-800/95 border border-white/10 backdrop-blur-sm p-3 rounded-xl shadow-xl">
-        <p className="font-semibold text-slate-200 text-sm mb-1">
+      <div className="bg-[#0F2A5C] text-white p-3 rounded-2xl shadow-xl">
+        <p className="font-semibold text-xs text-white/70 mb-1">
           {payload[0].payload.trialName}
         </p>
-        <p className={`text-${color}-400 font-bold text-lg`}>
+        <p className="text-[#FFB020] font-black text-lg">
           {payload[0].value} Net
         </p>
       </div>
@@ -473,27 +453,36 @@ const DashboardContent = () => {
           {/* Welcome Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-slate-400 mb-2 tracking-tight">
+              <h1 className="text-3xl md:text-4xl font-black text-[#0F2A5C] mb-1.5 tracking-tight">
                 Genel Bakış
               </h1>
-              <div className="text-sm font-medium text-slate-400 [&_p]:mb-1 [&_strong]:text-slate-200 [&_a]:text-purple-400 [&_ul]:list-disc [&_ul]:pl-4 [&_li]:my-0.5">
-                <Markdown>{welcomeMessage}</Markdown>
+              <p className="text-xs font-semibold text-[#4A5B7A] mb-3">
+                Deneme sonuçlarının güncel özeti
+              </p>
+              <div className="p-4 rounded-2xl bg-white border border-[#0F2A5C]/[0.08] shadow-sm flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#2F6BFF] text-white flex items-center justify-center shrink-0">
+                  <Zap size={18} />
+                </div>
+                <div className="text-xs font-medium text-[#4A5B7A] leading-relaxed [&_p]:mb-1 [&_strong]:text-[#0F2A5C]">
+                  <Markdown>{welcomeMessage}</Markdown>
+                </div>
               </div>
             </div>
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm shadow-inner">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-              <span className="text-xs font-medium text-slate-300">Sistem Aktif</span>
+            <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#0F2A5C]/[0.08] shadow-sm">
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="text-xs font-bold text-emerald-700">Sistem Aktif</span>
             </div>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <StatCard
               title="Toplam Deneme"
               value={stats.totalExams}
               subtext="Tüm zamanlar"
               icon={Calendar}
-              gradient="from-blue-500/30 to-cyan-500/30"
+              iconBg="bg-[#0F2A5C]"
+              iconColor="text-white"
             />
             <StatCard
               title="TYT Ortalama"
@@ -506,7 +495,8 @@ const DashboardContent = () => {
               icon={
                 tytTrend !== null && tytTrend >= 0 ? TrendingUp : TrendingDown
               }
-              gradient="from-purple-500/30 to-violet-500/30"
+              iconBg="bg-[#2F6BFF]"
+              iconColor="text-white"
             />
             <StatCard
               title="AYT Ortalama"
@@ -519,16 +509,17 @@ const DashboardContent = () => {
               icon={
                 aytTrend !== null && aytTrend >= 0 ? TrendingUp : TrendingDown
               }
-              gradient="from-pink-500/30 to-rose-500/30"
+              iconBg="bg-[#FFB020]"
+              iconColor="text-[#0F2A5C]"
             />
             <StatCard
               title="Hedef Netler"
               value={`${goals.tyt} / ${goals.ayt}`}
               subtext="Düzenlemek için tıkla"
               icon={Target}
-              gradient="from-green-500/30 to-emerald-500/30"
+              iconBg="bg-[#0F2A5C]"
+              iconColor="text-white"
               onClick={() => setIsGoalModalOpen(true)}
-              actionIcon={Edit2}
             />
           </div>
 
@@ -540,15 +531,17 @@ const DashboardContent = () => {
 
           {/* Chart with Tab Switcher */}
           {(tytData.length > 0 || aytData.length > 0) && (
-            <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-b from-white/[0.02] to-transparent backdrop-blur-xl p-6 md:p-8 shadow-2xl">
+            <div className="rounded-3xl border border-[#0F2A5C]/[0.08] bg-white p-6 md:p-8 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
                 <div>
-                  <h3 className="text-xl font-bold text-white tracking-tight">
+                  <h3 className="text-xl font-black text-[#0F2A5C] tracking-tight">
                     Net Değişim Grafiği
                   </h3>
-                  <p className="text-sm text-slate-400 mt-1">Son denemelerindeki net artışını takip et</p>
+                  <p className="text-xs text-[#4A5B7A] font-medium mt-1">
+                    Son denemelerindeki net artışını takip et
+                  </p>
                 </div>
-                <div className="flex gap-1.5 p-1.5 bg-slate-900/50 border border-white/5 rounded-2xl backdrop-blur-md">
+                <div className="flex gap-1.5 p-1 bg-[#F4F7FC] border border-[#0F2A5C]/[0.06] rounded-2xl">
                   {["TYT", "AYT"].map((tab) => {
                     const hasData =
                       tab === "TYT" ? tytData.length > 0 : aytData.length > 0;
@@ -557,14 +550,10 @@ const DashboardContent = () => {
                         key={tab}
                         onClick={() => hasData && setChartTab(tab)}
                         disabled={!hasData}
-                        className={`px-5 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${
+                        className={`px-5 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
                           chartTab === tab
-                            ? tab === "TYT"
-                              ? "bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-lg shadow-purple-900/40"
-                              : "bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg shadow-pink-900/40"
-                            : hasData
-                              ? "text-slate-400 hover:text-white hover:bg-white/5"
-                              : "text-slate-600 cursor-not-allowed"
+                            ? "bg-[#0F2A5C] text-white shadow-sm"
+                            : "text-[#4A5B7A] hover:text-[#0F2A5C]"
                         }`}
                       >
                         {tab}
@@ -579,11 +568,11 @@ const DashboardContent = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart
                       data={activeChartData}
-                      margin={{ top: 5, right: 5, bottom: 50, left: 0 }}
+                      margin={{ top: 10, right: 10, bottom: 30, left: 0 }}
                     >
                       <defs>
                         <linearGradient
-                          id={chartGradientId}
+                          id="puanizChartGradient"
                           x1="0"
                           y1="0"
                           x2="0"
@@ -591,29 +580,29 @@ const DashboardContent = () => {
                         >
                           <stop
                             offset="5%"
-                            stopColor={chartColor}
-                            stopOpacity={0.3}
+                            stopColor="#2F6BFF"
+                            stopOpacity={0.25}
                           />
                           <stop
                             offset="95%"
-                            stopColor={chartColor}
-                            stopOpacity={0}
+                            stopColor="#2F6BFF"
+                            stopOpacity={0.0}
                           />
                         </linearGradient>
                       </defs>
                       <CartesianGrid
                         strokeDasharray="3 3"
-                        stroke="#1e293b"
+                        stroke="#0F2A5C"
+                        strokeOpacity={0.07}
                         vertical={false}
                       />
                       <XAxis
                         dataKey="date"
-                        stroke="#475569"
+                        stroke="#4A5B7A"
                         tick={{
-                          angle: -45,
-                          textAnchor: "end",
                           fontSize: 11,
-                          fill: "#64748b",
+                          fill: "#4A5B7A",
+                          fontWeight: 500,
                         }}
                         tickFormatter={(value) => {
                           if (!value) return "";
@@ -623,31 +612,31 @@ const DashboardContent = () => {
                             month: "short",
                           });
                         }}
-                        height={60}
+                        height={40}
                       />
                       <YAxis
-                        stroke="#475569"
-                        tick={{ fontSize: 11, fill: "#64748b" }}
+                        stroke="#4A5B7A"
+                        tick={{ fontSize: 11, fill: "#4A5B7A", fontWeight: 500 }}
                       />
                       <Tooltip
                         content={({ active, payload }) => (
                           <ChartTooltip
                             active={active}
                             payload={payload}
-                            color={chartTab === "TYT" ? "purple" : "pink"}
                           />
                         )}
                       />
                       {activeGoal > 0 && (
                         <ReferenceLine
                           y={activeGoal}
-                          stroke="#22c55e"
+                          stroke="#FFB020"
                           strokeDasharray="6 4"
-                          strokeWidth={1.5}
+                          strokeWidth={2}
                           label={{
                             value: `Hedef: ${activeGoal}`,
-                            fill: "#22c55e",
+                            fill: "#0F2A5C",
                             fontSize: 11,
+                            fontWeight: 700,
                             position: "insideTopRight",
                           }}
                         />
@@ -655,30 +644,19 @@ const DashboardContent = () => {
                       <Area
                         type="monotone"
                         dataKey="net"
-                        stroke={chartColor}
+                        stroke="#2F6BFF"
+                        strokeWidth={3}
+                        dot={{ r: 4, fill: "#2F6BFF", stroke: "#fff", strokeWidth: 2 }}
+                        activeDot={{ r: 6, fill: "#FFB020", stroke: "#0F2A5C", strokeWidth: 2 }}
                         fillOpacity={1}
-                        fill={`url(#${chartGradientId})`}
-                        strokeWidth={4}
-                        isAnimationActive={false}
-                        dot={{
-                          fill: chartColor,
-                          r: 4,
-                          strokeWidth: 0,
-                        }}
-                        activeDot={{
-                          r: 8,
-                          fill: chartColor,
-                          stroke: "#fff",
-                          strokeWidth: 3,
-                        }}
-                        name="Net"
+                        fill="url(#puanizChartGradient)"
                       />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-[200px]">
-                  <p className="text-slate-500 text-sm">
+                  <p className="text-[#4A5B7A] text-sm">
                     Bu tür için henüz deneme verisi yok.
                   </p>
                 </div>

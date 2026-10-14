@@ -48,69 +48,63 @@ const ProfileCard = ({ user, isCollapsed, onClose }) => {
   };
 
   const displayName =
-    profile?.name || user?.displayName || user?.email?.split("@")[0] || "Kullanıcı";
-  const displayAvatar =
-    profile?.avatarUrl ||
-    user?.photoURL ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=7c3aed&color=fff&bold=true`;
-  const displayGrade = profile?.grade || "Öğrenci";
-  const initial = displayName[0]?.toUpperCase() || "?";
+    profile?.name || user?.displayName || user?.email?.split("@")[0] || "Enes Samed Gözlü";
+  const displayGrade = profile?.grade || "12. Sınıf - SAY";
+  const initials = displayName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "ES";
 
   return (
-    <div className="relative px-3 pb-4 pt-2 border-t border-white/5 shrink-0" ref={dropdownRef}>
+    <div className="relative px-3 pb-4 pt-2 border-t border-[#0F2A5C]/[0.08] shrink-0" ref={dropdownRef}>
       {/* ── Dropdown (opens upward) ── */}
       {isOpen && (
         <div
-          className={`absolute bottom-full z-50 mb-2
-            ${isCollapsed ? "left-14 w-60" : "left-0 right-0 w-full"}`}
+          className={`absolute bottom-full z-50 mb-3
+            ${isCollapsed ? "left-14 w-64" : "left-0 right-0 w-full"}`}
         >
-          <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden">
+          <div className="bg-white border border-[#0F2A5C]/10 rounded-2xl shadow-xl shadow-[#0F2A5C]/10 overflow-hidden">
             {/* User info header */}
-            <div className="p-4 border-b border-white/5">
+            <div className="p-4 border-b border-[#0F2A5C]/[0.06]">
               <div className="flex items-center gap-3">
                 <div className="relative shrink-0">
-                  <Image
-                    src={displayAvatar}
-                    alt={displayName}
-                    width={44}
-                    height={44}
-                    className="rounded-xl object-cover border-2 border-purple-500/30"
-                  />
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-900" />
+                  <div className="w-11 h-11 rounded-2xl bg-[#2F6BFF] text-white font-black text-sm flex items-center justify-center shadow-sm">
+                    {initials}
+                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-white text-sm truncate">{displayName}</p>
-                  <p className="text-xs text-slate-400 truncate">{user?.email}</p>
-                  <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20">
-                    <Shield size={9} className="text-purple-400" />
-                    <span className="text-[10px] text-purple-300 font-bold">{displayGrade}</span>
+                  <p className="font-bold text-[#0F2A5C] text-sm truncate">{displayName}</p>
+                  <p className="text-xs text-[#4A5B7A] truncate">{user?.email || "enessamed422@gmail.com"}</p>
+                  <div className="inline-flex items-center mt-1 px-2 py-0.5 rounded-full bg-[#2F6BFF]/10">
+                    <span className="text-[10px] text-[#2F6BFF] font-bold">{displayGrade}</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Menu items */}
-            <div className="p-2 space-y-0.5">
+            <div className="p-2 space-y-1">
               <Link
                 href="/dashboard/settings"
                 onClick={() => { setIsOpen(false); onClose?.(); }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 hover:bg-white/5 hover:text-white transition-colors text-sm font-medium group cursor-pointer"
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#0F2A5C] hover:bg-[#F4F7FC] transition-colors text-sm font-semibold group cursor-pointer"
               >
-                <div className="w-7 h-7 rounded-lg bg-slate-800 border border-white/5 flex items-center justify-center group-hover:bg-purple-500/10 group-hover:border-purple-500/20 transition-colors">
-                  <Settings size={14} className="text-slate-400 group-hover:text-purple-400 transition-colors" />
+                <div className="w-8 h-8 rounded-xl bg-[#F4F7FC] flex items-center justify-center text-[#2F6BFF] group-hover:bg-white group-hover:shadow-sm transition-all">
+                  <Settings size={16} />
                 </div>
                 <span>Profil & Ayarlar</span>
-                <ExternalLink size={12} className="text-slate-600 ml-auto" />
+                <ExternalLink size={12} className="text-[#4A5B7A] ml-auto opacity-40 group-hover:opacity-100" />
               </Link>
-
-              <div className="h-px bg-white/5 mx-1 my-1" />
 
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:text-red-300 hover:bg-red-500/10 transition-colors text-sm font-medium group cursor-pointer"
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-rose-600 hover:bg-rose-50 transition-colors text-sm font-semibold group cursor-pointer"
               >
-                <div className="w-7 h-7 rounded-lg bg-slate-800 border border-white/5 flex items-center justify-center group-hover:bg-red-500/10 group-hover:border-red-500/20 transition-colors">
-                  <LogOut size={14} className="text-slate-400 group-hover:text-red-400 transition-colors" />
+                <div className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center text-rose-500 transition-colors">
+                  <LogOut size={16} />
                 </div>
                 <span>Çıkış Yap</span>
               </button>
@@ -122,36 +116,29 @@ const ProfileCard = ({ user, isCollapsed, onClose }) => {
       {/* ── Trigger Button ── */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center gap-3 p-2 rounded-xl cursor-pointer
-          hover:bg-white/5 border transition-all duration-200 group
-          ${isOpen
-            ? "bg-white/5 border-white/10"
-            : "border-transparent hover:border-white/5"
-          }
-          ${isCollapsed ? "md:justify-center md:px-0 md:py-3" : ""}`}
+        className={`w-full flex items-center gap-3 p-2 rounded-2xl cursor-pointer
+          hover:bg-[#F4F7FC] transition-all duration-200 group
+          ${isOpen ? "bg-[#F4F7FC]" : "bg-transparent"}
+          ${isCollapsed ? "md:justify-center md:px-0 md:py-2.5" : ""}`}
       >
-        {/* Avatar */}
-        <div className={`relative shrink-0 ${isOpen ? "ring-2 ring-purple-500/50 ring-offset-2 ring-offset-slate-950 rounded-xl" : ""} transition-all`}>
-          <Image
-            src={displayAvatar}
-            alt={displayName}
-            width={34}
-            height={34}
-            className="rounded-xl object-cover border border-purple-500/20 group-hover:border-purple-400/40 transition-all"
-          />
-          <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-slate-950" />
+        {/* Avatar matching PDF (Rounded Blue Box with white ES initials) */}
+        <div className="relative shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-[#2F6BFF] text-white font-black text-xs flex items-center justify-center shadow-sm">
+            {initials}
+          </div>
+          <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white shadow-xs" />
         </div>
 
         {/* Name + grade (collapsed: hidden on desktop, visible on mobile) */}
         <div className={`flex-1 min-w-0 text-left transition-all ${isCollapsed ? "md:hidden" : ""}`}>
-          <p className="font-bold text-white text-[13px] truncate leading-tight">{displayName}</p>
-          <p className="text-[10px] text-slate-500 truncate">{displayGrade}</p>
+          <p className="font-bold text-[#0F2A5C] text-[13px] truncate leading-tight">{displayName}</p>
+          <p className="text-[10px] text-[#4A5B7A] truncate font-medium">{displayGrade}</p>
         </div>
 
         {/* Chevron */}
         <ChevronUp
           size={14}
-          className={`text-slate-600 transition-transform duration-200 shrink-0
+          className={`text-[#4A5B7A] transition-transform duration-200 shrink-0
             ${isOpen ? "rotate-0" : "rotate-180"}
             ${isCollapsed ? "md:hidden" : ""}`}
         />

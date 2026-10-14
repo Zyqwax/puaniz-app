@@ -117,18 +117,22 @@ const AIAnalysisCard = ({ analysis }) => {
   if (!analysis) return null;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-900/30 via-purple-900/20 to-slate-900/40 p-5 md:p-6">
-      <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+    <div className="relative overflow-hidden rounded-3xl bg-[#0F2A5C] text-white p-6 md:p-8 shadow-sm">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-[#2F6BFF]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
 
       <div className="relative flex items-start gap-4">
-        <div className="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/20 flex items-center justify-center shrink-0">
-          <Brain size={20} className="text-blue-400" />
+        <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center shrink-0">
+          <Brain size={24} className="text-[#FFB020]" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-base font-bold text-blue-100 mb-2">
-            Yapay Zeka Koç Görüşü
-          </h3>
-          <div className="text-sm text-slate-300 leading-relaxed [&_p]:mb-2 [&_a]:text-blue-400 [&_strong]:text-blue-200 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:my-0.5 [&_h1]:text-lg [&_h1]:font-bold [&_h1]:text-white [&_h1]:mb-2 [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-blue-100 [&_h2]:mb-2 [&_h3]:text-sm [&_h3]:font-bold [&_h3]:text-blue-200 [&_h3]:mb-1">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#FFB020]">AI Koç</span>
+            <span className="text-white/40">·</span>
+            <h3 className="text-lg font-bold text-white">
+              Yapay Zeka Görüşü & Strateji
+            </h3>
+          </div>
+          <div className="text-sm text-white/90 leading-relaxed [&_p]:mb-2 [&_a]:text-[#7FB0FF] [&_strong]:text-white [&_strong]:font-bold [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:my-0.5 [&_h1]:text-lg [&_h1]:font-bold [&_h1]:text-white [&_h1]:mb-2 [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-white [&_h2]:mb-2 [&_h3]:text-sm [&_h3]:font-bold [&_h3]:text-[#FFB020] [&_h3]:mb-1">
             <Markdown>{analysis}</Markdown>
           </div>
         </div>
@@ -151,29 +155,31 @@ const StrengthWeaknessCards = ({ stats, sortedKeys }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Strong */}
-      <div className="rounded-2xl border border-green-500/20 bg-green-900/10 p-5">
-        <h3 className="text-sm font-bold text-green-400 mb-4 flex items-center gap-2">
-          <Shield size={16} />
-          En Güçlü Dersler
+      <div className="rounded-3xl border border-[#0F2A5C]/[0.08] bg-white p-6 shadow-sm">
+        <h3 className="text-base font-bold text-[#0F2A5C] mb-4 flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+            <Shield size={18} />
+          </div>
+          En Güçlü Olduğun Dersler
         </h3>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {top3.map((sub, i) => (
             <div key={sub} className="flex items-center gap-3">
-              <span className="w-6 h-6 rounded-lg bg-green-500/15 flex items-center justify-center text-xs font-bold text-green-400">
+              <span className="w-7 h-7 rounded-xl bg-emerald-50 flex items-center justify-center text-xs font-bold text-emerald-600 shrink-0">
                 {i + 1}
               </span>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm text-slate-200 font-medium">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-sm text-[#0F2A5C] font-semibold">
                     {SUBJECT_LABELS[sub] || sub}
                   </span>
-                  <span className="text-sm font-bold text-green-400">
-                    {stats[sub].avg}
+                  <span className="text-sm font-bold text-emerald-600">
+                    {stats[sub].avg} Net
                   </span>
                 </div>
-                <div className="w-full bg-white/5 rounded-full h-1.5">
+                <div className="w-full bg-[#F4F7FC] rounded-full h-2">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-green-500 to-emerald-400 transition-all duration-500"
+                    className="h-full rounded-full bg-emerald-500 transition-all duration-500"
                     style={{
                       width: `${Math.min(100, (parseFloat(stats[sub].avg) / (stats[sub].max || 40)) * 100)}%`,
                     }}
@@ -186,29 +192,31 @@ const StrengthWeaknessCards = ({ stats, sortedKeys }) => {
       </div>
 
       {/* Weak */}
-      <div className="rounded-2xl border border-red-500/20 bg-red-900/10 p-5">
-        <h3 className="text-sm font-bold text-red-400 mb-4 flex items-center gap-2">
-          <AlertTriangle size={16} />
-          Geliştirilmesi Gereken
+      <div className="rounded-3xl border border-[#0F2A5C]/[0.08] bg-white p-6 shadow-sm">
+        <h3 className="text-base font-bold text-[#0F2A5C] mb-4 flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-[#FFB020]/15 flex items-center justify-center text-[#FFB020]">
+            <AlertTriangle size={18} />
+          </div>
+          Geliştirilmesi Gereken Dersler
         </h3>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {bottom3.map((sub, i) => (
             <div key={sub} className="flex items-center gap-3">
-              <span className="w-6 h-6 rounded-lg bg-red-500/15 flex items-center justify-center text-xs font-bold text-red-400">
+              <span className="w-7 h-7 rounded-xl bg-amber-50 flex items-center justify-center text-xs font-bold text-[#FFB020] shrink-0">
                 {i + 1}
               </span>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm text-slate-200 font-medium">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-sm text-[#0F2A5C] font-semibold">
                     {SUBJECT_LABELS[sub] || sub}
                   </span>
-                  <span className="text-sm font-bold text-red-400">
-                    {stats[sub].avg}
+                  <span className="text-sm font-bold text-[#FFB020]">
+                    {stats[sub].avg} Net
                   </span>
                 </div>
-                <div className="w-full bg-white/5 rounded-full h-1.5">
+                <div className="w-full bg-[#F4F7FC] rounded-full h-2">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-red-500 to-orange-400 transition-all duration-500"
+                    className="h-full rounded-full bg-[#FFB020] transition-all duration-500"
                     style={{
                       width: `${Math.min(100, (parseFloat(stats[sub].avg) / (stats[sub].max || 40)) * 100)}%`,
                     }}
@@ -231,55 +239,61 @@ const SubjectStatsGrid = ({ stats, sortedKeys }) => {
     avg: parseFloat(stats[sub].avg),
     max: stats[sub].max,
     min: stats[sub].min,
-    color: SUBJECT_COLORS[sub] || "#8b5cf6",
+    color: SUBJECT_COLORS[sub] || "#2F6BFF",
   }));
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent backdrop-blur-xl p-6 md:p-8 shadow-2xl">
-      <h3 className="text-lg font-bold text-white mb-5">
-        Ders Bazlı Ortalama Karşılaştırma
-      </h3>
+    <div className="relative overflow-hidden rounded-3xl border border-[#0F2A5C]/[0.08] bg-white p-6 md:p-8 shadow-sm">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h3 className="text-lg font-bold text-[#0F2A5C]">
+            Ders Bazlı Ortalama Karşılaştırma
+          </h3>
+          <p className="text-xs text-[#4A5B7A] mt-0.5">Tüm dersler için ortalama net başarı dağılımı</p>
+        </div>
+      </div>
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={barData} margin={{ bottom: 60, left: 0, right: 0 }}>
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="#1e293b"
+              stroke="#0F2A5C"
+              strokeOpacity={0.06}
               vertical={false}
             />
             <XAxis
               dataKey="name"
-              stroke="#475569"
+              stroke="#4A5B7A"
               tick={{
                 angle: -45,
                 textAnchor: "end",
                 fontSize: 11,
-                fill: "#64748b",
+                fill: "#4A5B7A",
               }}
               height={60}
             />
-            <YAxis stroke="#475569" tick={{ fontSize: 11, fill: "#64748b" }} />
+            <YAxis stroke="#4A5B7A" tick={{ fontSize: 11, fill: "#4A5B7A" }} />
             <Tooltip
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
                   const d = payload[0].payload;
                   return (
-                    <div className="bg-slate-800/95 border border-white/10 backdrop-blur-sm p-3 rounded-xl shadow-xl">
-                      <p className="font-semibold text-white text-sm mb-1">
+                    <div className="bg-white border border-[#0F2A5C]/[0.08] p-3 rounded-2xl shadow-lg">
+                      <p className="font-bold text-[#0F2A5C] text-sm mb-1.5">
                         {d.name}
                       </p>
                       <div className="space-y-0.5 text-xs">
                         <p>
-                          <span className="text-slate-400">Ort: </span>
-                          <span className="font-bold text-white">{d.avg}</span>
+                          <span className="text-[#4A5B7A]">Ortalama: </span>
+                          <span className="font-bold text-[#0F2A5C]">{d.avg} Net</span>
                         </p>
                         <p>
-                          <span className="text-slate-400">Max: </span>
-                          <span className="text-green-400">{d.max}</span>
+                          <span className="text-[#4A5B7A]">En Yüksek: </span>
+                          <span className="text-emerald-600 font-bold">{d.max}</span>
                         </p>
                         <p>
-                          <span className="text-slate-400">Min: </span>
-                          <span className="text-red-400">{d.min}</span>
+                          <span className="text-[#4A5B7A]">En Düşük: </span>
+                          <span className="text-[#FFB020] font-bold">{d.min}</span>
                         </p>
                       </div>
                     </div>
@@ -288,12 +302,12 @@ const SubjectStatsGrid = ({ stats, sortedKeys }) => {
                 return null;
               }}
             />
-            <Bar dataKey="avg" radius={[6, 6, 0, 0]} maxBarSize={36} isAnimationActive={false}>
+            <Bar dataKey="avg" radius={[8, 8, 0, 0]} maxBarSize={36} isAnimationActive={false}>
               {barData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={entry.color}
-                  fillOpacity={0.7}
+                  fillOpacity={0.85}
                 />
               ))}
             </Bar>
@@ -304,34 +318,34 @@ const SubjectStatsGrid = ({ stats, sortedKeys }) => {
       {/* Stats Cards Below */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mt-6">
         {sortedKeys.map((subject) => {
-          const color = SUBJECT_COLORS[subject] || "#8b5cf6";
+          const color = SUBJECT_COLORS[subject] || "#2F6BFF";
           return (
             <div
               key={subject}
-              className="rounded-xl bg-white/5 border border-white/5 p-3"
+              className="rounded-2xl bg-[#F4F7FC] border border-[#0F2A5C]/[0.05] p-3.5"
             >
               <div className="flex items-center gap-2 mb-2">
                 <div
-                  className="w-2 h-2 rounded-full"
+                  className="w-2.5 h-2.5 rounded-full"
                   style={{ backgroundColor: color }}
                 />
-                <h4 className="text-xs font-medium text-slate-400 truncate">
+                <h4 className="text-xs font-bold text-[#4A5B7A] truncate">
                   {SUBJECT_LABELS[subject] || subject}
                 </h4>
               </div>
-              <p className="text-xl font-bold text-white">
+              <p className="text-xl font-extrabold text-[#0F2A5C]">
                 {stats[subject].avg}
               </p>
-              <div className="flex justify-between mt-2 text-[10px] text-slate-500 border-t border-white/5 pt-1.5">
+              <div className="flex justify-between mt-2 text-[10px] text-[#4A5B7A] border-t border-[#0F2A5C]/[0.06] pt-1.5 font-medium">
                 <span>
                   Max:{" "}
-                  <span className="text-green-400 font-medium">
+                  <span className="text-emerald-600 font-bold">
                     {stats[subject].max}
                   </span>
                 </span>
                 <span>
                   Min:{" "}
-                  <span className="text-red-400 font-medium">
+                  <span className="text-[#FFB020] font-bold">
                     {stats[subject].min}
                   </span>
                 </span>
@@ -502,26 +516,28 @@ const AnalysisClient = () => {
       {/* Header + Tab */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <BarChart3 size={28} className="text-purple-400" />
+          <h1 className="text-3xl font-bold text-[#0F2A5C] flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[#2F6BFF]/10 flex items-center justify-center text-[#2F6BFF]">
+              <BarChart3 size={24} />
+            </div>
             Detaylı Analiz
           </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Ders bazlı istatistikler, güçlü/zayıf alanlar ve trendler
+          <p className="text-[#4A5B7A] text-sm mt-1">
+            Ders bazlı istatistikler, güçlü/zayıf alanlar ve gelişim grafikleri
           </p>
         </div>
-        <div className="flex gap-1 p-1 bg-white/5 rounded-xl w-fit">
+        <div className="flex gap-1.5 p-1.5 bg-white rounded-2xl border border-[#0F2A5C]/[0.08] shadow-xs w-fit">
           {["TYT", "AYT", "REPORT"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+              className={`px-5 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                 activeTab === tab
-                  ? "bg-purple-600 text-white shadow-lg shadow-purple-900/30"
-                  : "text-slate-400 hover:text-white hover:bg-white/5"
+                  ? "bg-[#0F2A5C] text-white shadow-xs"
+                  : "text-[#4A5B7A] hover:text-[#0F2A5C] hover:bg-[#F4F7FC]"
               }`}
             >
-              {tab === "REPORT" ? "Rapor" : tab}
+              {tab === "REPORT" ? "Rapor İndir" : tab}
             </button>
           ))}
         </div>
@@ -539,8 +555,8 @@ const AnalysisClient = () => {
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Radar Chart */}
-              <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent backdrop-blur-xl p-6 shadow-2xl">
-                <h3 className="text-base font-bold text-white mb-4">
+              <div className="relative overflow-hidden rounded-3xl border border-[#0F2A5C]/[0.08] bg-white p-6 shadow-sm">
+                <h3 className="text-base font-bold text-[#0F2A5C] mb-4">
                   Ders Başarı Dağılımı
                 </h3>
                 <div className="h-[300px]">
@@ -551,10 +567,10 @@ const AnalysisClient = () => {
                       outerRadius="75%"
                       data={radarData}
                     >
-                      <PolarGrid stroke="#1e293b" />
+                      <PolarGrid stroke="#0F2A5C" strokeOpacity={0.08} />
                       <PolarAngleAxis
                         dataKey="subject"
-                        tick={{ fill: "#94a3b8", fontSize: 11 }}
+                        tick={{ fill: "#4A5B7A", fontSize: 11, fontWeight: 500 }}
                       />
                       <PolarRadiusAxis
                         angle={30}
@@ -565,10 +581,10 @@ const AnalysisClient = () => {
                       <Radar
                         name="Başarı Oranı"
                         dataKey="A"
-                        stroke="#8b5cf6"
+                        stroke="#2F6BFF"
                         strokeWidth={2}
-                        fill="#8b5cf6"
-                        fillOpacity={0.25}
+                        fill="#2F6BFF"
+                        fillOpacity={0.2}
                         isAnimationActive={false}
                       />
                       <Tooltip
@@ -576,14 +592,14 @@ const AnalysisClient = () => {
                           if (active && payload && payload.length) {
                             const data = payload[0].payload;
                             return (
-                              <div className="bg-slate-800/95 border border-white/10 backdrop-blur-sm p-3 rounded-xl shadow-xl">
-                                <p className="font-semibold text-white text-sm mb-1">
+                              <div className="bg-white border border-[#0F2A5C]/[0.08] p-3 rounded-2xl shadow-lg">
+                                <p className="font-bold text-[#0F2A5C] text-sm mb-1">
                                   {data.subject}
                                 </p>
-                                <p className="text-purple-400 font-bold">
-                                  %{data.A}
+                                <p className="text-[#2F6BFF] font-bold">
+                                  %{data.A} Başarı
                                 </p>
-                                <p className="text-slate-400 text-xs">
+                                <p className="text-[#4A5B7A] text-xs">
                                   Net: {data.originalNet} / {data.fullMark}
                                 </p>
                               </div>
@@ -598,8 +614,8 @@ const AnalysisClient = () => {
               </div>
 
               {/* Trend Chart */}
-              <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent backdrop-blur-xl p-6 shadow-2xl">
-                <h3 className="text-base font-bold text-white mb-4">
+              <div className="relative overflow-hidden rounded-3xl border border-[#0F2A5C]/[0.08] bg-white p-6 shadow-sm">
+                <h3 className="text-base font-bold text-[#0F2A5C] mb-4">
                   Genel Net Değişimi
                 </h3>
                 <div className="h-[300px]">
@@ -607,31 +623,32 @@ const AnalysisClient = () => {
                     <LineChart data={trendData}>
                       <CartesianGrid
                         strokeDasharray="3 3"
-                        stroke="#1e293b"
+                        stroke="#0F2A5C"
+                        strokeOpacity={0.06}
                         vertical={false}
                       />
                       <XAxis
                         dataKey="name"
-                        stroke="#475569"
+                        stroke="#4A5B7A"
                         fontSize={11}
-                        tick={{ fill: "#64748b" }}
+                        tick={{ fill: "#4A5B7A" }}
                         tickFormatter={(val) =>
                           val.split("-").slice(1).join("/")
                         }
                       />
                       <YAxis
-                        stroke="#475569"
-                        tick={{ fontSize: 11, fill: "#64748b" }}
+                        stroke="#4A5B7A"
+                        tick={{ fontSize: 11, fill: "#4A5B7A" }}
                       />
                       <Tooltip
                         content={({ active, payload }) => {
                           if (active && payload && payload.length) {
                             return (
-                              <div className="bg-slate-800/95 border border-white/10 backdrop-blur-sm p-3 rounded-xl shadow-xl">
-                                <p className="font-semibold text-white text-sm mb-1">
+                              <div className="bg-white border border-[#0F2A5C]/[0.08] p-3 rounded-2xl shadow-lg">
+                                <p className="font-bold text-[#0F2A5C] text-sm mb-1">
                                   {payload[0].payload.examName}
                                 </p>
-                                <p className="text-pink-400 font-bold text-lg">
+                                <p className="text-[#2F6BFF] font-bold text-lg">
                                   {payload[0].value} Net
                                 </p>
                               </div>
@@ -643,13 +660,13 @@ const AnalysisClient = () => {
                       <Line
                         type="monotone"
                         dataKey="value"
-                        stroke="#ec4899"
+                        stroke="#2F6BFF"
                         strokeWidth={3}
                         isAnimationActive={false}
-                        dot={{ fill: "#ec4899", r: 4, strokeWidth: 0 }}
+                        dot={{ fill: "#2F6BFF", r: 4, strokeWidth: 0 }}
                         activeDot={{
                           r: 6,
-                          fill: "#ec4899",
+                          fill: "#2F6BFF",
                           stroke: "#fff",
                           strokeWidth: 2,
                         }}
@@ -664,9 +681,9 @@ const AnalysisClient = () => {
             <SubjectStatsGrid stats={stats} sortedKeys={sortedStatsKeys} />
 
             {/* Subject Analysis Chart */}
-            <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent backdrop-blur-xl p-6 md:p-8 shadow-2xl">
+            <div className="relative overflow-hidden rounded-3xl border border-[#0F2A5C]/[0.08] bg-white p-6 md:p-8 shadow-sm">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-5 gap-3">
-                <h3 className="text-base font-bold text-white">
+                <h3 className="text-base font-bold text-[#0F2A5C]">
                   Ders Bazlı Net Değişimi
                 </h3>
 
@@ -675,16 +692,16 @@ const AnalysisClient = () => {
                     <button
                       key={subject}
                       onClick={() => setSelectedChartSubject(subject)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         selectedChartSubject === subject
-                          ? "text-white shadow-lg"
-                          : "bg-white/5 text-slate-400 hover:text-white hover:bg-white/10"
+                          ? "text-white shadow-xs"
+                          : "bg-[#F4F7FC] text-[#4A5B7A] hover:text-[#0F2A5C]"
                       }`}
                       style={
                         selectedChartSubject === subject
                           ? {
                               backgroundColor:
-                                SUBJECT_COLORS[subject] || "#8b5cf6",
+                                SUBJECT_COLORS[subject] || "#2F6BFF",
                             }
                           : {}
                       }
@@ -709,14 +726,14 @@ const AnalysisClient = () => {
                         <stop
                           offset="5%"
                           stopColor={
-                            SUBJECT_COLORS[selectedChartSubject] || "#3b82f6"
+                            SUBJECT_COLORS[selectedChartSubject] || "#2F6BFF"
                           }
-                          stopOpacity={0.3}
+                          stopOpacity={0.25}
                         />
                         <stop
                           offset="95%"
                           stopColor={
-                            SUBJECT_COLORS[selectedChartSubject] || "#3b82f6"
+                            SUBJECT_COLORS[selectedChartSubject] || "#2F6BFF"
                           }
                           stopOpacity={0}
                         />
@@ -724,17 +741,18 @@ const AnalysisClient = () => {
                     </defs>
                     <CartesianGrid
                       strokeDasharray="3 3"
-                      stroke="#1e293b"
+                      stroke="#0F2A5C"
+                      strokeOpacity={0.06}
                       vertical={false}
                     />
                     <XAxis
                       dataKey="name"
-                      stroke="#475569"
+                      stroke="#4A5B7A"
                       tick={{
                         angle: -45,
                         textAnchor: "end",
                         fontSize: 11,
-                        fill: "#64748b",
+                        fill: "#4A5B7A",
                       }}
                       tickFormatter={(value) => {
                         if (!value) return "";
@@ -747,15 +765,15 @@ const AnalysisClient = () => {
                       height={60}
                     />
                     <YAxis
-                      stroke="#475569"
-                      tick={{ fontSize: 11, fill: "#64748b" }}
+                      stroke="#4A5B7A"
+                      tick={{ fontSize: 11, fill: "#4A5B7A" }}
                     />
                     <Tooltip
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
                           return (
-                            <div className="bg-slate-800/95 border border-white/10 backdrop-blur-sm p-3 rounded-xl shadow-xl">
-                              <p className="font-semibold text-white text-sm mb-1">
+                            <div className="bg-white border border-[#0F2A5C]/[0.08] p-3 rounded-2xl shadow-lg">
+                              <p className="font-bold text-[#0F2A5C] text-sm mb-1">
                                 {payload[0].payload.examName}
                               </p>
                               <p
@@ -763,7 +781,7 @@ const AnalysisClient = () => {
                                 style={{
                                   color:
                                     SUBJECT_COLORS[selectedChartSubject] ||
-                                    "#3b82f6",
+                                    "#2F6BFF",
                                 }}
                               >
                                 {SUBJECT_LABELS[selectedChartSubject] ||
@@ -779,19 +797,19 @@ const AnalysisClient = () => {
                     <Area
                       type="monotone"
                       dataKey="value"
-                      stroke={SUBJECT_COLORS[selectedChartSubject] || "#3b82f6"}
+                      stroke={SUBJECT_COLORS[selectedChartSubject] || "#2F6BFF"}
                       fillOpacity={1}
                       fill="url(#colorSubjectNet)"
                       strokeWidth={3}
                       isAnimationActive={false}
                       dot={{
-                        fill: SUBJECT_COLORS[selectedChartSubject] || "#3b82f6",
+                        fill: SUBJECT_COLORS[selectedChartSubject] || "#2F6BFF",
                         r: 4,
                         strokeWidth: 0,
                       }}
                       activeDot={{
                         r: 6,
-                        fill: SUBJECT_COLORS[selectedChartSubject] || "#3b82f6",
+                        fill: SUBJECT_COLORS[selectedChartSubject] || "#2F6BFF",
                         stroke: "#fff",
                         strokeWidth: 2,
                       }}
@@ -803,31 +821,31 @@ const AnalysisClient = () => {
             </div>
           </>
         ) : (
-          <div className="rounded-2xl border border-dashed border-white/10 bg-slate-800/30 text-center py-16">
-            <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-5">
-              <BarChart3 size={28} className="text-purple-400" />
+          <div className="rounded-3xl border border-dashed border-[#0F2A5C]/[0.15] bg-white text-center py-16 p-6">
+            <div className="w-16 h-16 rounded-2xl bg-[#2F6BFF]/10 flex items-center justify-center mx-auto mb-4 text-[#2F6BFF]">
+              <BarChart3 size={32} />
             </div>
-            <p className="text-white text-lg font-semibold mb-2">
+            <p className="text-[#0F2A5C] text-lg font-bold mb-1">
               Henüz {activeTab} deneme verisi bulunamadı
             </p>
-            <p className="text-slate-500 text-sm">
-              Deneme ekledikten sonra analizler burada görünecek.
+            <p className="text-[#4A5B7A] text-sm">
+              Deneme ekledikten sonra ders bazlı analizler ve grafikler burada listelenecek.
             </p>
           </div>
         )
       ) : (
         /* Report Generation View */
-        <div className="relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent backdrop-blur-xl p-6 md:p-8 shadow-2xl">
+        <div className="relative overflow-hidden rounded-3xl border border-[#0F2A5C]/[0.08] bg-white p-6 md:p-8 shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-4">
-              <h3 className="text-lg font-bold text-white">Rapor Oluştur</h3>
-              <div className="flex gap-1 p-1 bg-white/5 rounded-xl">
+              <h3 className="text-lg font-bold text-[#0F2A5C]">PDF Raporu Oluştur</h3>
+              <div className="flex gap-1 p-1 bg-[#F4F7FC] rounded-xl border border-[#0F2A5C]/[0.06]">
                 <button
                   onClick={() => handleReportFilterChange("TYT")}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     reportFilter === "TYT"
-                      ? "bg-purple-600 text-white shadow"
-                      : "text-slate-400 hover:text-white"
+                      ? "bg-[#0F2A5C] text-white shadow-xs"
+                      : "text-[#4A5B7A] hover:text-[#0F2A5C]"
                   }`}
                 >
                   TYT
@@ -836,8 +854,8 @@ const AnalysisClient = () => {
                   onClick={() => handleReportFilterChange("AYT")}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     reportFilter === "AYT"
-                      ? "bg-pink-600 text-white shadow"
-                      : "text-slate-400 hover:text-white"
+                      ? "bg-[#0F2A5C] text-white shadow-xs"
+                      : "text-[#4A5B7A] hover:text-[#0F2A5C]"
                   }`}
                 >
                   AYT
@@ -845,16 +863,16 @@ const AnalysisClient = () => {
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <button
                 onClick={selectAllExams}
-                className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white text-sm transition-colors cursor-pointer"
+                className="px-4 py-2 bg-[#F4F7FC] hover:bg-[#e8edf7] border border-[#0F2A5C]/[0.08] rounded-xl text-[#0F2A5C] text-sm font-semibold transition-colors cursor-pointer"
               >
                 Tümünü Seç
               </button>
               <button
                 onClick={handleDownloadPDF}
-                className="glass-btn flex items-center gap-2 cursor-pointer"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#2F6BFF] hover:bg-[#2558d6] text-white text-sm font-bold shadow-xs transition-colors cursor-pointer"
               >
                 <FileDown size={18} />
                 PDF İndir
@@ -862,45 +880,45 @@ const AnalysisClient = () => {
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-white/5">
-            <table className="w-full text-left text-sm text-slate-400">
-              <thead className="text-xs uppercase bg-white/5 text-slate-300">
+          <div className="overflow-x-auto rounded-2xl border border-[#0F2A5C]/[0.08]">
+            <table className="w-full text-left text-sm text-[#4A5B7A]">
+              <thead className="text-xs uppercase bg-[#F4F7FC] text-[#0F2A5C] font-bold">
                 <tr>
-                  <th className="px-4 py-3">Seç</th>
-                  <th className="px-4 py-3">Tarih</th>
-                  <th className="px-4 py-3">Deneme Adı</th>
-                  <th className="px-4 py-3">Tür</th>
-                  <th className="px-4 py-3 text-right">Net</th>
+                  <th className="px-4 py-3.5">Seç</th>
+                  <th className="px-4 py-3.5">Tarih</th>
+                  <th className="px-4 py-3.5">Deneme Adı</th>
+                  <th className="px-4 py-3.5">Tür</th>
+                  <th className="px-4 py-3.5 text-right">Net</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-[#0F2A5C]/[0.06]">
                 {exams
                   .filter((e) => e.type === reportFilter)
                   .map((exam) => (
                     <tr
                       key={exam.id}
-                      className={`border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer ${selectedExams.includes(exam.id) ? "bg-purple-900/20" : ""}`}
+                      className={`hover:bg-[#F4F7FC]/70 transition-colors cursor-pointer ${selectedExams.includes(exam.id) ? "bg-[#2F6BFF]/5" : ""}`}
                       onClick={() => toggleExamSelection(exam.id)}
                     >
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3.5">
                         {selectedExams.includes(exam.id) ? (
-                          <CheckSquare size={18} className="text-purple-400" />
+                          <CheckSquare size={18} className="text-[#2F6BFF]" />
                         ) : (
-                          <Square size={18} />
+                          <Square size={18} className="text-[#4A5B7A]/50" />
                         )}
                       </td>
-                      <td className="px-4 py-3">{exam.date}</td>
-                      <td className="px-4 py-3 font-medium text-white">
+                      <td className="px-4 py-3.5 font-medium">{exam.date}</td>
+                      <td className="px-4 py-3.5 font-bold text-[#0F2A5C]">
                         {exam.name}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3.5">
                         <span
-                          className={`px-2.5 py-1 rounded-full text-xs font-medium ${exam.type === "TYT" ? "bg-purple-500/20 text-purple-300" : "bg-pink-500/20 text-pink-300"}`}
+                          className={`px-2.5 py-1 rounded-full text-xs font-bold ${exam.type === "TYT" ? "bg-[#2F6BFF]/10 text-[#2F6BFF]" : "bg-[#FFB020]/15 text-[#c48208]"}`}
                         >
                           {exam.type} {exam.subtype && `(${exam.subtype})`}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right font-bold text-white">
+                      <td className="px-4 py-3.5 text-right font-extrabold text-[#0F2A5C]">
                         {exam.totalNet.toFixed(2)}
                       </td>
                     </tr>

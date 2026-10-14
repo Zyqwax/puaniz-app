@@ -66,20 +66,20 @@ const SubjectInput = ({ label, values, onChange, color, max = 40 }) => {
 
   return (
     <div
-      className={`rounded-xl border p-4 transition-all ${
+      className={`rounded-2xl border p-4 transition-all bg-white shadow-2xs ${
         isInvalid
-          ? "border-red-500/40 bg-red-500/5"
-          : "border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent hover:bg-white/[0.05] hover:border-white/10 backdrop-blur-md shadow-lg"
+          ? "border-red-400 bg-red-50/50"
+          : "border-[#0F2A5C]/[0.08] hover:border-[#2F6BFF]/30"
       }`}
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div
-            className={`w-2 h-2 rounded-full ${colorDot[color] || colorDot.blue}`}
+            className={`w-2.5 h-2.5 rounded-full ${colorDot[color] || colorDot.blue}`}
           />
-          <span className="text-sm font-medium text-white">{label}</span>
+          <span className="text-sm font-bold text-[#0F2A5C]">{label}</span>
         </div>
-        <span className="text-[11px] text-slate-500">{max} soru</span>
+        <span className="text-[11px] font-medium text-[#4A5B7A]">{max} soru</span>
       </div>
 
       <div className="flex items-center gap-2">
@@ -91,13 +91,13 @@ const SubjectInput = ({ label, values, onChange, color, max = 40 }) => {
             value={values.d || ""}
             onChange={(e) => onChange("d", parseInt(e.target.value) || 0)}
             placeholder="D"
-            className={`w-full bg-white/5 border rounded-lg px-3 py-2 text-center text-sm text-white placeholder-slate-600 focus:outline-none transition-all ${
+            className={`w-full bg-[#F4F7FC] border rounded-xl px-2.5 py-1.5 text-center text-sm font-bold text-[#0F2A5C] placeholder-[#4A5B7A]/50 focus:outline-none focus:bg-white transition-all ${
               isInvalid
-                ? "border-red-500/50 focus:border-red-400"
-                : "border-white/5 focus:border-green-500/40"
+                ? "border-red-400 focus:border-red-500"
+                : "border-[#0F2A5C]/[0.1] focus:border-emerald-500"
             }`}
           />
-          <span className="block text-[10px] text-slate-500 text-center mt-1">Doğru</span>
+          <span className="block text-[10px] font-medium text-[#4A5B7A] text-center mt-1">Doğru</span>
         </div>
 
         <div className="flex-1">
@@ -108,29 +108,29 @@ const SubjectInput = ({ label, values, onChange, color, max = 40 }) => {
             value={values.y || ""}
             onChange={(e) => onChange("y", parseInt(e.target.value) || 0)}
             placeholder="Y"
-            className={`w-full bg-white/5 border rounded-lg px-3 py-2 text-center text-sm text-white placeholder-slate-600 focus:outline-none transition-all ${
+            className={`w-full bg-[#F4F7FC] border rounded-xl px-2.5 py-1.5 text-center text-sm font-bold text-[#0F2A5C] placeholder-[#4A5B7A]/50 focus:outline-none focus:bg-white transition-all ${
               isInvalid
-                ? "border-red-500/50 focus:border-red-400"
-                : "border-white/5 focus:border-red-500/40"
+                ? "border-red-400 focus:border-red-500"
+                : "border-[#0F2A5C]/[0.1] focus:border-red-500"
             }`}
           />
-          <span className="block text-[10px] text-slate-500 text-center mt-1">Yanlış</span>
+          <span className="block text-[10px] font-medium text-[#4A5B7A] text-center mt-1">Yanlış</span>
         </div>
 
         <div className="w-14 text-center">
           <div
-            className={`text-base font-bold tabular-nums ${
-              isInvalid ? "text-red-400" : net > 0 ? "text-white" : "text-slate-600"
+            className={`text-base font-extrabold tabular-nums ${
+              isInvalid ? "text-red-500" : net > 0 ? "text-[#0F2A5C]" : "text-[#4A5B7A]/50"
             }`}
           >
             {net.toFixed(1)}
           </div>
-          <span className="block text-[10px] text-slate-500">Net</span>
+          <span className="block text-[10px] font-bold text-[#4A5B7A]">Net</span>
         </div>
       </div>
 
       {isInvalid && (
-        <div className="mt-2 flex items-center gap-1.5 text-red-400 text-[11px]">
+        <div className="mt-2 flex items-center gap-1.5 text-red-500 text-[11px] font-semibold">
           <AlertCircle size={12} />
           <span>Limit aşıldı ({total}/{max})</span>
         </div>
@@ -246,12 +246,12 @@ const ExamDetailModal = ({ exam, onClose, onDelete, onUpdate }) => {
     return (
       <div className="space-y-6">
         {grouped.map((group) => (
-          <div key={group.title} className="glass-card p-5 border-none">
-            <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-              <div className="w-1.5 h-5 bg-gradient-to-b from-purple-400 to-violet-600 rounded-full" />
+          <div key={group.title} className="bg-[#F4F7FC] rounded-2xl p-5 border border-[#0F2A5C]/[0.06]">
+            <h3 className="text-sm font-bold text-[#0F2A5C] mb-4 flex items-center gap-2">
+              <div className="w-1.5 h-4 bg-[#2F6BFF] rounded-full" />
               {group.title}
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
               {group.subjects.map((sub) => {
                 if (!editData.scores[sub]) {
                   editData.scores[sub] = { d: 0, y: 0, net: 0 };
@@ -293,11 +293,11 @@ const ExamDetailModal = ({ exam, onClose, onDelete, onUpdate }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0F2A5C]/50 backdrop-blur-xs"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 md:p-8 relative rounded-3xl bg-slate-900/95 backdrop-blur-xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)]"
+        className="w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 md:p-8 relative rounded-3xl bg-white border border-[#0F2A5C]/[0.1] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -306,7 +306,7 @@ const ExamDetailModal = ({ exam, onClose, onDelete, onUpdate }) => {
             {isEditing ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-slate-400 text-sm mb-1">
+                  <label className="block text-[#4A5B7A] text-sm font-bold mb-1">
                     Deneme Adı
                   </label>
                   <input
@@ -315,11 +315,11 @@ const ExamDetailModal = ({ exam, onClose, onDelete, onUpdate }) => {
                     onChange={(e) =>
                       setEditData({ ...editData, name: e.target.value })
                     }
-                    className="glass-input w-full"
+                    className="w-full px-4 py-2.5 rounded-xl border border-[#0F2A5C]/[0.1] text-[#0F2A5C] bg-[#F4F7FC] focus:bg-white focus:outline-none focus:border-[#2F6BFF] font-medium text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-400 text-sm mb-1">
+                  <label className="block text-[#4A5B7A] text-sm font-bold mb-1">
                     Tarih
                   </label>
                   <input
@@ -328,28 +328,28 @@ const ExamDetailModal = ({ exam, onClose, onDelete, onUpdate }) => {
                     onChange={(e) =>
                       setEditData({ ...editData, date: e.target.value })
                     }
-                    className="glass-input w-full"
+                    className="w-full px-4 py-2.5 rounded-xl border border-[#0F2A5C]/[0.1] text-[#0F2A5C] bg-[#F4F7FC] focus:bg-white focus:outline-none focus:border-[#2F6BFF] font-medium text-sm"
                   />
                 </div>
               </div>
             ) : (
               <div className="flex items-start gap-4">
                 <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg text-white shrink-0 ${
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-lg shrink-0 ${
                     exam.type === "TYT"
-                      ? "bg-purple-600/20 text-purple-400"
-                      : "bg-pink-600/20 text-pink-400"
+                      ? "bg-[#2F6BFF]/10 text-[#2F6BFF]"
+                      : "bg-[#FFB020]/15 text-[#c48208]"
                   }`}
                 >
                   {exam.subtype || exam.type}
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-xl font-bold text-white break-words">
+                  <h2 className="text-xl font-bold text-[#0F2A5C] break-words">
                     {exam.name}
                   </h2>
-                  <div className="flex items-center gap-2 text-slate-400 mt-1">
+                  <div className="flex items-center gap-2 text-[#4A5B7A] mt-1 text-sm font-medium">
                     <Calendar size={14} />
-                    <span className="text-sm">{exam.date}</span>
+                    <span>{exam.date}</span>
                   </div>
                 </div>
               </div>
@@ -360,7 +360,7 @@ const ExamDetailModal = ({ exam, onClose, onDelete, onUpdate }) => {
             {!isEditing && (
               <button
                 onClick={() => setIsEditing(true)}
-                className="p-2.5 text-blue-400 hover:bg-blue-400/10 rounded-xl transition-colors cursor-pointer"
+                className="p-2.5 text-[#2F6BFF] hover:bg-[#2F6BFF]/10 rounded-xl transition-colors cursor-pointer"
                 title="Düzenle"
               >
                 <Edit2 size={18} />
@@ -370,7 +370,7 @@ const ExamDetailModal = ({ exam, onClose, onDelete, onUpdate }) => {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="p-2.5 text-green-400 hover:bg-green-400/10 rounded-xl transition-colors cursor-pointer"
+                className="p-2.5 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors cursor-pointer"
                 title="Kaydet"
               >
                 <Save size={18} />
@@ -379,14 +379,14 @@ const ExamDetailModal = ({ exam, onClose, onDelete, onUpdate }) => {
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className="p-2.5 text-red-400 hover:bg-red-400/10 rounded-xl transition-colors cursor-pointer"
+              className="p-2.5 text-red-500 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
               title="Denemeyi Sil"
             >
               <Trash2 size={18} />
             </button>
             <button
               onClick={onClose}
-              className="p-2.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-xl transition-all cursor-pointer"
+              className="p-2.5 text-[#4A5B7A] hover:text-[#0F2A5C] hover:bg-[#F4F7FC] rounded-xl transition-all cursor-pointer"
             >
               <X size={18} />
             </button>
@@ -395,7 +395,7 @@ const ExamDetailModal = ({ exam, onClose, onDelete, onUpdate }) => {
 
         {isEditing ? (
           <div className="mb-8">
-            <h3 className="text-lg font-bold text-white mb-4">
+            <h3 className="text-base font-bold text-[#0F2A5C] mb-4">
               Netleri Düzenle
             </h3>
             {renderEditInputs()}
@@ -403,33 +403,33 @@ const ExamDetailModal = ({ exam, onClose, onDelete, onUpdate }) => {
         ) : (
           <>
             {/* Total Net */}
-            <div className="rounded-xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-white/10 p-3 mb-5 text-center flex items-center justify-center gap-3">
-              <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">Toplam Net:</p>
-              <p className="text-2xl font-bold text-white">
+            <div className="rounded-2xl bg-[#0F2A5C] text-white p-4 mb-6 text-center flex items-center justify-center gap-3 shadow-xs">
+              <p className="text-xs text-white/70 font-bold uppercase tracking-wider">Toplam Net:</p>
+              <p className="text-3xl font-extrabold text-[#FFB020]">
                 {exam.totalNet.toFixed(2)}
               </p>
             </div>
 
             {/* Subject Scores */}
-            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Ders Bazlı Sonuçlar</h3>
+            <h3 className="text-xs font-bold text-[#4A5B7A] uppercase tracking-wider mb-3">Ders Bazlı Sonuçlar</h3>
             <div className="space-y-4">
               {getGroupedSubjects().map((group) => {
                 const groupSubjects = group.subjects.filter(sub => exam.scores[sub]);
                 if (groupSubjects.length === 0) return null;
                 
                 return (
-                  <div key={group.title} className="glass-card p-4 border-none bg-white/[0.02]">
-                    <h4 className="text-xs font-bold text-slate-300 mb-3">{group.title}</h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
+                  <div key={group.title} className="rounded-2xl p-4 bg-[#F4F7FC] border border-[#0F2A5C]/[0.06]">
+                    <h4 className="text-xs font-bold text-[#0F2A5C] mb-3">{group.title}</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                       {groupSubjects.map((subject) => {
                         const stats = exam.scores[subject] || { d: 0, y: 0, net: 0 };
                         return (
-                          <div key={subject} className="flex items-center justify-between p-2 px-3 rounded-xl bg-white/5 border border-white/5">
-                            <span className="text-xs text-slate-200 font-medium">{SUBJECT_LABELS[subject] || subject}</span>
+                          <div key={subject} className="flex items-center justify-between p-2.5 px-3 rounded-xl bg-white border border-[#0F2A5C]/[0.06] shadow-2xs">
+                            <span className="text-xs text-[#0F2A5C] font-semibold">{SUBJECT_LABELS[subject] || subject}</span>
                             <div className="flex items-center gap-3 text-xs">
-                              <span className="text-green-400 font-semibold">{stats.d}D</span>
-                              <span className="text-red-400 font-semibold">{stats.y}Y</span>
-                              <span className="font-bold text-white w-10 text-right">{stats.net.toFixed(2)}</span>
+                              <span className="text-emerald-600 font-bold">{stats.d}D</span>
+                              <span className="text-red-500 font-bold">{stats.y}Y</span>
+                              <span className="font-extrabold text-[#0F2A5C] w-12 text-right">{stats.net.toFixed(2)} N</span>
                             </div>
                           </div>
                         );
@@ -469,24 +469,22 @@ const MiniStats = ({ exams }) => {
       : "—";
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <div className="glass-card p-4 border-none">
-        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Toplam</p>
-        <p className="text-2xl font-bold text-white">{exams.length}</p>
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+      <div className="bg-white rounded-3xl border border-[#0F2A5C]/[0.08] p-5 shadow-sm">
+        <p className="text-[11px] text-[#4A5B7A] font-bold uppercase tracking-wider mb-1">Toplam Deneme</p>
+        <p className="text-3xl font-extrabold text-[#0F2A5C]">{exams.length}</p>
       </div>
-      <div className="glass-card p-4 border-none">
-        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Son Deneme</p>
-        <p className="text-sm font-bold text-white mt-1">{lastExamDate}</p>
+      <div className="bg-white rounded-3xl border border-[#0F2A5C]/[0.08] p-5 shadow-sm">
+        <p className="text-[11px] text-[#4A5B7A] font-bold uppercase tracking-wider mb-1">Son Deneme</p>
+        <p className="text-base font-bold text-[#0F2A5C] mt-2 truncate">{lastExamDate}</p>
       </div>
-      <div className="glass-card p-4 border-none relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-16 h-16 bg-purple-500/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150" />
-        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">En Yüksek TYT</p>
-        <p className="text-2xl font-bold text-purple-400 relative z-10">{bestTyt !== null ? bestTyt.toFixed(1) : "—"}</p>
+      <div className="bg-white rounded-3xl border border-[#0F2A5C]/[0.08] p-5 shadow-sm">
+        <p className="text-[11px] text-[#4A5B7A] font-bold uppercase tracking-wider mb-1">En Yüksek TYT</p>
+        <p className="text-3xl font-extrabold text-[#2F6BFF]">{bestTyt !== null ? bestTyt.toFixed(1) : "—"}</p>
       </div>
-      <div className="glass-card p-4 border-none relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-16 h-16 bg-pink-500/10 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150" />
-        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">En Yüksek AYT</p>
-        <p className="text-2xl font-bold text-pink-400 relative z-10">{bestAyt !== null ? bestAyt.toFixed(1) : "—"}</p>
+      <div className="bg-white rounded-3xl border border-[#0F2A5C]/[0.08] p-5 shadow-sm">
+        <p className="text-[11px] text-[#4A5B7A] font-bold uppercase tracking-wider mb-1">En Yüksek AYT</p>
+        <p className="text-3xl font-extrabold text-[#FFB020]">{bestAyt !== null ? bestAyt.toFixed(1) : "—"}</p>
       </div>
     </div>
   );
@@ -628,37 +626,99 @@ const HistoryClient = () => {
         <div
           key={exam.id}
           onClick={() => setSelectedExam(exam)}
-          className="glass-card p-4 flex items-center justify-between border-none transition-all cursor-pointer group"
+          className="bg-white rounded-3xl border border-[#0F2A5C]/[0.08] p-4 sm:p-5 flex items-center justify-between shadow-xs hover:border-[#2F6BFF]/30 hover:shadow-md transition-all cursor-pointer group"
         >
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-4 min-w-0">
             <div
-              className={`w-9 h-9 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
+              className={`w-11 h-11 rounded-2xl flex items-center justify-center font-extrabold text-xs shrink-0 ${
                 exam.type === "TYT"
-                  ? "bg-purple-600/15 text-purple-400"
-                  : "bg-pink-600/15 text-pink-400"
+                  ? "bg-[#2F6BFF]/10 text-[#2F6BFF]"
+                  : "bg-[#FFB020]/15 text-[#c48208]"
               }`}
             >
               {exam.subtype || exam.type}
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-white truncate">
+              <h3 className="text-base font-bold text-[#0F2A5C] truncate group-hover:text-[#2F6BFF] transition-colors">
                 {exam.name}
               </h3>
-              <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                <Calendar size={10} />
+              <div className="flex items-center gap-1.5 text-xs text-[#4A5B7A] mt-0.5">
+                <Calendar size={12} />
                 <span>{exam.date}</span>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3 shrink-0 ml-3">
+          <div className="flex items-center gap-4 shrink-0 ml-3">
             {netChange !== null && (
               <span
-                className={`text-[10px] font-semibold flex items-center gap-0.5 ${
+                className={`text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 ${
                   netChange > 0
-                    ? "text-green-400"
+                    ? "bg-emerald-50 text-emerald-600"
                     : netChange < 0
-                      ? "text-red-400"
-                      : "text-slate-500"
+                      ? "bg-red-50 text-red-500"
+                      : "bg-[#F4F7FC] text-[#4A5B7A]"
+                }`}
+              >
+                {netChange > 0 ? (
+                  <TrendingUp size={12} />
+                ) : netChange < 0 ? (
+                  <TrendingDown size={12} />
+                ) : (
+                  <Minus size={12} />
+                )}
+                {netChange > 0 ? "+" : ""}
+                {netChange.toFixed(1)}
+              </span>
+            )}
+            <div className="text-right">
+              <p className="text-[10px] text-[#4A5B7A] uppercase font-bold tracking-wider">Net</p>
+              <p className="text-lg font-extrabold text-[#0F2A5C]">
+                {exam.totalNet.toFixed(2)}
+              </p>
+            </div>
+            <ChevronRight
+              size={18}
+              className="text-[#4A5B7A]/40 group-hover:text-[#2F6BFF] transition-colors"
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // Grid view (fallback)
+    return (
+      <div
+        key={exam.id}
+        onClick={() => setSelectedExam(exam)}
+        className="bg-white rounded-3xl border border-[#0F2A5C]/[0.08] p-5 shadow-xs hover:border-[#2F6BFF]/30 hover:shadow-md transition-all cursor-pointer flex flex-col gap-3 group"
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className={`w-10 h-10 rounded-2xl flex items-center justify-center font-extrabold text-xs shrink-0 ${
+              exam.type === "TYT"
+                ? "bg-[#2F6BFF]/10 text-[#2F6BFF]"
+                : "bg-[#FFB020]/15 text-[#c48208]"
+            }`}
+          >
+            {exam.subtype || exam.type}
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm font-bold text-[#0F2A5C] truncate group-hover:text-[#2F6BFF] transition-colors">
+              {exam.name}
+            </h3>
+            <span className="text-xs text-[#4A5B7A]">{exam.date}</span>
+          </div>
+        </div>
+        <div className="flex items-center justify-between mt-auto pt-3 border-t border-[#0F2A5C]/[0.06]">
+          <div className="flex items-center gap-1">
+            {netChange !== null && (
+              <span
+                className={`text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                  netChange > 0
+                    ? "bg-emerald-50 text-emerald-600"
+                    : netChange < 0
+                      ? "bg-red-50 text-red-500"
+                      : "bg-[#F4F7FC] text-[#4A5B7A]"
                 }`}
               >
                 {netChange > 0 ? (
@@ -672,71 +732,9 @@ const HistoryClient = () => {
                 {netChange.toFixed(1)}
               </span>
             )}
-            <div className="text-right">
-              <p className="text-[10px] text-slate-500">Net</p>
-              <p className="text-base font-bold text-white">
-                {exam.totalNet.toFixed(2)}
-              </p>
-            </div>
-            <ChevronRight
-              size={14}
-              className="text-slate-600 group-hover:text-white transition-colors"
-            />
           </div>
-        </div>
-      );
-    }
-
-    // Grid view (fallback)
-    return (
-      <div
-        key={exam.id}
-        onClick={() => setSelectedExam(exam)}
-        className="glass-card p-4 border-none transition-all cursor-pointer flex flex-col gap-3 group"
-      >
-        <div className="flex items-center gap-2">
-          <div
-            className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-[10px] shrink-0 ${
-              exam.type === "TYT"
-                ? "bg-purple-600/15 text-purple-400"
-                : "bg-pink-600/15 text-pink-400"
-            }`}
-          >
-            {exam.subtype || exam.type}
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-white truncate">
-              {exam.name}
-            </h3>
-            <span className="text-[10px] text-slate-500">{exam.date}</span>
-          </div>
-        </div>
-        <div className="flex items-center justify-between mt-auto pt-2 border-t border-white/5">
-          <div className="flex items-center gap-1">
-            {netChange !== null && (
-              <span
-                className={`text-[10px] font-semibold flex items-center gap-0.5 ${
-                  netChange > 0
-                    ? "text-green-400"
-                    : netChange < 0
-                      ? "text-red-400"
-                      : "text-slate-500"
-                }`}
-              >
-                {netChange > 0 ? (
-                  <TrendingUp size={9} />
-                ) : netChange < 0 ? (
-                  <TrendingDown size={9} />
-                ) : (
-                  <Minus size={9} />
-                )}
-                {netChange > 0 ? "+" : ""}
-                {netChange.toFixed(1)}
-              </span>
-            )}
-          </div>
-          <span className="text-sm font-bold text-white">
-            {exam.totalNet.toFixed(2)}
+          <span className="text-base font-extrabold text-[#0F2A5C]">
+            {exam.totalNet.toFixed(2)} Net
           </span>
         </div>
       </div>
@@ -748,26 +746,28 @@ const HistoryClient = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <History size={28} className="text-purple-400" />
+          <h1 className="text-3xl font-bold text-[#0F2A5C] flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[#2F6BFF]/10 flex items-center justify-center text-[#2F6BFF]">
+              <History size={24} />
+            </div>
             Deneme Geçmişi
           </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Tüm denemelerini görüntüle, düzenle ve karşılaştır
+          <p className="text-[#4A5B7A] text-sm mt-1">
+            Tüm denemelerini görüntüle, düzenle ve net gelişimini takip et
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={handleExportJSON}
-            className="px-3 py-2 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl text-white text-sm transition-colors flex items-center gap-2 cursor-pointer"
+            className="px-4 py-2.5 bg-white border border-[#0F2A5C]/[0.08] hover:bg-[#F4F7FC] rounded-2xl text-[#0F2A5C] text-sm font-bold shadow-xs transition-colors flex items-center gap-2 cursor-pointer"
             title="Dışa Aktar"
           >
             <Download size={16} />
             <span className="hidden sm:inline">Dışa Aktar</span>
           </button>
 
-          <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
+          <div className="flex bg-white p-1 rounded-2xl border border-[#0F2A5C]/[0.08] shadow-xs">
             {[
               { mode: "list", icon: LayoutList },
               { mode: "grid", icon: LayoutGrid },
@@ -775,10 +775,10 @@ const HistoryClient = () => {
               <button
                 key={mode}
                 onClick={() => handleSetViewMode(mode)}
-                className={`p-2 rounded-lg transition-all cursor-pointer ${
+                className={`p-2 rounded-xl transition-all cursor-pointer ${
                   viewMode === mode
-                    ? "bg-purple-600 text-white shadow-lg shadow-purple-900/30"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-[#0F2A5C] text-white shadow-xs"
+                    : "text-[#4A5B7A] hover:text-[#0F2A5C]"
                 }`}
                 title={mode}
               >
@@ -797,28 +797,28 @@ const HistoryClient = () => {
         <div className="relative flex-1">
           <Search
             size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#4A5B7A]"
           />
           <input
             type="text"
-            placeholder="Deneme ara..."
+            placeholder="Deneme adı veya tarih ara..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-purple-500/30 focus:ring-1 focus:ring-purple-500/20 transition-all"
+            className="w-full pl-10 pr-4 py-3 bg-white border border-[#0F2A5C]/[0.08] rounded-2xl text-[#0F2A5C] text-sm font-medium placeholder:text-[#4A5B7A]/60 focus:outline-none focus:border-[#2F6BFF] focus:ring-1 focus:ring-[#2F6BFF]/20 shadow-xs transition-all"
           />
         </div>
 
         <div className="flex gap-2">
           {/* Type Filter */}
-          <div className="flex gap-1 p-1 bg-white/5 rounded-xl">
+          <div className="flex gap-1 p-1 bg-white rounded-2xl border border-[#0F2A5C]/[0.08] shadow-xs">
             {["all", "TYT", "AYT"].map((filter) => (
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   activeFilter === filter
-                    ? "bg-purple-600 text-white shadow"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-[#0F2A5C] text-white shadow-xs"
+                    : "text-[#4A5B7A] hover:text-[#0F2A5C]"
                 }`}
               >
                 {filter === "all" ? "Tümü" : filter}
@@ -829,36 +829,36 @@ const HistoryClient = () => {
           {/* Sort */}
           <button
             onClick={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
-            className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-slate-400 hover:text-white text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2 bg-white border border-[#0F2A5C]/[0.08] hover:bg-[#F4F7FC] rounded-2xl text-[#0F2A5C] text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
             title="Sıralama"
           >
             <ArrowUpDown size={14} />
-            {sortOrder === "desc" ? "Yeni" : "Eski"}
+            {sortOrder === "desc" ? "En Yeni" : "En Eski"}
           </button>
         </div>
       </div>
 
       {/* Exam List */}
       {filteredExams.length === 0 ? (
-        <div className="glass-card border-dashed text-center py-16">
-          <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-5">
-            <ClipboardList size={28} className="text-purple-400" />
+        <div className="rounded-3xl border border-dashed border-[#0F2A5C]/[0.15] bg-white text-center py-16 p-6">
+          <div className="w-16 h-16 rounded-2xl bg-[#2F6BFF]/10 flex items-center justify-center mx-auto mb-4 text-[#2F6BFF]">
+            <ClipboardList size={30} />
           </div>
-          <p className="text-white text-lg font-semibold mb-2">
-            {searchQuery ? "Sonuç bulunamadı" : "Henüz deneme yok"}
+          <p className="text-[#0F2A5C] text-lg font-bold mb-1">
+            {searchQuery ? "Aramaya uygun deneme bulunamadı" : "Henüz deneme kaydı yok"}
           </p>
-          <p className="text-slate-500 text-sm">
+          <p className="text-[#4A5B7A] text-sm">
             {searchQuery
               ? "Farklı bir arama terimi deneyin."
-              : "Deneme ekledikten sonra geçmişiniz burada görünecek."}
+              : "Deneme ekle sayfasından ilk denemeni ekleyebilirsin."}
           </p>
         </div>
       ) : (
         <div
           className={
             viewMode === "grid"
-              ? "grid grid-cols-2 lg:grid-cols-3 gap-3"
-              : "space-y-2"
+              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5"
+              : "space-y-3"
           }
         >
           {filteredExams.map((exam) => renderExamCard(exam))}

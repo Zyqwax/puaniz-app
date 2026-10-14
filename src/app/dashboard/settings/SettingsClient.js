@@ -43,8 +43,8 @@ const GRADES = [
 /* ── Reusable form field ── */
 const Field = ({ label, icon: Icon, children }) => (
   <div className="space-y-2">
-    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-      {Icon && <Icon size={13} className="text-purple-400" />}
+    <label className="text-xs font-bold text-[#0F2A5C] uppercase tracking-wider flex items-center gap-2">
+      {Icon && <Icon size={14} className="text-[#2F6BFF]" />}
       {label}
     </label>
     {children}
@@ -52,7 +52,7 @@ const Field = ({ label, icon: Icon, children }) => (
 );
 
 const inputCls =
-  "w-full bg-slate-900/60 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 focus:bg-slate-800/80 transition-all";
+  "w-full bg-[#F4F7FC] border border-[#0F2A5C]/[0.1] rounded-2xl px-4 py-3 text-[#0F2A5C] text-sm font-medium placeholder:text-[#4A5B7A]/50 focus:outline-none focus:ring-2 focus:ring-[#2F6BFF]/20 focus:border-[#2F6BFF] focus:bg-white transition-all";
 
 const SettingsClient = () => {
   const router = useRouter();
@@ -138,63 +138,61 @@ const SettingsClient = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <div className="w-12 h-12 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
-        <p className="text-slate-500 text-sm font-medium">Profil yükleniyor...</p>
+        <div className="w-12 h-12 border-4 border-[#2F6BFF]/20 border-t-[#2F6BFF] rounded-full animate-spin" />
+        <p className="text-[#4A5B7A] text-sm font-medium">Profil bilgileri yükleniyor...</p>
       </div>
     );
   }
 
   const avatarPreview =
     formData.avatarUrl ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name || "User")}&background=7c3aed&color=fff&bold=true`;
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name || "User")}&background=2F6BFF&color=fff&bold=true`;
 
   return (
     <div className="max-w-2xl mx-auto pb-24">
 
       {/* ── Page Header ── */}
-      <div className="mb-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-bold uppercase tracking-wider mb-4">
+      <div className="mb-8">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#2F6BFF]/10 text-[#2F6BFF] text-xs font-bold uppercase tracking-wider mb-3">
           <Sparkles size={13} />
           Hesap Yönetimi
         </div>
-        <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 mb-2 tracking-tight">
+        <h1 className="text-3xl font-extrabold text-[#0F2A5C] mb-2 tracking-tight">
           Profil & Ayarlar
         </h1>
-        <p className="text-slate-400 text-sm">
-          Kişisel bilgilerini düzenle, profilini özelleştir.
+        <p className="text-[#4A5B7A] text-sm">
+          Kişisel bilgilerini düzenle, hedeflerini ve sınıfını güncelle.
         </p>
       </div>
 
       {/* ── Toast Message ── */}
       {message.content && (
         <div
-          className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold mb-6 border transition-all ${
+          className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-bold mb-6 border transition-all ${
             message.type === "success"
-              ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
-              : "bg-red-500/10 text-red-300 border-red-500/20"
+              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+              : "bg-red-50 text-red-700 border-red-200"
           }`}
         >
           {message.type === "success" ? (
-            <CheckCircle size={18} className="shrink-0" />
+            <CheckCircle size={18} className="shrink-0 text-emerald-600" />
           ) : (
-            <XCircle size={18} className="shrink-0" />
+            <XCircle size={18} className="shrink-0 text-red-600" />
           )}
           {message.content}
         </div>
       )}
 
       {/* ── Profile Card ── */}
-      <div className="glass-card p-6 md:p-8 mb-6 border-none relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-48 h-48 bg-purple-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-
+      <div className="bg-white rounded-3xl border border-[#0F2A5C]/[0.08] p-6 md:p-8 mb-6 shadow-sm relative overflow-hidden">
         {/* Avatar + user info */}
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8 relative z-10">
           {/* Avatar upload */}
           <div className="relative group shrink-0">
-            <div className="w-24 h-24 rounded-3xl overflow-hidden border-2 border-white/10 bg-slate-800 relative group-hover:border-purple-500/50 transition-all duration-300 shadow-xl shadow-purple-900/10">
+            <div className="w-24 h-24 rounded-3xl overflow-hidden border-2 border-[#0F2A5C]/[0.1] bg-[#F4F7FC] relative group-hover:border-[#2F6BFF] transition-all duration-300 shadow-sm">
               <Image src={avatarPreview} alt="Profil" fill className="object-cover" />
             </div>
-            <label className="absolute inset-0 flex items-center justify-center bg-slate-900/70 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm">
+            <label className="absolute inset-0 flex items-center justify-center bg-[#0F2A5C]/60 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-xs">
               <div className="flex flex-col items-center gap-1">
                 <Camera size={18} className="text-white" />
                 <span className="text-[10px] text-white font-bold">Değiştir</span>
@@ -221,20 +219,20 @@ const SettingsClient = () => {
               />
             </label>
             {/* Online dot */}
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-slate-900 shadow" />
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white shadow-xs" />
           </div>
 
           <div className="text-center sm:text-left">
-            <h2 className="text-xl font-black text-white mb-1">
+            <h2 className="text-xl font-bold text-[#0F2A5C] mb-1">
               {formData.name || "İsimsiz Kullanıcı"}
             </h2>
-            <div className="flex items-center justify-center sm:justify-start gap-2 text-slate-400 text-sm mb-3">
-              <Mail size={13} className="text-slate-500" />
+            <div className="flex items-center justify-center sm:justify-start gap-2 text-[#4A5B7A] text-sm mb-3 font-medium">
+              <Mail size={14} className="text-[#4A5B7A]/70" />
               {user?.email}
             </div>
             {formData.grade && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-bold">
-                <Shield size={11} />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#2F6BFF]/10 text-[#2F6BFF] text-xs font-bold">
+                <Shield size={12} />
                 {formData.grade}
               </span>
             )}
@@ -261,11 +259,11 @@ const SettingsClient = () => {
               onChange={handleChange}
               className={`${inputCls} cursor-pointer`}
             >
-              <option value="" className="bg-slate-800 text-white">
+              <option value="" className="text-[#4A5B7A]">
                 Seçiniz...
               </option>
               {GRADES.map((g) => (
-                <option key={g.value} value={g.value} className="bg-slate-800 text-white">
+                <option key={g.value} value={g.value} className="text-[#0F2A5C]">
                   {g.label}
                 </option>
               ))}
@@ -275,7 +273,7 @@ const SettingsClient = () => {
           <button
             type="submit"
             disabled={saving}
-            className="w-full flex items-center justify-center gap-2.5 py-3.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-2xl shadow-lg shadow-purple-900/30 hover:shadow-purple-900/50 hover:-translate-y-0.5 disabled:opacity-50 disabled:grayscale disabled:hover:translate-y-0 transition-all cursor-pointer"
+            className="w-full flex items-center justify-center gap-2.5 py-3.5 bg-[#0F2A5C] hover:bg-[#1a3a78] text-white font-bold rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 disabled:opacity-50 disabled:grayscale disabled:hover:translate-y-0 transition-all cursor-pointer"
           >
             {saving ? (
               <>
@@ -293,55 +291,55 @@ const SettingsClient = () => {
       </div>
 
       {/* ── Danger Zone ── */}
-      <div className="rounded-3xl border border-red-500/15 bg-red-900/5 overflow-hidden">
+      <div className="rounded-3xl border border-red-200 bg-white overflow-hidden shadow-xs">
         {/* Header */}
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-red-500/10 bg-red-500/5">
-          <div className="w-8 h-8 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-            <AlertTriangle size={16} className="text-red-400" />
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-red-100 bg-red-50/50">
+          <div className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center">
+            <AlertTriangle size={16} className="text-red-600" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-red-300 uppercase tracking-wider">
+            <h3 className="text-sm font-bold text-red-600 uppercase tracking-wider">
               Tehlikeli Bölge
             </h3>
-            <p className="text-xs text-slate-500">Geri alınamaz işlemler</p>
+            <p className="text-xs text-[#4A5B7A]">Geri alınamaz hesap işlemleri</p>
           </div>
         </div>
 
         <div className="p-6 space-y-5">
-          <p className="text-slate-400 text-sm leading-relaxed">
-            Hesabınızı sildiğinizde tüm denemeleriniz, gönderileriniz ve profil
+          <p className="text-[#4A5B7A] text-sm leading-relaxed font-medium">
+            Hesabınızı sildiğinizde tüm denemeleriniz, verileriniz ve profil
             bilgileriniz kalıcı olarak silinir.{" "}
-            <span className="text-red-400 font-semibold">Bu işlem geri alınamaz.</span>
+            <span className="text-red-600 font-bold">Bu işlem geri alınamaz.</span>
           </p>
 
           {!showDeleteConfirm ? (
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/30 text-red-400 hover:text-red-300 text-sm font-bold transition-all cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 text-sm font-bold transition-all cursor-pointer"
             >
               <Trash2 size={15} />
               Hesabımı Kalıcı Olarak Sil
             </button>
           ) : (
-            <div className="space-y-4 pt-4 border-t border-red-500/10">
+            <div className="space-y-4 pt-4 border-t border-red-100">
               <div className="space-y-2">
-                <label className="text-sm text-slate-400">
+                <label className="text-sm text-[#4A5B7A] font-medium">
                   Onaylamak için{" "}
-                  <span className="text-white font-bold">onaylıyorum</span> yazın
+                  <span className="text-red-600 font-bold">onaylıyorum</span> yazın
                 </label>
                 <input
                   type="text"
                   value={confirmText}
                   onChange={(e) => setConfirmText(e.target.value)}
                   placeholder="onaylıyorum"
-                  className={`${inputCls} border-red-500/20 focus:ring-red-500/30 focus:border-red-500/50`}
+                  className={`${inputCls} border-red-300 focus:ring-red-200 focus:border-red-500`}
                 />
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={handleDeleteAccount}
                   disabled={confirmText !== "onaylıyorum" || deleting}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-red-500 hover:bg-red-600 disabled:bg-slate-700 disabled:text-slate-500 text-white text-sm font-bold rounded-xl transition-all cursor-pointer shadow-lg shadow-red-900/30"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white text-sm font-bold rounded-xl transition-all cursor-pointer shadow-xs"
                 >
                   {deleting ? (
                     <>
@@ -360,7 +358,7 @@ const SettingsClient = () => {
                     setShowDeleteConfirm(false);
                     setConfirmText("");
                   }}
-                  className="px-5 py-2.5 text-slate-400 hover:text-white text-sm font-semibold rounded-xl hover:bg-white/5 transition-colors cursor-pointer"
+                  className="px-5 py-2.5 text-[#4A5B7A] hover:text-[#0F2A5C] text-sm font-semibold rounded-xl hover:bg-[#F4F7FC] transition-colors cursor-pointer"
                 >
                   Vazgeç
                 </button>
