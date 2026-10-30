@@ -24,7 +24,7 @@ import {
   bulkUpdateTopics,
   incrementRepeat,
   updateQuestionCount,
-} from "@/services/subjectService";
+} from "@/server/actions/subject";
 import { useAuth } from "@/context/AuthContext";
 import { TopicTrackingItem } from "@/types";
 
@@ -550,7 +550,7 @@ const SubjectTrackerClient: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (user) {
-        const data = await getTopicTracking(user.uid);
+        const data = await getTopicTracking();
         setTopicTracking(data);
       }
       setLoading(false);
@@ -569,7 +569,7 @@ const SubjectTrackerClient: React.FC = () => {
           lastStudied: new Date().toISOString(),
         },
       }));
-      const result = await updateTopicData(user.uid, topicKey, {
+      const result = await updateTopicData(topicKey, {
         completed: isCompleted,
       });
       if (!result.success) {
@@ -597,7 +597,7 @@ const SubjectTrackerClient: React.FC = () => {
           lastStudied: new Date().toISOString(),
         },
       }));
-      const result = await updateQuestionCount(user.uid, topicKey, count);
+      const result = await updateQuestionCount(topicKey, count);
       if (!result.success) {
         setTopicTracking((prev) => ({
           ...prev,
@@ -622,7 +622,7 @@ const SubjectTrackerClient: React.FC = () => {
           lastStudied: new Date().toISOString(),
         },
       }));
-      const result = await incrementRepeat(user.uid, topicKey, currentCount);
+      const result = await incrementRepeat(topicKey);
       if (!result.success) {
         setTopicTracking((prev) => ({
           ...prev,
@@ -648,7 +648,7 @@ const SubjectTrackerClient: React.FC = () => {
           lastStudied: new Date().toISOString(),
         },
       }));
-      const result = await updateTopicData(user.uid, topicKey, {
+      const result = await updateTopicData(topicKey, {
         repeatCount: newCount,
       });
       if (!result.success) {
@@ -693,7 +693,7 @@ const SubjectTrackerClient: React.FC = () => {
         return next;
       });
 
-      const result = await bulkUpdateTopics(user.uid, topicKeys, isCompleted);
+      const result = await bulkUpdateTopics(topicKeys, isCompleted);
       if (!result.success) {
         setTopicTracking((prev) => {
           const next = { ...prev };

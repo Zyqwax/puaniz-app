@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getPost } from "@/services/communityService";
+import { getPostMeta } from "@/server/queries/post";
 import CommunityRoomClient from "./CommunityRoomClient";
 
 interface PageProps {
@@ -12,9 +12,9 @@ export async function generateMetadata({
   const { id } = await params;
 
   try {
-    const post = await getPost(id);
+    const post = await getPostMeta(id);
     const title = post?.title || "Topluluk";
-    const description = post?.text?.substring(0, 160) || "Puaniz topluluk";
+    const description = post?.body?.substring(0, 160) || "Puaniz topluluk";
 
     return {
       title: `${title} | Puaniz Topluluk`,

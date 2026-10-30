@@ -12,7 +12,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { EXAM_CONFIG, type ExamType } from "@/constants";
-import { addExam, calculateNet } from "@/services/examService";
+import { addExam } from "@/server/actions/exam";
+import { calculateNet } from "@/lib/exam";
 import { useRouter } from "next/navigation";
 import type { SubjectScore } from "@/types";
 
@@ -245,7 +246,7 @@ const AddExamClient: React.FC = () => {
       totalNet: calculatedTotal,
     };
 
-    const result = await addExam(user.uid, examData);
+    const result = await addExam(examData);
 
     setLoading(false);
     if (result.success) {
@@ -308,7 +309,7 @@ const AddExamClient: React.FC = () => {
             totalNet: calculatedTotal,
           };
 
-          const result = await addExam(user.uid, examData);
+          const result = await addExam(examData);
           if (result.success) successCount++;
           else failCount++;
         }

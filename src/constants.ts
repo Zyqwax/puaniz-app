@@ -30,5 +30,3 @@ export const EXAM_CONFIG = {
 export type ExamType = keyof typeof EXAM_CONFIG;
 export type TYTSubjectKey = keyof typeof EXAM_CONFIG.TYT;
 export type AYTSubjectKey = keyof typeof EXAM_CONFIG.AYT;
-
-export const WHITELISTED_EMAILS: string[] = ["test@test.com"];

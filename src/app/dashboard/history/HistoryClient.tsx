@@ -5,8 +5,8 @@ import {
   getUserExams,
   deleteExam,
   updateExam,
-  calculateNet,
-} from "@/services/examService";
+} from "@/server/actions/exam";
+import { calculateNet } from "@/lib/exam";
 import { useAuth } from "@/context/AuthContext";
 import {
   Calendar,
@@ -542,7 +542,7 @@ const HistoryClient: React.FC = () => {
   useEffect(() => {
     const fetchExams = async () => {
       if (user) {
-        const data = await getUserExams(user.uid);
+        const data = await getUserExams();
         setExams(data);
       }
       setLoading(false);

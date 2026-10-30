@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { getPost } from "@/services/communityService";
+import { getPostWithComments } from "@/server/actions/community";
 import PostCard from "@/components/community/PostCard";
 import {
   ArrowLeft,
@@ -32,7 +32,7 @@ export default function CommunityRoomClient({ id }: CommunityRoomClientProps) {
       if (!id) return;
       setLoading(true);
       try {
-        const fetchedPost = await getPost(id);
+        const fetchedPost = await getPostWithComments(id);
         setPost(fetchedPost);
       } catch (err) {
         console.error("Error fetching post:", err);

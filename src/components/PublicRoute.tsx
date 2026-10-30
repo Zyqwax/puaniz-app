@@ -3,18 +3,14 @@
 import { useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { WHITELISTED_EMAILS } from "@/constants";
 
 export const PublicRoute = ({ children }: { children: ReactNode }) => {
   const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && user) {
-      const isWhitelisted = user.email && WHITELISTED_EMAILS.includes(user.email);
-      if (user.emailVerified || isWhitelisted) {
-        router.push("/dashboard");
-      }
+    if (!loading && user?.emailVerified) {
+      router.push("/dashboard");
     }
   }, [user, loading, router]);
 
@@ -26,8 +22,7 @@ export const PublicRoute = ({ children }: { children: ReactNode }) => {
     );
   }
 
-  const isWhitelisted = user?.email && WHITELISTED_EMAILS.includes(user.email);
-  if (user && (user.emailVerified || isWhitelisted)) {
+  if (user?.emailVerified) {
     return null;
   }
 

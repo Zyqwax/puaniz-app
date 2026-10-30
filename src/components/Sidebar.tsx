@@ -17,8 +17,7 @@ import {
 } from "lucide-react";
 import ProfileCard from "./ProfileCard";
 import PuanizLogo from "./PuanizLogo";
-import type { UserProfile } from "@/types";
-import type { User } from "firebase/auth";
+import type { SessionUser, UserProfile } from "@/types";
 
 interface NavItem {
   path: string;
@@ -74,7 +73,7 @@ const NAV_ITEMS: NavItem[] = [
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  user: (UserProfile | User) | null;
+  user: (UserProfile | SessionUser) | null;
   isCollapsed?: boolean;
 }
 

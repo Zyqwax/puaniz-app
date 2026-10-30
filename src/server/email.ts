@@ -1,0 +1,74 @@
+import { Resend } from "resend";
+
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const EMAIL_FROM = process.env.EMAIL_FROM ?? "Puaniz <no-reply@puaniz.com.tr>";
+
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
+
+type SendArgs = {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+};
+
+async function send({ to, subject, html, text }: SendArgs) {
+  if (!resend) {
+    // No provider configured (local development): surface the link in the
+    // server log so the verification/reset flow can still be exercised.
+    console.warn(
+      `[email] RESEND_API_KEY is not set — skipping send to ${to}\nSubject: ${subject}\n${text}`,
+    );
+    return;
+  }
+
+  const { error } = await resend.emails.send({ from: EMAIL_FROM, to, subject, html, text });
+  if (error) {
+    console.error("[email] Resend error:", error);
+    throw new Error("E-posta gönderilemedi.");
+  }
+}
+
+const layout = (heading: string, body: string, cta: string, url: string) => `
+<div style="font-family:ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;background:#f5f7fb;padding:32px 16px">
+  <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:24px;padding:36px 32px;border:1px solid #e5e9f2">
+    <div style="font-size:22px;font-weight:800;color:#0F2A5C;margin-bottom:24px">
+      puan<span style="color:#2F6BFF">iz</span>
+    </div>
+    <h1 style="font-size:20px;font-weight:800;color:#0F2A5C;margin:0 0 12px">${heading}</h1>
+    <p style="font-size:14px;line-height:1.7;color:#4a5468;margin:0 0 28px">${body}</p>
+    <a href="${url}" style="display:inline-block;background:#2F6BFF;color:#ffffff;font-weight:700;font-size:14px;padding:13px 26px;border-radius:14px;text-decoration:none">${cta}</a>
+    <p style="font-size:12px;line-height:1.6;color:#8a93a6;margin:28px 0 0">
+      Bağlantı çalışmıyorsa şu adresi tarayıcına yapıştır:<br />
+      <span style="word-break:break-all;color:#2F6BFF">${url}</span>
+    </p>
+  </div>
+</div>`;
+
+export async function sendVerificationEmail({ to, url }: { to: string; url: string }) {
+  await send({
+    to,
+    subject: "Puaniz — E-posta adresini doğrula",
+    html: layout(
+      "E-posta adresini doğrula",
+      "Puaniz hesabını kullanmaya başlamak için aşağıdaki bağlantıya tıkla. Bağlantı 1 saat geçerlidir.",
+      "E-postamı Doğrula",
+      url,
+    ),
+    text: `Puaniz hesabını doğrulamak için: ${url}`,
+  });
+}
+
+export async function sendPasswordResetEmail({ to, url }: { to: string; url: string }) {
+  await send({
+    to,
+    subject: "Puaniz — Şifre sıfırlama",
+    html: layout(
+      "Şifreni sıfırla",
+      "Şifre sıfırlama talebinde bulundun. Yeni bir şifre belirlemek için aşağıdaki bağlantıya tıkla. Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin.",
+      "Şifremi Sıfırla",
+      url,
+    ),
+    text: `Puaniz şifreni sıfırlamak için: ${url}`,
+  });
+}

@@ -25,13 +25,13 @@ import {
   deletePost,
   editComment,
   deleteComment,
-} from "@/services/communityService";
+} from "@/server/actions/community";
 import type { ForumPost, PostComment, UserProfile } from "@/types";
-import type { User } from "firebase/auth";
+import type { SessionUser } from "@/types";
 
 interface PostCardProps {
   post: ForumPost;
-  user: (UserProfile | User) | null;
+  user: (UserProfile | SessionUser) | null;
   onPostDeleted?: () => void;
   isDetail?: boolean;
 }
@@ -69,10 +69,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, user, onPostDeleted, isDetail
   }, [post.id]);
 
   useEffect(() => {
-    if (post.likes && user) {
-      setIsLiked(post.likes.includes(user.uid));
-      setLikesCount(post.likes.length);
-    }
+    setIsLiked(Boolean(post.likedByMe));
+    setLikesCount(post.likesCount ?? 0);
     setCommentsCount(post.commentsCount || 0);
 
     if (isDetail) {
@@ -89,7 +87,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, user, onPostDeleted, isDetail
     setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
 
     try {
-      await toggleLike(post.id, user.uid, previousLiked);
+      const result = await toggleLike(post.id, previousLiked);
+      if (typeof result.likesCount === "number") setLikesCount(result.likesCount);
     } catch (error) {
       setIsLiked(previousLiked);
       setLikesCount(previousCount);
@@ -126,7 +125,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, user, onPostDeleted, isDetail
     if (editingCommentState) {
       setSubmittingComment(true);
       try {
-        await editComment(post.id, editingCommentState.id, newComment);
+        await editComment(editingCommentState.id, newComment);
         setEditingCommentState(null);
         setNewComment("");
         fetchComments();
@@ -140,7 +139,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, user, onPostDeleted, isDetail
 
     setSubmittingComment(true);
     try {
-      await addComment(post.id, newComment, user, replyingTo?.id, replyingTo?.userName);
+      await addComment(post.id, newComment, replyingTo?.id ?? null);
       setNewComment("");
       setReplyingTo(null);
       setCommentsCount((prev) => prev + 1);
@@ -188,7 +187,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, user, onPostDeleted, isDetail
     if (!window.confirm("Bu yorumu silmek istediğinden emin misin?")) return;
     setLoadingActionId(commentId);
     try {
-      await deleteComment(post.id, commentId);
+      await deleteComment(commentId);
       setCommentsCount((prev) => Math.max(0, prev - 1));
       fetchComments();
     } catch (err) {
@@ -581,7 +580,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, user, onPostDeleted, isDetail
 interface CommentItemProps {
   comment: PostComment;
   allComments: PostComment[];
-  user: (UserProfile | User) | null;
+  user: (UserProfile | SessionUser) | null;
   formatTime: (timestamp?: unknown) => string;
   handleReplyClick: (comment: PostComment) => void;
   handleEditComment: (comment: PostComment) => void;

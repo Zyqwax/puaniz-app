@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, useMemo, type FormEvent } from "react";
-import { auth } from "@/lib/firebase";
-import { getUserExams } from "@/services/examService";
-import { chatWithAI } from "@/services/aiService";
+import { getUserExams } from "@/server/actions/exam";
+import { chatWithAI } from "@/server/actions/ai";
 import {
   Plus,
   Trash2,
@@ -165,19 +164,17 @@ export default function AssistantClient() {
     }
 
     const fetchContext = async () => {
-      if (auth.currentUser) {
-        try {
-          const exams = await getUserExams(auth.currentUser.uid);
-          if (exams && exams.length > 0) {
-            const summary = exams
-              .slice(0, 5)
-              .map((e) => `${e.date} tarihli ${e.type} denemesi: ${e.totalNet} Net`)
-              .join("\n");
-            setExamContext(summary);
-          }
-        } catch (e) {
-          console.error("Error fetching exams for assistant:", e);
+      try {
+        const exams = await getUserExams();
+        if (exams && exams.length > 0) {
+          const summary = exams
+            .slice(0, 5)
+            .map((e) => `${e.date} tarihli ${e.type} denemesi: ${e.totalNet} Net`)
+            .join("\n");
+          setExamContext(summary);
         }
+      } catch (e) {
+        console.error("Error fetching exams for assistant:", e);
       }
     };
     fetchContext();

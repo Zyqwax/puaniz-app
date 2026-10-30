@@ -21,9 +21,9 @@ import {
   Tooltip,
   Cell,
 } from "recharts";
-import { getUserExams } from "@/services/examService";
-import { generateAnalysis } from "@/services/aiService";
-import { getUserProfile, updateUserProfile } from "@/services/userService";
+import { getUserExams } from "@/server/actions/exam";
+import { generateAnalysis } from "@/server/actions/ai";
+import { getUserProfile, updateUserProfile } from "@/server/actions/profile";
 import { useAuth } from "@/context/AuthContext";
 import {
   calculateSubjectStats,
@@ -380,7 +380,7 @@ const AnalysisClient: React.FC = () => {
   useEffect(() => {
     const fetchExams = async () => {
       if (user) {
-        const data = await getUserExams(user.uid);
+        const data = await getUserExams();
         data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         setExams(data);
 
@@ -394,7 +394,7 @@ const AnalysisClient: React.FC = () => {
           }));
 
           const dataHash = JSON.stringify(recentExams);
-          const profile = await getUserProfile(user.uid);
+          const profile = await getUserProfile();
 
           if (
             profile &&
@@ -405,7 +405,7 @@ const AnalysisClient: React.FC = () => {
           } else {
             generateAnalysis(recentExams).then(async (res) => {
               setAiAnalysis(res);
-              await updateUserProfile(user.uid, {
+              await updateUserProfile({
                 analysisMessage: res,
                 lastAnalysisHash: dataHash,
               });

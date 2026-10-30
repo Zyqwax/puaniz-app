@@ -17,13 +17,13 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebase";
+import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/context/AuthContext";
 import {
   getUserProfile,
   updateUserProfile,
-  deleteUserAccountData,
-} from "@/services/userService";
-import { updateProfile, deleteUser, User as FirebaseUser } from "firebase/auth";
+  deleteAccount,
+} from "@/server/actions/profile";
 import { uploadProfileImage } from "@/services/cloudinaryService";
 
 const GRADES = [
@@ -64,7 +64,7 @@ const SettingsClient: React.FC = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const { user, reloadUserProfile } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     avatarUrl: "",
@@ -79,20 +79,21 @@ const SettingsClient: React.FC = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      if (!currentUser) return;
-      setUser(currentUser);
-      getUserProfile(currentUser.uid).then((profile) => {
-        setFormData({
-          name: profile?.name || currentUser.displayName || "",
-          avatarUrl: profile?.avatarUrl || "",
-          grade: profile?.grade || "",
-        });
-        setLoading(false);
+    if (!user) return;
+    let cancelled = false;
+    getUserProfile().then((profile) => {
+      if (cancelled) return;
+      setFormData({
+        name: profile?.name || user.displayName || "",
+        avatarUrl: profile?.avatarUrl || "",
+        grade: profile?.grade || "",
       });
+      setLoading(false);
     });
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -115,13 +116,14 @@ const SettingsClient: React.FC = () => {
     setMessage({ type: "", content: "" });
     try {
       if (user) {
-        await updateUserProfile(user.uid, formData);
-        if (formData.name !== user.displayName) {
-          await updateProfile(user, { displayName: formData.name });
+        await updateUserProfile(formData);
+        if (formData.name !== user.name || formData.avatarUrl !== user.image) {
+          await authClient.updateUser({
+            name: formData.name,
+            image: formData.avatarUrl || null,
+          });
         }
-        if (formData.avatarUrl !== user.photoURL) {
-          await updateProfile(user, { photoURL: formData.avatarUrl });
-        }
+        await reloadUserProfile();
         showMsg("success", "Profil başarıyla güncellendi!");
       }
     } catch (error) {
@@ -138,20 +140,18 @@ const SettingsClient: React.FC = () => {
     setMessage({ type: "", content: "" });
     try {
       if (user) {
-        const dbResult = await deleteUserAccountData(user.uid);
-        if (!dbResult.success)
-          throw new Error("Veri silme işlemi sırasında hata oluştu.");
-        await deleteUser(user);
+        const result = await deleteAccount();
+        if (!result.success)
+          throw new Error("Hesap silme işlemi sırasında hata oluştu.");
+        await authClient.signOut();
         router.push("/auth");
       }
     } catch (error: any) {
       console.error("Account deletion error:", error);
       showMsg(
         "error",
-        error.code === "auth/requires-recent-login"
-          ? "Bu işlemi yapmadan önce tekrar giriş yapmalısınız."
-          : "Hesap silme sırasında bir hata oluştu: " +
-              (error.message || "Bilinmeyen hata"),
+        "Hesap silme sırasında bir hata oluştu: " +
+          (error?.message || "Bilinmeyen hata"),
         8000
       );
     } finally {

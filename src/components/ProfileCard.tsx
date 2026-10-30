@@ -12,14 +12,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { auth } from "../lib/firebase";
-import { getUserProfile } from "../services/userService";
+import { authClient } from "@/lib/auth-client";
+import { getUserProfile } from "@/server/actions/profile";
 import { useTheme } from "@/context/ThemeContext";
-import { User } from "firebase/auth";
-import { UserProfile } from "@/types";
+import { SessionUser, UserProfile } from "@/types";
 
 interface ProfileCardProps {
-  user: User | UserProfile | any | null;
+  user: SessionUser | UserProfile | any | null;
   isCollapsed?: boolean;
   onClose?: () => void;
 }
@@ -34,7 +33,7 @@ export const ProfileCard = ({ user, isCollapsed = false, onClose }: ProfileCardP
   useEffect(() => {
     const fetchProfile = async () => {
       if (user?.uid) {
-        const userProfile = await getUserProfile(user.uid);
+        const userProfile = await getUserProfile();
         setProfile(userProfile);
       }
     };
@@ -53,8 +52,9 @@ export const ProfileCard = ({ user, isCollapsed = false, onClose }: ProfileCardP
 
   const handleLogout = async () => {
     setIsOpen(false);
-    await auth.signOut();
+    await authClient.signOut();
     router.push("/auth");
+    router.refresh();
   };
 
   const displayName =

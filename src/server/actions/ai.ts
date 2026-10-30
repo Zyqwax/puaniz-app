@@ -1,6 +1,9 @@
+"use server";
+
+import "server-only";
 import Groq from "groq-sdk";
 
-const GROQ_API_KEY = process.env.NEXT_PUBLIC_GROQ_API_KEY;
+const GROQ_API_KEY = process.env.GROQ_API_KEY ?? process.env.NEXT_PUBLIC_GROQ_API_KEY;
 const OPENROUTER_API_KEY = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
 
 let groq: Groq | null = null;
@@ -8,7 +11,7 @@ let groq: Groq | null = null;
 const GROQ_MODEL = "llama-3.1-8b-instant";
 const OPENROUTER_MODEL = "openrouter/elephant-alpha";
 
-export interface AIChatOptions {
+interface AIChatOptions {
   mode?: "AI Koç" | "Soru Çözücü" | "Konu Anlatıcı" | string;
   examTarget?: "TYT" | "AYT" | string;
   deepThink?: boolean;
@@ -55,7 +58,7 @@ const callAI = async (
 
   if (provider === "groq") {
     if (!groq) {
-      groq = new Groq({ apiKey: GROQ_API_KEY || "", dangerouslyAllowBrowser: true });
+      groq = new Groq({ apiKey: GROQ_API_KEY || "" });
     }
     const completion = await groq.chat.completions.create({
       messages,
@@ -114,7 +117,7 @@ export const chatWithAI = async (
   }
 };
 
-export const generateAnalysis = async (examData: any): Promise<string> => {
+export const generateAnalysis = async (examData: unknown): Promise<string> => {
   try {
     const systemPrompt = `
       Aşağıdaki YKS deneme sınavı verilerini analiz et ve öğrenciye kısa, motive edici bir "Koçun Notu" yaz.
@@ -142,7 +145,7 @@ export const generateAnalysis = async (examData: any): Promise<string> => {
   }
 };
 
-export const generateWelcomeMessage = async (examData: any): Promise<string> => {
+export const generateWelcomeMessage = async (examData: unknown): Promise<string> => {
   try {
     const systemPrompt = `
       Kullanıcı sisteme giriş yaptı. Son deneme sınavı verilerine bakarak ona TEK CÜMLELİK, kısa, enerjik ve motive edici bir karşılama mesajı yaz.

@@ -15,7 +15,8 @@ import {
   MessageSquare,
   Smile,
 } from "lucide-react";
-import { createPost } from "@/services/communityService";
+import { createPost } from "@/server/actions/community";
+import { uploadPostImage } from "@/services/cloudinaryService";
 import { useAuth } from "@/context/AuthContext";
 
 const PREDEFINED_TAGS = [
@@ -95,7 +96,9 @@ export default function NewPostClient() {
     if (!title.trim() || !user) return;
     setLoading(true);
     try {
-      await createPost(title, text, image, selectedTags, user);
+      const imageUrl = image ? await uploadPostImage(image) : null;
+      const result = await createPost(title, text, imageUrl, selectedTags);
+      if (!result.success) throw result.error;
       router.push("/dashboard/community");
     } catch (error) {
       console.error("Error posting:", error);

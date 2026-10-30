@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import ForumRow from "@/components/community/ForumRow";
 import PostSkeleton from "@/components/community/PostSkeleton";
-import { getPosts } from "@/services/communityService";
+import { getPosts } from "@/server/actions/community";
 import { useAuth } from "@/context/AuthContext";
 import {
   Plus,

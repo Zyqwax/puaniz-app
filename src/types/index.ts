@@ -1,7 +1,21 @@
-import { User as FirebaseUser } from "firebase/auth";
-
 export type ThemeMode = "light" | "dark" | "system";
 export type ExamType = "TYT" | "AYT";
+
+/**
+ * Session user exposed by `useAuth()`. Carries Firebase-era aliases
+ * (`uid`, `displayName`, `photoURL`) so existing components keep working.
+ */
+export interface SessionUser {
+  id: string;
+  uid: string;
+  email: string;
+  name: string;
+  displayName: string;
+  image: string | null;
+  photoURL: string | null;
+  avatarUrl: string | null;
+  emailVerified: boolean;
+}
 
 export interface UserProfile {
   uid: string;
@@ -58,7 +72,7 @@ export interface PostComment {
   postId?: string;
   userId?: string;
   userName?: string;
-  userPhoto?: string;
+  userPhoto?: string | null;
   content?: string;
   text?: string;
   replyToId?: string | null;
@@ -73,12 +87,12 @@ export interface ForumPost {
   id: string;
   userId?: string;
   userName?: string;
-  userPhoto?: string;
+  userPhoto?: string | null;
   title?: string;
   content?: string;
   text?: string;
   tags?: string[];
-  imageUrl?: string;
+  imageUrl?: string | null;
   likes?: string[];
   likesCount?: number;
   commentsCount?: number;
@@ -122,7 +136,7 @@ export interface ChatMessage {
 }
 
 export interface AuthContextType {
-  user: FirebaseUser | null;
+  user: SessionUser | null;
   userProfile: UserProfile | null;
   loading: boolean;
   logout: () => Promise<void>;

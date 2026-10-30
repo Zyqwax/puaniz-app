@@ -12,19 +12,9 @@ import {
   CircleCheck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebase";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  updateProfile,
-  sendEmailVerification,
-  sendPasswordResetEmail,
-  signOut,
-} from "firebase/auth";
-import { updateUserProfile } from "@/services/userService";
-import PublicRoute from "@/components/PublicRoute";
+import { authClient } from "@/lib/auth-client";
 import { useAuth } from "@/context/AuthContext";
-import { WHITELISTED_EMAILS } from "@/constants";
+import PublicRoute from "@/components/PublicRoute";
 import PuanizLogo from "@/components/PuanizLogo";
 import Link from "next/link";
 
@@ -45,7 +35,7 @@ const AuthClient: React.FC = () => {
 
   // Cooldown timer for resend email
   useEffect(() => {
-    let timer: NodeJS.Timeout | undefined;
+    let timer: ReturnType<typeof setInterval> | undefined;
     if (resendCooldown > 0) {
       timer = setInterval(() => {
         setResendCooldown((prev) => prev - 1);
@@ -56,15 +46,11 @@ const AuthClient: React.FC = () => {
     };
   }, [resendCooldown]);
 
-  // If user is already logged in but not verified, show verification screen
+  // Signed in but unverified → show the verification screen.
   useEffect(() => {
-    if (!authLoading && authUser) {
-      const userEmail = authUser.email || "";
-      const isWhitelisted = WHITELISTED_EMAILS.includes(userEmail);
-      if (!authUser.emailVerified && !isWhitelisted) {
-        setView("verify-email");
-        setEmail(userEmail);
-      }
+    if (!authLoading && authUser && !authUser.emailVerified) {
+      setView("verify-email");
+      setEmail(authUser.email);
     }
   }, [authUser, authLoading]);
 
@@ -76,51 +62,49 @@ const AuthClient: React.FC = () => {
 
     try {
       if (view === "login") {
-        const userCredential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password,
-        );
-        const user = userCredential.user;
-        const isWhitelisted = WHITELISTED_EMAILS.includes(user.email || "");
+        const { error: signInError } = await authClient.signIn.email({ email, password });
 
-        if (!user.emailVerified && !isWhitelisted) {
-          await sendEmailVerification(user);
-          setView("verify-email");
-          setMessage("Doğrulama maili gönderildi.");
+        if (signInError) {
+          if (signInError.code === "EMAIL_NOT_VERIFIED" || signInError.status === 403) {
+            await authClient.sendVerificationEmail({ email, callbackURL: "/dashboard" });
+            setView("verify-email");
+            setMessage("Doğrulama maili gönderildi.");
+          } else {
+            setError(signInError.message || "Giriş yapılamadı.");
+          }
         } else {
           router.push("/dashboard");
         }
       } else if (view === "register") {
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
+        const { error: signUpError } = await authClient.signUp.email({
+          name,
           email,
           password,
-        );
-        const user = userCredential.user;
-
-        await updateProfile(user, { displayName: name });
-        await sendEmailVerification(user);
-
-        await updateUserProfile(user.uid, {
-          name: name,
-          email: email,
-          createdAt: new Date(),
-          avatarUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=2F6BFF&color=fff&bold=true`,
-          grade: "",
+          callbackURL: "/dashboard",
         });
 
-        setView("verify-email");
-        setMessage("Kayıt başarılı! Lütfen e-postanızı doğrulayın.");
+        if (signUpError) {
+          setError(signUpError.message || "Kayıt tamamlanamadı.");
+        } else {
+          setView("verify-email");
+          setMessage("Kayıt başarılı! Lütfen e-postanızı doğrulayın.");
+        }
       } else if (view === "forgot-password") {
-        await sendPasswordResetEmail(auth, email);
-        setMessage("Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.");
-        setTimeout(() => setView("login"), 3000);
+        const { error: resetError } = await authClient.requestPasswordReset({
+          email,
+          redirectTo: "/auth/reset-password",
+        });
+
+        if (resetError) {
+          setError(resetError.message || "Sıfırlama bağlantısı gönderilemedi.");
+        } else {
+          setMessage("Şifre sıfırlama bağlantısı e-posta adresinize gönderildi.");
+          setTimeout(() => setView("login"), 3000);
+        }
       }
     } catch (err: unknown) {
       console.error(err);
-      const msg = err instanceof Error ? err.message : "Bilinmeyen bir hata oluştu";
-      setError(msg.replace("Firebase:", "").trim());
+      setError(err instanceof Error ? err.message : "Bilinmeyen bir hata oluştu");
     } finally {
       setLoading(false);
     }
@@ -131,16 +115,17 @@ const AuthClient: React.FC = () => {
     setMessage("");
     setLoading(true);
     try {
-      if (auth.currentUser) {
-        await auth.currentUser.reload();
-        if (auth.currentUser.emailVerified) {
-          setMessage("E-posta başarıyla doğrulandı! Yönlendiriliyorsunuz...");
-          setTimeout(() => router.push("/dashboard"), 1500);
-        } else {
-          setError(
-            "E-posta henüz doğrulanmamış görünüyor. Lütfen gelen kutunuzu kontrol edin.",
-          );
-        }
+      const { data } = await authClient.getSession({
+        query: { disableCookieCache: true },
+      });
+
+      if (data?.user?.emailVerified) {
+        setMessage("E-posta başarıyla doğrulandı! Yönlendiriliyorsunuz...");
+        setTimeout(() => router.push("/dashboard"), 1500);
+      } else {
+        setError(
+          "E-posta henüz doğrulanmamış görünüyor. Lütfen gelen kutunuzu kontrol edin.",
+        );
       }
     } catch {
       setError("Doğrulama durumu kontrol edilemedi.");
@@ -151,7 +136,7 @@ const AuthClient: React.FC = () => {
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
+      await authClient.signOut();
       setView("login");
       setEmail("");
       setPassword("");
@@ -167,22 +152,23 @@ const AuthClient: React.FC = () => {
     setMessage("");
     setLoading(true);
     try {
-      if (auth.currentUser) {
-        await sendEmailVerification(auth.currentUser);
-        setMessage("Doğrulama maili tekrar gönderildi.");
-        setResendCooldown(60);
-      } else {
+      const target = email || authUser?.email;
+      if (!target) {
         setError("Oturum zaman aşımına uğradı. Lütfen tekrar giriş yapın.");
         setView("login");
+        return;
       }
-    } catch (err: unknown) {
-      console.error(err);
-      const errorObj = err as { code?: string; message?: string };
-      if (errorObj.code === "auth/too-many-requests") {
-        setError("Çok fazla istek gönderildi. Lütfen biraz bekleyin.");
+
+      const { error: resendError } = await authClient.sendVerificationEmail({
+        email: target,
+        callbackURL: "/dashboard",
+      });
+
+      if (resendError) {
+        setError("Mail gönderilemedi: " + (resendError.message || "bilinmeyen hata"));
       } else {
-        const msg = errorObj.message || "Mail gönderilemedi.";
-        setError("Mail gönderilemedi: " + msg.replace("Firebase:", "").trim());
+        setMessage("Doğrulama maili tekrar gönderildi.");
+        setResendCooldown(60);
       }
     } finally {
       setLoading(false);
@@ -321,6 +307,7 @@ const AuthClient: React.FC = () => {
                       placeholder="Şifre"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      minLength={8}
                       className="w-full pl-10 pr-4 py-3 bg-[var(--surface-2)] border border-[var(--border-strong)] rounded-2xl text-[var(--text)] text-sm font-medium placeholder:text-[var(--text-subtle)] focus:outline-none focus:bg-[var(--surface)] focus:border-[#7FB0FF] focus:ring-2 focus:ring-[#7FB0FF]/25 transition-all"
                       required
                     />

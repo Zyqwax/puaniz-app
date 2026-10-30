@@ -25,8 +25,8 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
-import { getUserExams } from "@/services/examService";
-import { getUserProfile, updateUserGoals } from "@/services/userService";
+import { getUserExams } from "@/server/actions/exam";
+import { getUserProfile, updateUserGoals } from "@/server/actions/profile";
 import { useAuth } from "@/context/AuthContext";
 import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton";
 import Link from "next/link";
@@ -366,13 +366,11 @@ const DashboardContent: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (user) {
-        const userId = user.uid;
-
-        const examData = await getUserExams(userId);
+        const examData = await getUserExams();
         const reversedData = [...examData].reverse();
         setExams(reversedData);
 
-        const userProfile = await getUserProfile(userId);
+        const userProfile = await getUserProfile();
         if (userProfile && userProfile.goals) {
           setGoals(userProfile.goals);
         }
@@ -416,7 +414,7 @@ const DashboardContent: React.FC = () => {
 
   const handleGoalSave = async (newGoals: { tyt: number; ayt: number }) => {
     if (user) {
-      await updateUserGoals(user.uid, newGoals);
+      await updateUserGoals(newGoals);
       setGoals(newGoals);
       setIsGoalModalOpen(false);
     }

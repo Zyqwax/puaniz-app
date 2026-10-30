@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Puaniz
 
-## Getting Started
+YKS (TYT/AYT) deneme takibi, analiz ve topluluk platformu.
 
-First, run the development server:
+Next.js 16 (App Router) · PostgreSQL + Drizzle ORM · Better Auth · Tailwind v4
+
+## Kurulum
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.local.example .env.local   # yoksa: aşağıdaki değişkenleri doldur
+pnpm db:migrate                    # şemayı uygula
+pnpm db:seed                       # (opsiyonel) doğrulanmış test kullanıcısı
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Uygulama http://localhost:3000 adresinde açılır.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Ortam değişkenleri
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Değişken | Açıklama |
+|---|---|
+| `DATABASE_URL` | PostgreSQL bağlantı adresi |
+| `BETTER_AUTH_SECRET` | Oturum imzalama anahtarı (`openssl rand -base64 32`) |
+| `BETTER_AUTH_URL` / `NEXT_PUBLIC_APP_URL` | Uygulamanın kök adresi |
+| `RESEND_API_KEY` | Doğrulama / şifre sıfırlama e-postaları. Boşsa bağlantılar sunucu konsoluna yazılır. |
+| `EMAIL_FROM` | Gönderen adresi, örn. `"Puaniz <no-reply@puaniz.com.tr>"` |
+| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`, `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET` | Görsel yükleme |
+| `GROQ_API_KEY` | AI asistanı (sunucu tarafında) |
 
-## Learn More
+## Komutlar
 
-To learn more about Next.js, take a look at the following resources:
+| Komut | Açıklama |
+|---|---|
+| `pnpm dev` | Geliştirme sunucusu |
+| `pnpm build` / `pnpm start` | Üretim derlemesi / sunucusu |
+| `pnpm typecheck` | TypeScript kontrolü |
+| `pnpm lint` | ESLint |
+| `pnpm db:generate` | Şema değişikliğinden migration üret |
+| `pnpm db:migrate` | Migration'ları uygula |
+| `pnpm db:studio` | Drizzle Studio |
+| `pnpm db:seed` | Doğrulanmış test kullanıcısı oluştur |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Mimari
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+İstemci bileşeni
+   └─> src/server/actions/*   ("use server" — kullanıcı kimliği oturumdan gelir)
+          └─> Drizzle ─> PostgreSQL
 
-## Deploy on Vercel
+src/proxy.ts                  → /dashboard ↔ /auth yönlendirmesi (optimistik)
+src/app/api/auth/[...all]     → Better Auth handler
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Kimlik doğrulama:** Better Auth, e-posta + şifre, doğrulama zorunlu.
+  `src/server/session.ts` içindeki `requireUser()` her server action'da çalışır;
+  istemci hiçbir zaman `userId` göndermez.
+- **Veri erişimi:** yalnızca sunucu actions üzerinden. Her sorgu
+  `where(user_id = oturum.userId)` ile sahiplik kontrolü yapar.
+- **Şema:** `src/server/db/auth-schema.ts` (Better Auth tabloları) ve
+  `src/server/db/schema.ts` (uygulama tabloları). Hesap silme, FK cascade ile
+  tüm veriyi temizler.
+- **Görseller:** Cloudinary (istemcide boyutlandırma + unsigned upload).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Yapı
+
+```
+src/
+├─ app/            App Router sayfaları (public, auth, dashboard)
+├─ components/     UI bileşenleri
+├─ context/        Auth & tema sağlayıcıları
+├─ data/           Statik ders/konu kataloğu
+├─ lib/            auth-client, saf yardımcılar
+├─ server/
+│  ├─ actions/     Server actions (exam, profile, subject, community, ai)
+│  ├─ db/          Drizzle istemcisi + şemalar
+│  ├─ queries/     Server component okumaları
+│  ├─ auth.ts      Better Auth yapılandırması
+│  ├─ email.ts     Resend şablonları
+│  └─ session.ts   Oturum yardımcıları
+├─ services/       Cloudinary istemcisi
+├─ types/          Paylaşılan tipler
+└─ utils/          Analiz / PDF yardımcıları
+```

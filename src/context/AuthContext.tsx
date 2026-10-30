@@ -1,13 +1,12 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { onAuthStateChanged, User, signOut } from "firebase/auth";
-import { auth } from "../lib/firebase";
-import { getUserProfile } from "../services/userService";
-import { UserProfile } from "@/types";
+import { authClient } from "@/lib/auth-client";
+import { getUserProfile } from "@/server/actions/profile";
+import type { SessionUser, UserProfile } from "@/types";
 
 interface AuthContextType {
-  user: User | null;
+  user: SessionUser | null;
   userProfile: UserProfile | null;
   loading: boolean;
   logout: () => Promise<void>;
@@ -24,48 +23,88 @@ const AuthContext = createContext<AuthContextType>({
 
 export const useAuth = () => useContext(AuthContext);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+const toSessionUser = (user: {
+  id: string;
+  email: string;
+  name: string;
+  image?: string | null;
+  emailVerified: boolean;
+}): SessionUser => ({
+  id: user.id,
+  uid: user.id,
+  email: user.email,
+  name: user.name,
+  displayName: user.name,
+  image: user.image ?? null,
+  photoURL: user.image ?? null,
+  avatarUrl: user.image ?? null,
+  emailVerified: user.emailVerified,
+});
 
-  const fetchProfile = async (currentUser: User | null) => {
-    if (currentUser) {
-      try {
-        const profile = await getUserProfile(currentUser.uid);
-        setUserProfile(profile);
-      } catch (e) {
-        console.error("Error loading user profile:", e);
-      }
-    } else {
-      setUserProfile(null);
-    }
-  };
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const { data: session, isPending, refetch } = authClient.useSession();
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  const sessionUser = session?.user ? toSessionUser(session.user) : null;
+  const userId = sessionUser?.id ?? null;
+  const emailVerified = sessionUser?.emailVerified ?? false;
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser: User | null) => {
-      setUser(currentUser);
-      await fetchProfile(currentUser);
-      setLoading(false);
-    });
+    let cancelled = false;
 
-    return () => unsubscribe();
-  }, []);
+    const load = async () => {
+      if (!userId || !emailVerified) {
+        if (!cancelled) {
+          setUserProfile(null);
+          setProfileLoading(false);
+        }
+        return;
+      }
+
+      setProfileLoading(true);
+      try {
+        const profile = await getUserProfile();
+        if (!cancelled) setUserProfile(profile);
+      } catch (error) {
+        console.error("Error loading user profile:", error);
+        if (!cancelled) setUserProfile(null);
+      } finally {
+        if (!cancelled) setProfileLoading(false);
+      }
+    };
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, emailVerified]);
 
   const logout = async () => {
-    await signOut(auth);
-    setUser(null);
+    await authClient.signOut();
     setUserProfile(null);
+    await refetch();
   };
 
   const reloadUserProfile = async () => {
-    if (user) {
-      await fetchProfile(user);
+    if (!userId || !emailVerified) return;
+    try {
+      setUserProfile(await getUserProfile());
+    } catch (error) {
+      console.error("Error reloading user profile:", error);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, userProfile, loading, logout, reloadUserProfile }}>
+    <AuthContext.Provider
+      value={{
+        user: sessionUser,
+        userProfile,
+        loading: isPending || profileLoading,
+        logout,
+        reloadUserProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
