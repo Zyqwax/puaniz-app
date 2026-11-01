@@ -1,21 +1,11 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import {
-  LogOut,
-  Settings,
-  ChevronUp,
-  ExternalLink,
-  Sun,
-  Moon,
-  Laptop,
-} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Settings } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
-import { getUserProfile } from "@/server/actions/profile";
-import { useTheme } from "@/context/ThemeContext";
-import { SessionUser, UserProfile } from "@/types";
+import { useAuth } from "@/context/AuthContext";
+import type { SessionUser, UserProfile } from "@/types";
 
 interface ProfileCardProps {
   user: SessionUser | UserProfile | any | null;
@@ -24,189 +14,84 @@ interface ProfileCardProps {
 }
 
 export const ProfileCard = ({ user, isCollapsed = false, onClose }: ProfileCardProps) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
-  const { theme, setTheme } = useTheme();
+  const { userProfile } = useAuth();
+  const profile = userProfile || (user as UserProfile | null);
+  const avatarUrl =
+    profile?.avatarUrl || profile?.photoURL || (profile as any)?.image ||
+    user?.avatarUrl || user?.photoURL || (user as any)?.image || null;
+  const [avatarFailed, setAvatarFailed] = useState(false);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (user?.uid) {
-        const userProfile = await getUserProfile();
-        setProfile(userProfile);
-      }
-    };
-    fetchProfile();
-  }, [user]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleLogout = async () => {
-    setIsOpen(false);
-    await authClient.signOut();
-    router.push("/auth");
-    router.refresh();
-  };
+  useEffect(() => setAvatarFailed(false), [avatarUrl]);
 
   const displayName =
-    (profile as any)?.name || user?.displayName || user?.email?.split("@")[0] || "Öğrenci";
-  const displayGrade = (profile as any)?.grade || "YKS Hazırlık";
-  const initials =
-    displayName
-      .split(" ")
-      .map((n: string) => n[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase() || "PZ";
+    profile?.name || user?.displayName || user?.email?.split("@")[0] || "Kullanıcı";
+  const displayGrade = profile?.isSuperAdmin
+    ? "Yönetici"
+    : profile?.role === "principal"
+      ? profile?.schoolMembership?.schoolName
+        ? `Müdür • ${profile.schoolMembership.schoolName}`
+        : "Okul Müdürü"
+      : profile?.role === "teacher"
+        ? profile?.schoolMembership?.title || "Öğretmen"
+        : profile?.grade ||
+          (profile?.schoolMembership?.className
+            ? `${profile.schoolMembership.className} Öğrencisi`
+            : "YKS Hazırlık");
+  const initials = displayName
+    .split(" ")
+    .filter(Boolean)
+    .map((part: string) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "PZ";
 
   return (
     <div
-      className={`relative py-3 border-t border-[var(--border)] shrink-0 flex items-center
-        ${isCollapsed ? "md:justify-center md:px-0 px-3" : "px-3"}`}
-      ref={dropdownRef}
+      className={`relative flex shrink-0 items-center gap-2 border-t border-[var(--border)] py-3 ${
+        isCollapsed ? "px-3 md:flex-col md:px-0" : "px-3"
+      }`}
     >
-      {isOpen && (
-        <div
-          className={`absolute z-50 mb-1
-            ${isCollapsed ? "left-full ml-3.5 bottom-0 w-72" : "bottom-full left-0 right-0 w-full mb-3"}`}
-        >
-          <div className="bg-[var(--surface-2)] border border-[var(--border-strong)] rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div className="p-4 border-b border-[var(--border)]">
-              <div className="flex items-center gap-3">
-                <div className="relative shrink-0">
-                  <div className="w-11 h-11 rounded-2xl bg-[#2F6BFF] text-white font-black text-sm flex items-center justify-center shadow-sm">
-                    {initials}
-                  </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#4ADE80] rounded-full border-2 border-[var(--surface-2)] shadow-xs" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-[var(--text)] text-sm truncate">{displayName}</p>
-                  <p className="text-xs text-[var(--text-muted)] truncate">{user?.email || ""}</p>
-                  <div className="inline-flex items-center mt-1 px-2 py-0.5 rounded-full bg-[var(--brand-soft)]">
-                    <span className="text-[10px] text-[var(--link)] font-bold">{displayGrade}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-2 space-y-1">
-              <Link
-                href="/dashboard/settings"
-                onClick={() => {
-                  setIsOpen(false);
-                  onClose?.();
-                }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[var(--text)] hover:bg-[var(--surface-3)] transition-colors text-sm font-semibold group cursor-pointer"
-              >
-                <div className="w-8 h-8 rounded-xl bg-[var(--surface-3)] flex items-center justify-center text-[var(--link)] group-hover:bg-[var(--surface)] group-hover:shadow-sm transition-all">
-                  <Settings size={16} />
-                </div>
-                <span>Profil & Ayarlar</span>
-                <ExternalLink
-                  size={12}
-                  className="text-[var(--text-subtle)] ml-auto opacity-50 group-hover:opacity-100"
-                />
-              </Link>
-
-              <div className="px-3 py-2 my-1 border-y border-[var(--border)]">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-subtle)] mb-2">
-                  Tema
-                </div>
-                <div className="grid grid-cols-3 gap-1 bg-[var(--surface)] p-1 rounded-xl border border-[var(--border)]">
-                  <button
-                    type="button"
-                    onClick={() => setTheme("light")}
-                    className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                      theme === "light"
-                        ? "bg-[#2F6BFF] text-white shadow-xs"
-                        : "text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]"
-                    }`}
-                  >
-                    <Sun size={13} />
-                    <span>Açık</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setTheme("dark")}
-                    className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                      theme === "dark"
-                        ? "bg-[#2F6BFF] text-white shadow-xs"
-                        : "text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]"
-                    }`}
-                  >
-                    <Moon size={13} />
-                    <span>Koyu</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setTheme("system")}
-                    className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                      theme === "system"
-                        ? "bg-[#2F6BFF] text-white shadow-xs"
-                        : "text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]"
-                    }`}
-                  >
-                    <Laptop size={13} />
-                    <span>Sistem</span>
-                  </button>
-                </div>
-              </div>
-
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[var(--err)] hover:bg-[var(--err-bg)] transition-colors text-sm font-semibold group cursor-pointer"
-              >
-                <div className="w-8 h-8 rounded-xl bg-[var(--err-bg)] flex items-center justify-center text-[var(--err)] transition-colors">
-                  <LogOut size={16} />
-                </div>
-                <span>Çıkış Yap</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`relative flex items-center cursor-pointer transition-all duration-200 group
-          ${isCollapsed ? "md:w-11 md:h-11 md:justify-center md:rounded-2xl" : "w-full gap-3 p-2 rounded-2xl hover:bg-[var(--surface-2)]"}
-          ${isOpen ? "bg-[var(--surface-2)]" : "bg-transparent"}`}
+      <Link
+        href="/dashboard/settings"
+        onClick={() => onClose?.()}
+        aria-label="Profil ve ayarlar"
+        title={isCollapsed ? "Profil ve ayarlar" : undefined}
+        className={`group relative flex min-w-0 items-center transition-all duration-200 ${
+          isCollapsed
+            ? "md:h-11 md:w-11 md:justify-center md:rounded-2xl"
+            : "flex-1 gap-3 rounded-2xl p-2 hover:bg-[var(--surface-2)]"
+        }`}
       >
-        <div className="relative shrink-0 transition-transform duration-200 group-hover:scale-105">
-          <div className="w-10 h-10 rounded-2xl bg-[#2F6BFF] text-white font-extrabold text-xs flex items-center justify-center shadow-xs">
-            {initials}
-          </div>
-          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#4ADE80] rounded-full border-2 border-[var(--surface)] shadow-xs" />
-        </div>
+        <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[#2F6BFF] text-xs font-extrabold text-white shadow-sm transition-shadow group-hover:shadow-lg group-hover:shadow-[#2F6BFF]/25">
+          <span className="flex h-full w-full items-center justify-center">{initials}</span>
+          {avatarUrl && !avatarFailed && (
+            <Image
+              src={avatarUrl}
+              alt={`${displayName} profil fotoğrafı`}
+              fill
+              unoptimized
+              onError={() => setAvatarFailed(true)}
+              className="rounded-full object-cover"
+            />
+          )}
+        </span>
 
-        <div className={`flex-1 min-w-0 text-left transition-all ${isCollapsed ? "md:hidden" : ""}`}>
-          <p className="font-bold text-[var(--text)] text-[13px] truncate leading-tight">{displayName}</p>
-          <p className="text-[10px] text-[var(--text-muted)] truncate font-medium">{displayGrade}</p>
-        </div>
+        <span className={`min-w-0 flex-1 text-left ${isCollapsed ? "md:hidden" : ""}`}>
+          <span className="block truncate text-[13px] font-bold leading-tight text-[var(--text)]">{displayName}</span>
+          <span className="mt-0.5 block truncate text-[10px] font-medium text-[var(--text-muted)]">{displayGrade}</span>
+        </span>
 
-        <ChevronUp
-          size={14}
-          className={`text-[var(--text-muted)] transition-transform duration-200 shrink-0
-            ${isOpen ? "rotate-0" : "rotate-180"}
-            ${isCollapsed ? "md:hidden" : ""}`}
-        />
+        <span className="absolute right-0 top-0 flex h-6 w-6 translate-x-1 -translate-y-1 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--link)] opacity-0 shadow-md transition-all duration-200 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100 group-hover:shadow-lg group-hover:shadow-[var(--link)]/25 md:right-0">
+          <Settings size={13} />
+        </span>
 
         {isCollapsed && (
-          <div className="hidden md:group-hover:flex absolute left-full ml-3.5 px-3 py-1.5 rounded-xl bg-[var(--surface-2)] text-[var(--text)] border border-[var(--border-strong)] text-xs font-bold shadow-xl whitespace-nowrap pointer-events-none z-50 items-center gap-1.5 animate-in fade-in zoom-in-95 duration-150">
-            <span>Profil & Ayarlar</span>
-            <div className="absolute right-full top-1/2 -translate-y-1/2 -mr-px border-4 border-transparent border-r-[var(--border-strong)]" />
-          </div>
+          <span className="pointer-events-none absolute left-full z-50 ml-3.5 hidden items-center gap-1.5 whitespace-nowrap rounded-xl border border-[var(--border-strong)] bg-[var(--surface-2)] px-3 py-1.5 text-xs font-bold text-[var(--text)] shadow-xl animate-in fade-in zoom-in-95 duration-150 md:group-hover:flex">
+            Profil & Ayarlar
+          </span>
         )}
-      </button>
+      </Link>
+
     </div>
   );
 };

@@ -4,8 +4,10 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, Sun, Moon, Laptop } from "lucide-react";
+import Image from "next/image";
 import PuanizLogo from "@/components/PuanizLogo";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/context/AuthContext";
 
 interface NavLinkItem {
   href: string;
@@ -24,6 +26,10 @@ const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
+  const { user, userProfile, loading } = useAuth();
+  const avatarUrl = userProfile?.avatarUrl || userProfile?.photoURL || user?.image || null;
+  const profileName = userProfile?.name || user?.name || "Profilim";
+  const initials = profileName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "P";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -86,12 +92,28 @@ const Navbar: React.FC = () => {
               {theme === "light" ? <Sun size={17} /> : theme === "dark" ? <Moon size={17} /> : <Laptop size={17} />}
             </button>
 
-            <Link
-              href="/auth"
-              className="hidden sm:inline-flex items-center px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[#2F6BFF] hover:bg-[#4A80FF] shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
-            >
-              Giriş Yap
-            </Link>
+            {loading ? (
+              <div className="hidden sm:block h-10 w-28 animate-pulse rounded-xl bg-[var(--surface-2)]" aria-label="Hesap yükleniyor" />
+            ) : user ? (
+              <Link
+                href="/dashboard"
+                aria-label="Profilim, panele git"
+                className="hidden sm:inline-flex items-center gap-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] py-1.5 pl-1.5 pr-4 text-sm font-bold text-[var(--text)] shadow-sm transition hover:border-[var(--link)]/40 hover:bg-[var(--surface-2)]"
+              >
+                <span className="relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-[#2F6BFF] text-xs font-extrabold text-white">
+                  {initials}
+                  {avatarUrl && <Image src={avatarUrl} alt="" fill unoptimized onError={(event) => { event.currentTarget.style.display = "none"; }} className="object-cover" />}
+                </span>
+                <span className="max-w-32 truncate">{profileName}</span>
+              </Link>
+            ) : (
+              <Link
+                href="/auth"
+                className="hidden sm:inline-flex items-center px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[#2F6BFF] hover:bg-[#4A80FF] shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Giriş Yap
+              </Link>
+            )}
 
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -129,13 +151,30 @@ const Navbar: React.FC = () => {
             );
           })}
           <div className="pt-2">
-            <Link
-              href="/auth"
-              onClick={() => setIsMenuOpen(false)}
-              className="block w-full text-center px-4 py-3 rounded-xl text-sm font-bold text-white bg-[#2F6BFF]"
-            >
-              Giriş Yap
-            </Link>
+            {loading ? (
+              <div className="h-11 animate-pulse rounded-xl bg-[var(--surface-2)]" aria-label="Hesap yükleniyor" />
+            ) : user ? (
+              <Link
+                href="/dashboard"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex w-full items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm font-bold text-[var(--text)]"
+              >
+                <span className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#2F6BFF] text-xs font-extrabold text-white">
+                  {initials}
+                  {avatarUrl && <Image src={avatarUrl} alt="" fill unoptimized onError={(event) => { event.currentTarget.style.display = "none"; }} className="object-cover" />}
+                </span>
+                <span className="min-w-0 flex-1 truncate">{profileName}</span>
+                <span className="text-xs font-semibold text-[var(--link)]">Panele git</span>
+              </Link>
+            ) : (
+              <Link
+                href="/auth"
+                onClick={() => setIsMenuOpen(false)}
+                className="block w-full text-center px-4 py-3 rounded-xl text-sm font-bold text-white bg-[#2F6BFF]"
+              >
+                Giriş Yap
+              </Link>
+            )}
           </div>
         </div>
       </div>

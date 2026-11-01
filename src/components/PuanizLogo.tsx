@@ -25,8 +25,8 @@ export function PuanizLogo({
   const isDark = resolvedTheme === "dark";
   const isIcon = variant === "icon";
 
-  const brandNavy = isDark ? "#2F6BFF" : "#0F2A5C";
-  const textPuan = isDark ? "#FFFFFF" : "#0F2A5C";
+  const brandNavy = isDark ? "#2F6BFF" : "#111827";
+  const textPuan = isDark ? "#FFFFFF" : "#111827";
   const textIz = isDark ? "#7FB0FF" : "#2F6BFF";
 
   if (isIcon) {

@@ -1,9 +1,12 @@
+import { notFound } from "next/navigation";
+import { getForumTopic } from "@/server/actions/forum";
 import { Metadata } from "next";
 import { getPostMeta } from "@/server/queries/post";
 import CommunityRoomClient from "./CommunityRoomClient";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string; reply?: string }>;
 }
 
 export async function generateMetadata({
@@ -39,7 +42,11 @@ export async function generateMetadata({
   }
 }
 
-export default async function CommunityRoomPage({ params }: PageProps) {
+export default async function CommunityRoomPage({ params, searchParams }: PageProps) {
   const { id } = await params;
-  return <CommunityRoomClient id={id} />;
+  const { page, reply } = await searchParams;
+  if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
+  const data = await getForumTopic(id, Number(page) || 1, reply && /^[0-9a-f-]{36}$/i.test(reply) ? reply : undefined);
+  if (!data) notFound();
+  return <CommunityRoomClient data={data} />;
 }

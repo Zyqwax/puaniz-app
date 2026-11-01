@@ -1,168 +1,56 @@
 "use client";
+import { useEffect, useRef, useState, useTransition } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { Bell, Bookmark, CheckCheck, ChevronRight, Flag, Heart, LockKeyhole, Pin, Quote, Send, SquarePen, Trash2, X } from 'lucide-react';
+import { Avatar, RoleBadge, ForumBody, ForumPagination, forumButton, forumPrimary, forumInput } from '@/components/community/ForumUI';
+import ForumEditor from '@/components/community/ForumEditor';
+import { markForumTopicRead, deleteForumContent, editForumContent, likeForumTopic, likeForumReply, moderateForumTopic, replyForumTopic, reportForumContent, selectForumSolution, setForumTopicState } from '@/server/actions/forum';
+import type { getForumTopic } from '@/server/actions/forum';
+import { forumTime } from '@/lib/forum';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import { getPostWithComments } from "@/server/actions/community";
-import PostCard from "@/components/community/PostCard";
-import {
-  ArrowLeft,
-  AlertCircle,
-  Users,
-  ChevronRight,
-  MessageSquare,
-} from "lucide-react";
-import Link from "next/link";
-import { Post } from "@/types";
-
-interface CommunityRoomClientProps {
-  id: string;
-}
-
-export default function CommunityRoomClient({ id }: CommunityRoomClientProps) {
-  const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
-
-  const [post, setPost] = useState<Post | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchPost = async () => {
-      if (!id) return;
-      setLoading(true);
-      try {
-        const fetchedPost = await getPostWithComments(id);
-        setPost(fetchedPost);
-      } catch (err) {
-        console.error("Error fetching post:", err);
-        setError("Gönderi bulunamadı veya bir hata oluştu.");
-      } finally {
-        setLoading(false);
+type Data=NonNullable<Awaited<ReturnType<typeof getForumTopic>>>;
+export default function CommunityRoomClient({data}:{data:Data}) {
+  const {topic,replies,page,pages,viewerId,isAdmin,tags}=data;const router=useRouter();const [pending,startTransition]=useTransition();const [error,setError]=useState(''),[notice,setNotice]=useState(''),[body,setBody]=useState('');
+  const [quote,setQuote]=useState<{id:string;name:string;body:string}|null>(null),[editing,setEditing]=useState<{id:string;body:string;title?:string;isTopic:boolean}|null>(null);
+  const [report,setReport]=useState<{commentId?:string}|null>(null),[reason,setReason]=useState(''),[deleting,setDeleting]=useState<{id:string;isTopic:boolean}|null>(null);
+  const dialogRef=useRef<HTMLElement>(null);
+  const dialogOpen=Boolean(editing||report||deleting);
+  useEffect(()=>{
+    if(!dialogOpen)return;
+    const previous=document.activeElement as HTMLElement|null;
+    const dialog=dialogRef.current;
+    dialog?.focus();
+    function keyboard(event:KeyboardEvent){
+      if(event.key==='Escape'){setEditing(null);setReport(null);setDeleting(null);}
+      if(event.key==='Tab'){
+        const items=Array.from(dialog?.querySelectorAll<HTMLElement>('button:not(:disabled), input, textarea, select, a[href]')||[]);
+        const first=items[0],last=items.at(-1);
+        if(event.shiftKey&&(document.activeElement===first||document.activeElement===dialog)){event.preventDefault();last?.focus();}
+        else if(!event.shiftKey&&(document.activeElement===last||document.activeElement===dialog)){event.preventDefault();first?.focus();}
       }
-    };
-    fetchPost();
-  }, [id]);
-
-  const handlePostDeleted = () => {
-    router.push("/dashboard/community");
-  };
-
-  /* ── Loading State ── */
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <div className="w-12 h-12 border-4 border-[#2F6BFF]/20 border-t-[#2F6BFF] rounded-full animate-spin" />
-        <p className="text-[var(--text-muted)] text-sm font-medium">
-          Konu yükleniyor...
-        </p>
-      </div>
-    );
-  }
-
-  /* ── Error State ── */
-  if (error || !post) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-6 text-center px-4">
-        <div className="w-20 h-20 bg-[var(--err-bg)] border border-[var(--err)]/20 rounded-3xl flex items-center justify-center">
-          <AlertCircle size={36} className="text-[var(--err)]" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-black text-[var(--text)] mb-2">
-            Gönderi Bulunamadı
-          </h1>
-          <p className="text-[var(--text-muted)] text-sm max-w-sm mx-auto">
-            {error || "Bu konu silinmiş veya erişim izniniz yok."}
-          </p>
-        </div>
-        <Link
-          href="/dashboard/community"
-          className="flex items-center gap-2 px-6 py-3 bg-[var(--surface-2)] hover:bg-[var(--surface-3)] text-[var(--text)] rounded-xl font-semibold transition-colors border border-[var(--border)]"
-        >
-          <ArrowLeft size={16} />
-          Topluluğa Dön
-        </Link>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen pb-24">
-      {/* Ambient glow */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#2F6BFF]/5 blur-[120px] rounded-full pointer-events-none" />
-
-      {/* ── Sticky Breadcrumb Nav ── */}
-      <div className="sticky top-0 z-30 bg-[var(--surface)]/90 backdrop-blur-xl border-b border-[var(--border)] mb-8">
-        <div className="max-w-4xl mx-auto px-4 md:px-6 h-14 flex items-center gap-3">
-          <Link
-            href="/dashboard/community"
-            className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text)] transition-colors group shrink-0"
-          >
-            <div className="w-8 h-8 rounded-xl bg-[var(--surface-2)] border border-[var(--border)] flex items-center justify-center group-hover:bg-[var(--surface-3)] transition-all">
-              <ArrowLeft size={15} />
-            </div>
-            <span className="text-sm font-semibold hidden sm:inline">
-              Topluluk
-            </span>
-          </Link>
-
-          <ChevronRight
-            size={14}
-            className="text-[var(--text-subtle)] shrink-0"
-          />
-
-          <div className="flex items-center gap-2 min-w-0">
-            <MessageSquare size={14} className="text-[var(--brand)] shrink-0" />
-            <span className="text-sm font-bold text-[var(--text)] truncate">
-              {post.title || "Konu"}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Content ── */}
-      <div className="max-w-4xl mx-auto px-4 md:px-6">
-        {/* Tags bar above post */}
-        {post.tags && post.tags.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 mb-5">
-            <span className="text-xs text-[var(--text-subtle)] font-medium">
-              Etiketler:
-            </span>
-            {post.tags.map((tag) => (
-              <Link
-                key={tag}
-                href={`/dashboard/community?tag=${tag}`}
-                className="text-xs font-bold px-3 py-1 rounded-lg bg-[var(--brand-soft)] text-[var(--link)] border border-[var(--border-strong)] hover:bg-[var(--surface-3)] transition-colors"
-              >
-                #{tag.startsWith("#") ? tag.slice(1) : tag}
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {/* Main PostCard */}
-        <PostCard
-          post={post}
-          user={user}
-          onPostDeleted={handlePostDeleted}
-          isDetail={true}
-        />
-
-        {/* Community info footer */}
-        <div className="mt-8 flex items-center justify-between py-5 border-t border-[var(--border)]">
-          <div className="flex items-center gap-3 text-[var(--text-muted)]">
-            <Users size={15} />
-            <span className="text-sm font-medium">Puanİz Topluluğu</span>
-          </div>
-          <Link
-            href="/dashboard/community"
-            className="text-sm font-semibold text-[var(--link)] hover:underline flex items-center gap-1.5 transition-colors"
-          >
-            Tüm Konulara Bak
-            <ChevronRight size={15} />
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
+    }
+    document.addEventListener('keydown',keyboard);
+    return()=>{document.removeEventListener('keydown',keyboard);previous?.focus();};
+  },[dialogOpen]);
+  const own=topic.userId===viewerId;
+  const lastReplyId=replies.at(-1)?.id;
+  useEffect(()=>{void markForumTopicRead(topic.id,lastReplyId).catch(()=>{});},[topic.id,lastReplyId]);
+  function run(task:()=>Promise<void>){if(pending)return;setError('');startTransition(async()=>{try{await task();router.refresh();}catch(e){setError(e instanceof Error?e.message:'İşlem tamamlanamadı.');}});}
+  useEffect(()=>{const hash=window.location.hash.slice(1);if(hash)requestAnimationFrame(()=>document.getElementById(hash)?.scrollIntoView({block:'center'}));},[data]);
+  function reply(){run(async()=>{await replyForumTopic(topic.id,body,quote?.id);setBody('');setQuote(null);router.push(`/dashboard/community/${topic.id}?page=${Math.floor(topic.commentsCount/20)+1}#reply-composer`);});}
+  const actions=(id:string,isTopic:boolean,ownerId:string,text:string)=><div className="flex flex-wrap items-center gap-3 text-xs text-[var(--text-muted)]">{!topic.locked&&!isTopic&&<button disabled={pending} onClick={()=>{setQuote({id,name:replies.find(r=>r.id===id)?.userName||'',body:text});document.getElementById('reply-composer')?.scrollIntoView({behavior:'smooth',block:'center'});}} className="inline-flex items-center gap-1 hover:text-[var(--link)]"><Quote size={13}/> Alıntıla / yanıtla</button>}{ownerId===viewerId&&!topic.locked&&<><button disabled={pending} onClick={()=>setEditing({id,body:text,isTopic,title:isTopic?topic.title:undefined})} className="inline-flex items-center gap-1 hover:text-[var(--link)]"><SquarePen size={13}/> Düzenle</button><button disabled={pending} onClick={()=>setDeleting({id,isTopic})} className="inline-flex items-center gap-1 hover:text-[var(--err)]"><Trash2 size={13}/> Sil</button></>}<button disabled={pending} onClick={()=>{setReport({commentId:isTopic?undefined:id});setReason('');}} className="inline-flex items-center gap-1 hover:text-[var(--err)]"><Flag size={13}/> Bildir</button></div>;
+  return <div className="mx-auto max-w-5xl pb-12"><nav aria-label="Konu yolu" className="mb-5 flex items-center gap-2 text-xs text-[var(--text-muted)]"><Link href="/dashboard/community">Forum</Link><ChevronRight size={12}/><Link href={`/dashboard/community?category=${topic.categorySlug}`}>{topic.categoryName}</Link></nav>
+    <div className="mb-6 border-b border-[var(--border)] pb-6"><div className="mb-3 flex flex-wrap gap-2 text-xs">{topic.solutionId&&<Link href={`?reply=${topic.solutionId}#${topic.solutionId}`} className="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-2 py-1 font-bold text-emerald-600 dark:text-emerald-400"><CheckCheck size={13}/> Çözümü gör</Link>}{topic.pinned&&<span className="inline-flex items-center gap-1 text-[var(--link)]"><Pin size={13}/> Sabit konu</span>}{topic.locked&&<span className="inline-flex items-center gap-1 text-[var(--text-muted)]"><LockKeyhole size={13}/> Kilitli</span>}<span className="text-[var(--text-muted)]">{topic.kind==='question'?'Soru':topic.kind==='announcement'?'Duyuru':'Tartışma'}</span></div><h2 className="text-2xl font-extrabold leading-tight tracking-tight text-[var(--text)] md:text-3xl">{topic.title}</h2><div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-[var(--text-muted)]"><span>{topic.userName}</span><span>· {forumTime(topic.createdAt)}</span><span>· {topic.commentsCount} yanıt</span>{tags.map(tag=><Link key={tag} href={`/dashboard/community?tag=${encodeURIComponent(tag)}`} className="text-[var(--link)]">#{tag}</Link>)}</div><div className="mt-5 flex flex-wrap gap-2"><button disabled={pending} className={`${forumButton} ${topic.following?'!bg-[var(--brand-soft)] !text-[var(--link)]':''}`} onClick={()=>run(async()=>{await setForumTopicState(topic.id,'following',!topic.following);})}><Bell size={15}/>{topic.following?'Takip ediliyor':'Takip et'}</button><button disabled={pending} className={forumButton} onClick={()=>run(async()=>{await setForumTopicState(topic.id,'bookmarked',!topic.bookmarked);})}><Bookmark size={15} className={topic.bookmarked?'fill-current text-[var(--link)]':''}/>{topic.bookmarked?'Kaydedildi':'Kaydet'}</button><button className={forumButton} onClick={()=>run(async()=>{await navigator.clipboard.writeText(location.origin+`/dashboard/community/${topic.id}`);setNotice('Konu bağlantısı kopyalandı.');})}>Bağlantıyı kopyala</button>{data.firstUnreadId&&<Link className={forumButton} href={`/dashboard/community/${topic.id}?reply=${data.firstUnreadId}#${data.firstUnreadId}`}>İlk okunmamış yanıt</Link>}</div></div>
+    {error&&<p role="alert" className="sticky top-28 z-20 mb-4 rounded-lg border border-[var(--err)]/20 bg-[var(--err-bg)] p-3 text-sm text-[var(--err)]">{error}</p>}{notice&&<p role="status" className="mb-4 rounded-lg bg-[var(--brand-soft)] p-3 text-sm text-[var(--link)]">{notice}</p>}
+    <article className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--surface)]"><div className="flex items-center gap-3 border-b border-[var(--border)] px-5 py-4"><Avatar src={topic.userPhoto} name={topic.userName}/><div><div className="flex items-center gap-2"><span className="text-sm font-bold text-[var(--text)]">{topic.userName}</span><RoleBadge role={topic.role}/></div><p className="mt-1 text-xs text-[var(--text-muted)]">Konu sahibi</p></div><span className="ml-auto text-xs text-[var(--text-muted)]">{forumTime(topic.createdAt)}</span></div><div className="px-5 py-3 md:px-7"><ForumBody body={topic.body}/>{topic.imageUrl&&<a href={topic.imageUrl} target="_blank" rel="noopener noreferrer"><Image src={topic.imageUrl} width={1000} height={700} unoptimized alt="Konuya eklenen görsel" className="my-4 max-h-[600px] w-auto max-w-full rounded-lg object-contain"/></a>}</div><div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)] px-5 py-3"><button disabled={pending} onClick={()=>run(async()=>{await likeForumTopic(topic.id,!topic.likedByMe);})} className={`inline-flex items-center gap-2 text-sm ${topic.likedByMe?'text-[var(--err)]':'text-[var(--text-muted)]'}`}><Heart size={16} className={topic.likedByMe?'fill-current':''}/>{topic.likesCount} beğeni</button>{actions(topic.id,true,topic.userId,topic.body)}</div></article>
+    <div className="mb-3 flex items-center justify-between"><h3 className="text-base font-bold text-[var(--text)]">Yanıtlar <span className="ml-1 text-sm font-normal text-[var(--text-muted)]">{topic.commentsCount}</span></h3><span className="text-xs text-[var(--text-muted)]">Eskiden yeniye</span></div>
+    <div className="divide-y divide-[var(--border)] border-y border-[var(--border)]">{replies.map((r,index)=><article id={r.id} key={r.id} className={`scroll-mt-32 py-6 ${topic.solutionId===r.id?'border-l-2 border-l-emerald-500 bg-emerald-500/5 px-4':''}`}><div className="flex gap-3"><Avatar src={r.userPhoto} name={r.userName}/><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2 text-xs"><span className="text-sm font-bold text-[var(--text)]">{r.userName}</span><RoleBadge role={r.role}/>{r.userId===topic.userId&&<span className="text-[var(--link)]">Konu sahibi</span>}<a href={`#${r.id}`} className="ml-auto text-[var(--text-muted)]">#{(page-1)*20+index+1} · {forumTime(r.createdAt)}</a></div>{topic.solutionId===r.id&&<p className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400"><CheckCheck size={15}/> Çözüm olarak seçildi</p>}{r.replyToId&&<a href={`?reply=${r.replyToId}#${r.replyToId}`} className="mt-4 block border-l-2 border-[var(--border-strong)] bg-[var(--surface-2)] p-3 text-xs leading-5 text-[var(--text-muted)]"><b>{r.replyToUser}</b><span className="mt-1 block line-clamp-3 whitespace-pre-wrap">{r.quote}</span></a>}<ForumBody body={r.body}/>{r.isEdited&&<p className="mb-3 text-[10px] text-[var(--text-muted)]">Düzenlendi</p>}<div className="mt-3 flex flex-wrap justify-between gap-3"><div className="flex flex-wrap items-center gap-4"><button disabled={pending} onClick={()=>run(async()=>{await likeForumReply(r.id,!r.likedByMe);})} className={`inline-flex items-center gap-1 text-xs ${r.likedByMe?'text-[var(--err)]':'text-[var(--text-muted)]'}`}><Heart size={13} className={r.likedByMe?'fill-current':''}/>{r.likesCount||''} Beğen</button>{actions(r.id,false,r.userId,r.body)}</div>{topic.kind==='question'&&(own||isAdmin)&&<button disabled={pending} className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--link)]" onClick={()=>run(async()=>{await selectForumSolution(topic.id,topic.solutionId===r.id?null:r.id);})}><CheckCheck size={14}/>{topic.solutionId===r.id?'Çözümü kaldır':'Çözüm olarak seç'}</button>}</div></div></div></article>)}</div>
+    {!replies.length&&<p className="py-8 text-center text-sm text-[var(--text-muted)]">Henüz yanıt yok. İlk katkıyı sen yap.</p>}
+    <ForumPagination page={page} pages={pages} href={p=>`/dashboard/community/${topic.id}?page=${p}`}/>
+    <section id="reply-composer" className="scroll-mt-32 border-t border-[var(--border)] pt-6"><h3 className="mb-4 font-bold text-[var(--text)]">{topic.locked?'Bu konu yeni yanıtlara kapalı':'Konuşmaya katkı sağla'}</h3>{!topic.locked&&<><div className="mb-3 flex items-center gap-2 text-xs text-[var(--text-muted)]">{quote&&<><Quote size={14}/><span>{quote.name} kişisine yanıt veriyorsun</span><button aria-label="Alıntıyı kaldır" onClick={()=>setQuote(null)}><X size={14}/></button></>}</div><ForumEditor value={body} onChange={setBody} maxLength={15000} placeholder="Yanıtını yaz…"/><div className="mt-3 flex justify-end"><button disabled={pending||!body.trim()} onClick={reply} className={forumPrimary}><Send size={15}/>{pending?'Gönderiliyor…':'Yanıtla'}</button></div></>}</section>
+    {isAdmin&&<div className="mt-8 flex flex-wrap items-center gap-2 border-t border-[var(--border)] pt-4"><span className="mr-2 text-xs text-[var(--text-muted)]">Yönetim</span><button disabled={pending} className={forumButton} onClick={()=>run(async()=>{await moderateForumTopic(topic.id,'pin',!topic.pinned);})}>{topic.pinned?'Sabitlemeyi kaldır':'Sabitle'}</button><button disabled={pending} className={forumButton} onClick={()=>run(async()=>{await moderateForumTopic(topic.id,'lock',!topic.locked);})}>{topic.locked?'Kilidi aç':'Kilitle'}</button><Link className={forumButton} href="/dashboard/admin/community">Moderasyon paneli</Link></div>}
+    {(editing||report||deleting)&&<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"><section ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="forum-dialog-title" className="max-h-[90dvh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6"><div className="mb-5 flex items-center justify-between"><h3 id="forum-dialog-title" className="text-lg font-bold text-[var(--text)]">{editing?'İçeriği düzenle':report?'İçeriği bildir':'İçerik silinsin mi?'}</h3><button aria-label="Kapat" className={forumButton} onClick={()=>{setEditing(null);setReport(null);setDeleting(null);}}><X size={16}/></button></div>{editing&&<><div className="space-y-3">{editing.isTopic&&<input aria-label="Başlık" className={forumInput} value={editing.title} onChange={e=>setEditing({...editing,title:e.target.value})}/>}<ForumEditor value={editing.body} onChange={body=>setEditing({...editing,body})}/></div><button disabled={pending} className={`${forumPrimary} mt-4`} onClick={()=>run(async()=>{await editForumContent(editing.id,editing.body,editing.isTopic,editing.title);setEditing(null);})}>Değişiklikleri kaydet</button></>}{report&&<><p className="mb-4 text-sm text-[var(--text-muted)]">Neden bu içeriği bildirmek istiyorsun? Açıklaman yalnızca yöneticilere görünür.</p><textarea aria-label="Bildirim gerekçesi" className={forumInput} maxLength={1000} rows={4} value={reason} onChange={e=>setReason(e.target.value)}/><button disabled={pending||reason.trim().length<5} className={`${forumPrimary} mt-4`} onClick={()=>run(async()=>{await reportForumContent(topic.id,reason,report.commentId);setReport(null);setNotice('Bildirimin yönetim ekibine iletildi.');})}>Bildirimi gönder</button></>}{deleting&&<><p className="text-sm text-[var(--text-muted)]">Bu işlem geri alınamaz.</p><button disabled={pending} className={`${forumButton} mt-4 !bg-[var(--err-bg)] !text-[var(--err)]`} onClick={()=>run(async()=>{await deleteForumContent(deleting.id,deleting.isTopic);if(deleting.isTopic)router.push('/dashboard/community');setDeleting(null);})}>Kalıcı olarak sil</button></>}{error&&<p role="alert" className="mt-3 text-sm text-[var(--err)]">{error}</p>}</section></div>}
+  </div>;
 }

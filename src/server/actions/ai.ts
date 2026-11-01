@@ -2,6 +2,7 @@
 
 import "server-only";
 import Groq from "groq-sdk";
+import { getUserProfile } from "@/server/actions/profile";
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY ?? process.env.NEXT_PUBLIC_GROQ_API_KEY;
 const OPENROUTER_API_KEY = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
@@ -78,29 +79,47 @@ export const chatWithAI = async (
   try {
     const { mode = "AI Koç", examTarget = "TYT", deepThink = false } = options;
 
+    let studentProfileInfo = "";
+    try {
+      const profile = await getUserProfile();
+      if (profile) {
+        studentProfileInfo = `
+Öğrenci Profili ve Hedefleri:
+- Alanı: ${profile.field || "Belirtilmemiş"} (Sınıfı: ${profile.grade || "YKS Hazırlık"})
+- Hedef Üniversite: ${profile.targetUniversity || "Henüz belirlenmedi"}
+- Hedef Bölüm: ${profile.targetDepartment || "Henüz belirlenmedi"}
+- Hedef Sıralama: ${profile.targetRanking ? `${profile.targetRanking}. sıralama` : "Belirtilmemiş"}
+- Hedef Netler: TYT ${profile.goals?.tyt || 0} Net, AYT ${profile.goals?.ayt || 0} Net
+`;
+      }
+    } catch {
+      // Profile fetch optional for anonymous/unauthenticated callers
+    }
+
     let modeInstruction =
       "Sen YKS (Yükseköğretim Kurumları Sınavı) öğrencilerine rehberlik eden yardımsever ve motive edici bir yapay zeka asistanısın.";
     if (mode === "Soru Çözücü") {
       modeInstruction =
-        "Sen YKS soru çözüm uzmanısın. Soruları adım adım, anlaşılır, formülleri ve pratik yöntemleri belirterek çözersin.";
+        "Sen YKS soru çözüm uzmanısın. Soruları adım adım, formülleri ve mantığı açıkça belirterek açıkla.";
     } else if (mode === "Konu Anlatıcı") {
       modeInstruction =
-        "Sen YKS konu anlatım koçusun. Konuları sade, akılda kalıcı, şematik ve sınavda en çok çıkan noktalara odaklanarak anlatırsın.";
+        "Sen YKS konularını en anlaşılır ve kalıcı şekilde özetleyen bir konu anlatım uzmanısın.";
     }
 
-    const deepThinkInstruction = deepThink
-      ? "Öğrencinin talebini DERİNLEMESİNE, aşama aşama, hiçbir detayı atlamadan kapsamlı bir şekilde analiz et ve çok yönlü çözüm sun."
-      : "Lütfen bu bağlamda öğrenciye kısa, öz ve net cevaplar ver.";
-
     const systemPrompt = `
-      ${modeInstruction}
-      Hedef Sınav Türü: ${examTarget}
-      
-      Öğrencinin sınav verileri ve durumu hakkında şu bilgilere sahipsin:
-      ${context}
+${modeInstruction}
+Hedef sınav türü: ${examTarget}
 
-      ${deepThinkInstruction}
-    `;
+${studentProfileInfo}
+
+${
+  deepThink
+    ? "Cevabını DERİNLEMESİNE, kapsamlı stratejiler ve detaylı adımlarla açıkla."
+    : "Kısa, net ve uygulanabilir tavsiyeler ver."
+}
+
+${context ? `Kullanıcının son deneme verileri ve bağlamı:\n${context}` : ""}
+`;
 
     const content = await callAI(
       [
@@ -120,15 +139,15 @@ export const chatWithAI = async (
 export const generateAnalysis = async (examData: unknown): Promise<string> => {
   try {
     const systemPrompt = `
-      Aşağıdaki YKS deneme sınavı verilerini analiz et ve öğrenciye kısa, motive edici bir "Koçun Notu" yaz.
-      Güçlü ve zayıf yönlerine değin ama çok uzun olmasın (maksimum 2-3 cümle).
-      Samimi ve destekleyici bir dil kullan.
-    `;
+Aşağıdaki YKS deneme sınavı verilerini analiz et ve öğrenciye kısa, motive edici bir "Koçun Notu" yaz.
+Güçlü ve zayıf yönlerine değin ama çok uzun olmasın (maksimum 2-3 cümle).
+Samimi ve destekleyici bir dil kullan.
+`;
 
     const userPrompt = `
-      Sınav Verileri:
-      ${JSON.stringify(examData, null, 2)}
-    `;
+Sınav Verileri:
+${JSON.stringify(examData, null, 2)}
+`;
 
     const content = await callAI(
       [
@@ -148,15 +167,15 @@ export const generateAnalysis = async (examData: unknown): Promise<string> => {
 export const generateWelcomeMessage = async (examData: unknown): Promise<string> => {
   try {
     const systemPrompt = `
-      Kullanıcı sisteme giriş yaptı. Son deneme sınavı verilerine bakarak ona TEK CÜMLELİK, kısa, enerjik ve motive edici bir karşılama mesajı yaz.
-      Eğer netleri artıyorsa bunu kutla, düşüyorsa moral ver.
-      Asla sıkıcı olma, emoji kullan.
-    `;
+Kullanıcı sisteme giriş yaptı. Son deneme sınavı verilerine bakarak ona TEK CÜMLELİK, kısa, enerjik ve motive edici bir karşılama mesajı yaz.
+Eğer netleri artıyorsa bunu kutla, düşüyorsa moral ver.
+Asla sıkıcı olma, emoji kullan.
+`;
 
     const userPrompt = `
-      Son 3 Sınav Verisi:
-      ${JSON.stringify(examData, null, 2)}
-    `;
+Son 3 Sınav Verisi:
+${JSON.stringify(examData, null, 2)}
+`;
 
     const content = await callAI(
       [

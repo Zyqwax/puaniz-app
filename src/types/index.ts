@@ -148,3 +148,101 @@ export interface ThemeContextType {
   resolvedTheme: "light" | "dark";
   setTheme: (theme: ThemeMode) => void;
 }
+
+/* ── School & Multi-Tenant Types ─────────────────────────────────────────── */
+
+export type UserRole = "superadmin" | "principal" | "teacher" | "student";
+
+export interface School {
+  id: string;
+  name: string;
+  code: string;
+  city?: string | null;
+  district?: string | null;
+  createdAt: any;
+  studentCount?: number;
+  teacherCount?: number;
+  classCount?: number;
+}
+
+export interface ClassItem {
+  id: string;
+  schoolId: string;
+  name: string;
+  grade: string;
+  field?: string | null;
+  joinCode: string;
+  studentCount?: number;
+  createdAt?: any;
+}
+
+export interface SchoolMemberInfo {
+  id: string;
+  schoolId: string;
+  schoolName: string;
+  role: "principal" | "teacher" | "student";
+  title?: string | null;
+  classId?: string | null;
+  className?: string | null;
+  studentNumber?: string | null;
+}
+
+export interface SchoolExamRecord {
+  id: string;
+  schoolId: string;
+  name: string;
+  type: string;
+  date: string;
+  totalParticipants?: number;
+  averageNet?: number;
+  createdAt?: any;
+}
+
+export interface SchoolStudentExamResult {
+  id: string;
+  schoolExamId: string;
+  examName: string;
+  examDate: string;
+  examType: string;
+  studentNumber: string;
+  studentName: string;
+  scores: Record<string, SubjectScore>;
+  totalNet: number;
+  rankInClass?: number | null;
+  rankInSchool?: number | null;
+  totalInClass?: number;
+  totalInSchool?: number;
+}
+
+/* ── Student Activities & Coaching Types ─────────────────────────────────── */
+
+export interface StudySessionItem {
+  id: string;
+  userId: string;
+  subject: string;
+  durationMinutes: number;
+  questionCount: number;
+  notes?: string | null;
+  date: string;
+  createdAt: any;
+}
+
+export interface StudyStats {
+  todayMinutes: number;
+  todayQuestions: number;
+  totalMinutes: number;
+  totalQuestions: number;
+  currentStreak: number;
+  recentSessions: StudySessionItem[];
+}
+
+export interface TeacherFeedbackItem {
+  id: string;
+  teacherId: string;
+  teacherName?: string;
+  studentUserId: string;
+  classId?: string | null;
+  className?: string | null;
+  note: string;
+  createdAt: any;
+}

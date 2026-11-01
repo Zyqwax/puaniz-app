@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/server/db";
 import { posts } from "@/server/db/schema";
 import { users } from "@/server/db/auth-schema";
@@ -21,7 +21,7 @@ export const getPostMeta = async (postId: string) => {
     })
     .from(posts)
     .innerJoin(users, eq(users.id, posts.userId))
-    .where(eq(posts.id, postId))
+    .where(and(eq(posts.id, postId), eq(posts.hidden, false)))
     .limit(1);
 
   return row ?? null;

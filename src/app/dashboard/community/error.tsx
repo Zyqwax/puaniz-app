@@ -1,0 +1,2 @@
+"use client";
+export default function ForumError({reset}:{reset:()=>void}){return <div className="mx-auto max-w-lg py-24 text-center"><h2 className="text-xl font-bold text-[var(--text)]">Forum yüklenemedi</h2><p className="mt-3 text-sm text-[var(--text-muted)]">Bağlantını kontrol edip yeniden deneyebilirsin.</p><button onClick={reset} className="mt-6 rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-bold text-white">Tekrar dene</button></div>;}

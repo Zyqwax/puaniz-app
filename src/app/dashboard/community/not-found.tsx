@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function ForumNotFound(){return <div className="mx-auto max-w-lg py-24 text-center"><h2 className="text-2xl font-bold text-[var(--text)]">Konu bulunamadı</h2><p className="mt-3 text-sm text-[var(--text-muted)]">Konu kaldırılmış olabilir ya da bağlantı geçersiz olabilir.</p><Link href="/dashboard/community" className="mt-6 inline-block text-sm font-bold text-[var(--link)]">Foruma dön →</Link></div>;}

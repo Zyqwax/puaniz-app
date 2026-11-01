@@ -1,6 +1,8 @@
 import React from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
+import LandingNetCalculator from "@/components/landing/LandingNetCalculator";
+import { School, CheckCircle2, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Puaniz | YKS Analiz ve Takip Platformu",
@@ -165,7 +167,7 @@ export default function HomePage() {
       </section>
 
       {/* Stats Bar */}
-      <section className="py-10 bg-[#0F2A5C] text-white border-y border-[var(--border-strong)]">
+      <section className="py-10 bg-[var(--hero-to)] text-white border-y border-[var(--border-strong)]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat) => (
@@ -177,6 +179,13 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Live Net & Rank Calculator Simulation */}
+      <section className="py-16 sm:py-20 bg-[var(--surface-2)]/50 border-b border-[var(--border)]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <LandingNetCalculator />
         </div>
       </section>
 
@@ -269,10 +278,77 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Institutional / School Showcase Section */}
+      <section className="py-20 sm:py-24 border-b border-[var(--border)] bg-[var(--surface)]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="p-8 sm:p-12 rounded-3xl bg-[var(--surface-2)] border border-[var(--border)] shadow-md">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+              <div className="lg:col-span-7 space-y-4">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 text-blue-500 text-xs font-bold">
+                  <School size={16} />
+                  <span>Okullar & Dershaneler İçin Puaniz</span>
+                </div>
+                <h2 className="text-2xl sm:text-4xl font-black text-[var(--text)] tracking-tight">
+                  Tüm Okulun Deneme Başarısını Tek Panelden Yönetin
+                </h2>
+                <p className="text-sm sm:text-base text-[var(--text-muted)] leading-relaxed">
+                  Puaniz kurumsal altyapısı ile okul yöneticileri ve öğretmenler; sınıfları oluşturabilir, tek tıkla toplu CSV deneme sonucu yükleyebilir ve sınıflar arası başarı karşılaştırmalarını anlık takip edebilir.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  <div className="flex items-start gap-2.5 text-xs text-[var(--text)]">
+                    <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                    <span>Öğrenci numarasıyla otomatik sınav ve karne eşleştirme</span>
+                  </div>
+                  <div className="flex items-start gap-2.5 text-xs text-[var(--text)]">
+                    <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                    <span>Sınıflar arası TYT / AYT net karşılaştırma grafikleri</span>
+                  </div>
+                  <div className="flex items-start gap-2.5 text-xs text-[var(--text)]">
+                    <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                    <span>Öğretmenlere özel koçluk notları ve öğrenci takibi</span>
+                  </div>
+                  <div className="flex items-start gap-2.5 text-xs text-[var(--text)]">
+                    <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                    <span>Toplu CSV deneme sonucu yükleme ve karne indirme</span>
+                  </div>
+                </div>
+              </div>
+              <div className="lg:col-span-5 p-6 rounded-2xl bg-[var(--surface-3)]/40 border border-[var(--border)] space-y-4">
+                <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-[var(--text)]">12-A Şubesi (TYT Ort.)</span>
+                    <span className="font-bold text-emerald-500">88.4 Net</span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-[var(--surface-2)] overflow-hidden">
+                    <div className="w-[88%] h-full bg-emerald-500 rounded-full" />
+                  </div>
+                </div>
+                <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-[var(--text)]">12-B Şubesi (TYT Ort.)</span>
+                    <span className="font-bold text-[#2F6BFF]">82.1 Net</span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-[var(--surface-2)] overflow-hidden">
+                    <div className="w-[82%] h-full bg-[#2F6BFF] rounded-full" />
+                  </div>
+                </div>
+                <Link
+                  href="/auth"
+                  className="w-full py-3 px-4 rounded-xl bg-[#2F6BFF] hover:bg-[#4A80FF] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-md transition"
+                >
+                  <span>Kurumunuzu Ekleyin & Keşfedin</span>
+                  <ArrowRight size={14} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 sm:py-28">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative p-10 sm:p-16 rounded-3xl bg-gradient-to-br from-[#16244A] to-[#0F2A5C] text-white text-center shadow-2xl border border-[var(--border-strong)] overflow-hidden">
+          <div className="relative p-10 sm:p-16 rounded-3xl bg-[var(--hero-to)] text-white text-center shadow-2xl border border-[var(--border-strong)] overflow-hidden">
             <div className="absolute right-6 bottom-0 flex items-end gap-3 opacity-15 pointer-events-none">
               <div className="w-7 h-20 bg-white rounded-t-lg" />
               <div className="w-7 h-32 bg-white rounded-t-lg" />

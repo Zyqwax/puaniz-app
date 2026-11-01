@@ -1,0 +1,8 @@
+"use client";
+import { useState,useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { reviseLearningMeeting } from '@/server/actions/coaching';
+export default function LearningMeetingEditor({meeting}:{meeting:{id:string;revision:number;meetingDate:string;followupDate:string|null;note:string}}) {
+ const router=useRouter();const [pending,start]=useTransition();const [error,setError]=useState('');
+ return <details><summary>Görüşme notunu düzelt</summary><p className="learning-muted">Önceki kayıt saklanır. Düzeltme gerekçesi ve geçmişi öğrenciye de görünür.</p><form className="learning-edit-form" onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);setError('');start(async()=>{try{await reviseLearningMeeting({id:meeting.id,revision:meeting.revision,meetingDate:String(f.get('date')),followupDate:String(f.get('followup')),note:String(f.get('note')),reason:String(f.get('reason'))});router.refresh();}catch(e){setError(e instanceof Error?e.message:'Düzeltme kaydedilemedi.');}});}}><div className="learning-toolbar"><label>Görüşme tarihi<input type="date" name="date" required defaultValue={meeting.meetingDate}/></label><label>Takip tarihi<input type="date" name="followup" defaultValue={meeting.followupDate??''}/></label></div><label>Öğrenciyle paylaşılan not<textarea name="note" required maxLength={4000} defaultValue={meeting.note}/></label><label>Düzeltme gerekçesi<input name="reason" required maxLength={500}/></label>{error&&<p role="alert">{error}</p>}<button disabled={pending}>{pending?'Kaydediliyor…':'Düzeltmeyi kaydet'}</button></form></details>;
+}

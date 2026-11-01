@@ -3,72 +3,12 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutGrid,
-  CirclePlus,
-  FileText,
-  PieChart,
-  Users,
-  Bot,
-  BookOpen,
-  Sparkles,
-  X,
-  type LucideIcon,
-} from "lucide-react";
+import { X } from "lucide-react";
+import { getDashboardNavGroups, type DashboardNavItem } from "@/lib/dashboard-navigation";
 import ProfileCard from "./ProfileCard";
 import PuanizLogo from "./PuanizLogo";
+import { useAuth } from "@/context/AuthContext";
 import type { SessionUser, UserProfile } from "@/types";
-
-interface NavItem {
-  path: string;
-  icon: LucideIcon;
-  label: string;
-  exact?: boolean;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  {
-    path: "/dashboard",
-    icon: LayoutGrid,
-    label: "Genel Bakış",
-    exact: true,
-  },
-  {
-    path: "/dashboard/add-exam",
-    icon: CirclePlus,
-    label: "Deneme Ekle",
-  },
-  {
-    path: "/dashboard/subjects",
-    icon: FileText,
-    label: "Konu Takip",
-  },
-  {
-    path: "/dashboard/analysis",
-    icon: PieChart,
-    label: "Detaylı Analiz",
-  },
-  {
-    path: "/dashboard/community",
-    icon: Users,
-    label: "Topluluk",
-  },
-  {
-    path: "/dashboard/assistant",
-    icon: Bot,
-    label: "YKS Asistan",
-  },
-  {
-    path: "/dashboard/history",
-    icon: BookOpen,
-    label: "Deneme Geçmişi",
-  },
-  {
-    path: "/dashboard/changelog",
-    icon: Sparkles,
-    label: "Yenilikler",
-  },
-];
 
 interface SidebarProps {
   isOpen: boolean;
@@ -79,8 +19,12 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, user, isCollapsed = true }) => {
   const pathname = usePathname();
+  const { userProfile } = useAuth();
 
-  const isActive = (item: NavItem) =>
+  const profile = (userProfile || user) as UserProfile | null;
+  const navGroups = getDashboardNavGroups(profile?.isSuperAdmin ? "admin" : profile?.role);
+
+  const isActive = (item: DashboardNavItem) =>
     item.exact ? pathname === item.path : pathname.startsWith(item.path);
 
   return (
@@ -130,7 +74,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, user, isCollapsed = 
           className={`flex-1 overflow-y-auto py-3 space-y-2.5 scrollbar-none flex flex-col
             ${isCollapsed ? "md:items-center px-3 md:px-0" : "px-3"}`}
         >
-          {NAV_ITEMS.map((item) => {
+          {navGroups.map((group, index) => (
+            <div key={group.label} className="w-full space-y-2">
+              {index > 0 && <div role="separator" className={`mx-3 mb-3 border-t border-[var(--border)] ${isCollapsed ? "md:mx-5" : ""}`} />}
+              {group.items.map((item) => {
             const active = isActive(item);
             const Icon = item.icon;
 
@@ -142,7 +89,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, user, isCollapsed = 
                 className={`group relative flex items-center transition-all duration-200 cursor-pointer
                   ${
                     isCollapsed
-                      ? "md:w-11 md:h-11 md:justify-center md:rounded-2xl w-full px-3.5 py-3 rounded-2xl gap-3.5"
+                      ? "md:w-11 md:h-11 md:mx-auto md:justify-center md:rounded-2xl w-full px-3.5 py-3 rounded-2xl gap-3.5"
                       : "w-full px-3.5 py-3 rounded-2xl gap-3.5"
                   }
                   ${
@@ -176,7 +123,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, user, isCollapsed = 
                 )}
               </Link>
             );
-          })}
+              })}
+            </div>
+          ))}
         </nav>
 
         {/* ── User Avatar & Profile Card ── */}
