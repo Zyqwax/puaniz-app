@@ -32,6 +32,10 @@ const AuthClient: React.FC = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
 
   const router = useRouter();
+  const getNextPath = () => {
+    const requested = new URLSearchParams(window.location.search).get("next");
+    return requested?.startsWith("/dashboard/") ? requested : "/dashboard";
+  };
 
   // Cooldown timer for resend email
   useEffect(() => {
@@ -60,27 +64,29 @@ const AuthClient: React.FC = () => {
     setMessage("");
     setLoading(true);
 
+    const nextPath = getNextPath();
+
     try {
       if (view === "login") {
         const { error: signInError } = await authClient.signIn.email({ email, password });
 
         if (signInError) {
           if (signInError.code === "EMAIL_NOT_VERIFIED" || signInError.status === 403) {
-            await authClient.sendVerificationEmail({ email, callbackURL: "/dashboard" });
+            await authClient.sendVerificationEmail({ email, callbackURL: nextPath });
             setView("verify-email");
             setMessage("Doğrulama maili gönderildi.");
           } else {
             setError(signInError.message || "Giriş yapılamadı.");
           }
         } else {
-          router.push("/dashboard");
+          router.push(nextPath);
         }
       } else if (view === "register") {
         const { error: signUpError } = await authClient.signUp.email({
           name,
           email,
           password,
-          callbackURL: "/dashboard",
+          callbackURL: nextPath,
         });
 
         if (signUpError) {
@@ -121,7 +127,7 @@ const AuthClient: React.FC = () => {
 
       if (data?.user?.emailVerified) {
         setMessage("E-posta başarıyla doğrulandı! Yönlendiriliyorsunuz...");
-        setTimeout(() => router.push("/dashboard"), 1500);
+        setTimeout(() => router.push(getNextPath()), 1500);
       } else {
         setError(
           "E-posta henüz doğrulanmamış görünüyor. Lütfen gelen kutunuzu kontrol edin.",
@@ -279,6 +285,12 @@ const AuthClient: React.FC = () => {
                       required
                     />
                   </div>
+                )}
+
+                {view === "register" && (
+                  <p className="text-xs leading-5 text-[var(--text-muted)]">
+                    Hesap oluşturduğunuzda kişisel verilerinizin işlenmesine ilişkin <Link className="font-semibold text-[var(--link)] underline" href="/privacy">Aydınlatma Metni</Link> sunulur. Bu bilgilendirmeyi okumak açık rıza verdiğiniz anlamına gelmez.
+                  </p>
                 )}
 
                 <div className="relative">

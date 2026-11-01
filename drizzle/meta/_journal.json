@@ -8,6 +8,34 @@
       "when": 1793385122133,
       "tag": "0000_sweet_blizzard",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793490000000,
+      "tag": "0001_individual_subscription_pilot",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793500000000,
+      "tag": "0002_institution_subscriptions",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793510000000,
+      "tag": "0003_institution_checkout_and_demos",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793520000000,
+      "tag": "0004_institution_payment_gate",
+      "breakpoints": true
     }
   ]
 }

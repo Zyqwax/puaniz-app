@@ -6,7 +6,7 @@ const Footer: React.FC = () => {
   return (
     <footer className="border-t border-[var(--border)] bg-[var(--footer-bg)]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand */}
           <div className="space-y-4">
             <Link href="/" className="inline-block">
@@ -46,6 +46,15 @@ const Footer: React.FC = () => {
               <Link href="/dashboard" className="block text-sm text-[var(--text-muted)] hover:text-[var(--link)] font-medium transition-colors">
                 Panel
               </Link>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold text-[var(--text)] uppercase tracking-wider">Yasal ve gizlilik</h3>
+            <div className="space-y-2.5">
+              <Link href="/privacy" className="block text-sm text-[var(--text-muted)] hover:text-[var(--link)] font-medium transition-colors">KVKK Aydınlatma Metni</Link>
+              <Link href="/cookies" className="block text-sm text-[var(--text-muted)] hover:text-[var(--link)] font-medium transition-colors">Çerez Bilgilendirmesi</Link>
+              <Link href="/terms" className="block text-sm text-[var(--text-muted)] hover:text-[var(--link)] font-medium transition-colors">Kullanım Koşulları</Link>
             </div>
           </div>
         </div>

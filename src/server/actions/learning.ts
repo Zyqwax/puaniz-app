@@ -1,5 +1,5 @@
 "use server";
-import { and, eq, inArray, desc, isNull, sql } from 'drizzle-orm';
+import { and, eq, inArray, desc, isNull, or, sql } from 'drizzle-orm';
 import { db } from '@/server/db';
 import { users } from '@/server/db/auth-schema';
 import { classes, schoolMembers, schoolExamResults, schoolExams, teacherClasses, exams, learningTasks, schoolAuditLog, userProfiles, studySessions, userTopicProgress, schoolResultRevisions } from '@/server/db/schema';
@@ -7,7 +7,7 @@ import { schoolResultSnapshot } from '@/lib/school-results';
 import { recalculateSchoolRanks } from '@/server/school-results';
 import { notifyLearning } from '@/server/learning-notifications';
 import { requireUser } from '@/server/session';
-import { requirePrincipal, requireTeacher, requireStudentAccess } from '@/server/school-auth';
+import { getUsableSchoolIdsForUser, requirePrincipal, requireTeacher, requireStudentAccess, requireUsableInstitutionLicense } from '@/server/school-auth';
 import { validCalendarDate } from '@/lib/school-import';
 import type { LearningResult } from '@/lib/learning';
 
@@ -30,11 +30,13 @@ async function scope(role: 'student'|'teacher'|'principal') {
 }
 export async function getLearningWorkspace(role:'student'|'teacher'|'principal') {
  const context=await scope(role); const ids=context.students.map(s=>s.id);
- const schoolRows=role==='student' ? await db.select({r:schoolExamResults,e:schoolExams}).from(schoolExamResults).innerJoin(schoolExams,eq(schoolExams.id,schoolExamResults.schoolExamId)).where(eq(schoolExamResults.studentUserId,context.user.id)) : context.classIds.length ? await db.select({r:schoolExamResults,e:schoolExams}).from(schoolExamResults).innerJoin(schoolExams,eq(schoolExams.id,schoolExamResults.schoolExamId)).where(and(eq(schoolExamResults.schoolId,context.schoolId!),inArray(schoolExamResults.classId,context.classIds))) : [];
+ const licensedSchoolIds=role==='student'?await getUsableSchoolIdsForUser(context.user.id):[];
+ const schoolRows=role==='student' ? licensedSchoolIds.length?await db.select({r:schoolExamResults,e:schoolExams}).from(schoolExamResults).innerJoin(schoolExams,eq(schoolExams.id,schoolExamResults.schoolExamId)).where(and(eq(schoolExamResults.studentUserId,context.user.id),inArray(schoolExamResults.schoolId,licensedSchoolIds))):[] : context.classIds.length ? await db.select({r:schoolExamResults,e:schoolExams}).from(schoolExamResults).innerJoin(schoolExams,eq(schoolExams.id,schoolExamResults.schoolExamId)).where(and(eq(schoolExamResults.schoolId,context.schoolId!),inArray(schoolExamResults.classId,context.classIds))) : [];
  // Personal records are private: staff analytics use institution-owned results only.
  const personal=role==='student'?await db.select().from(exams).where(eq(exams.userId,context.user.id)):[];
  const results:LearningResult[]=[...schoolRows.map(({r,e})=>({studentId:r.studentUserId??`unmatched:${r.studentNumber}`,classId:r.classId,date:e.date,type:e.type,net:Number(r.totalNet),source:'Okul',scores:r.scores})),...personal.map(e=>({studentId:context.user.id,classId:null,date:e.date,type:e.type,net:Number(e.totalNet),source:'Kişisel',scores:e.scores}))];
- const tasks=ids.length?await db.select().from(learningTasks).where(and(inArray(learningTasks.studentId,ids),role==='student'?undefined:eq(learningTasks.schoolId,context.schoolId!))).orderBy(desc(learningTasks.createdAt)):[];
+ const taskScope=role==='student'?or(isNull(learningTasks.schoolId),licensedSchoolIds.length?inArray(learningTasks.schoolId,licensedSchoolIds):undefined):eq(learningTasks.schoolId,context.schoolId!);
+ const tasks=ids.length?await db.select().from(learningTasks).where(and(inArray(learningTasks.studentId,ids),taskScope)).orderBy(desc(learningTasks.createdAt)):[];
  const logs=role==='principal'?await db.select({id:schoolAuditLog.id,action:schoolAuditLog.action,details:schoolAuditLog.details,actorName:users.name,createdAt:schoolAuditLog.createdAt}).from(schoolAuditLog).leftJoin(users,eq(users.id,schoolAuditLog.actorId)).where(eq(schoolAuditLog.schoolId,context.schoolId!)).orderBy(desc(schoolAuditLog.createdAt)).limit(30):[];
  const qualityCount=role==='principal'?(await db.select({count:sql<number>`count(*)::int`}).from(schoolExamResults).where(and(eq(schoolExamResults.schoolId,context.schoolId!),isNull(schoolExamResults.studentUserId))))[0].count:0;
  const profile=role==='student'?(await db.select().from(userProfiles).where(eq(userProfiles.userId,context.user.id)).limit(1))[0]:null;
@@ -59,6 +61,7 @@ export async function createLearningTask(input:{studentId:string;title:string;su
 export async function updateLearningTask(input:{id:string;status:'open'|'done';reflection:string;revision:number}) {
  const [task]=await db.select().from(learningTasks).where(eq(learningTasks.id,input.id)).limit(1);
  if(!task) throw new Error('Görev bulunamadı.');
+ if(task.schoolId) await requireUsableInstitutionLicense(task.schoolId);
  const user=await requireStudentAccess(task.studentId);
  if(!['open','done'].includes(input.status)||input.reflection.length>2000) throw new Error('Geçersiz görev güncellemesi.');
  // Reflections belong to the student; staff can follow completion but cannot rewrite it.

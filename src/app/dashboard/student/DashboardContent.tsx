@@ -29,6 +29,7 @@ import { useAuth } from "@/context/AuthContext";
 import { EXAM_CONFIG } from "@/constants";
 import { StudentSection, StudentMetric, StudentSegments, StudentEmpty, StudentModal, StudentNotice, StudentHeaderActions, StudentLoading, studentInput, studentPrimary, studentButton } from "@/components/student/StudentUI";
 import Link from "next/link";
+import PremiumGiftBanner from "@/components/dashboard/PremiumGiftBanner";
 import type {
   ExamRecord,
   SchoolMemberInfo,
@@ -263,6 +264,7 @@ const DashboardContent: React.FC = () => {
   const remaining=activeGoal?Math.max(0,activeGoal-average):null;
   const priority=lastExam?Object.entries(lastExam.scores||{}).map(([key,score])=>({key,net:score.net||0,limit:(EXAM_CONFIG[lastExam.type as keyof typeof EXAM_CONFIG] as Record<string,number>)[key]||40})).sort((a,b)=>a.net/a.limit-b.net/b.limit).slice(0,3):[];
   return <div className="student-page">
+    <PremiumGiftBanner />
     <StudentHeaderActions><button className={studentButton} onClick={()=>setIsGoalModalOpen(true)}><Target size={15}/> Hedefleri düzenle</button></StudentHeaderActions>
     {loadError&&<StudentNotice error>{loadError}</StudentNotice>}
     <div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-sm text-[var(--text-muted)]">Bugünkü çalışma özeti</p><p className="mt-1 font-medium">{studyStats.todayMinutes} dakika odaklanma · {studyStats.todayQuestions} soru</p></div><div className="flex flex-wrap items-center gap-3"><span className="student-badge"><Flame size={14}/>{studyStats.currentStreak} günlük seri</span>{daysUntilYKS>0&&<span className="text-sm text-[var(--text-muted)]">YKS’ye {daysUntilYKS} gün</span>}</div></div>

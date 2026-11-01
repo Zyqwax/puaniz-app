@@ -1,12 +1,12 @@
 "use server";
 
-import { and, eq, desc, sql } from 'drizzle-orm';
+import { and, eq, desc, inArray, isNull, or, sql } from 'drizzle-orm';
 import { db } from '@/server/db';
 import { users } from '@/server/db/auth-schema';
 import { classes, schoolMembers, schoolExams, schoolExamResults, learningTasks, learningMeetings, learningMeetingRevisions, schoolAuditLog } from '@/server/db/schema';
 import { notifyLearning } from '@/server/learning-notifications';
 import { requireUser } from '@/server/session';
-import { requireStudentAccess, requireTeacher, getSchoolMembership } from '@/server/school-auth';
+import { getUsableSchoolIdsForUser, requireStudentAccess, requireTeacher, getSchoolMembership, requireUsableInstitutionLicense } from '@/server/school-auth';
 import { validCalendarDate } from '@/lib/school-import';
 
 async function studentScope(studentId:string) {
@@ -19,10 +19,12 @@ async function studentScope(studentId:string) {
  if(!student) throw new Error('Öğrenci kaydı bulunamadı.');
  return {user,student};
 }
-async function meetingHistory(studentId:string,schoolId?:string) {
+async function meetingHistory(studentId:string,schoolScope?:string|string[]) {
+ const schoolFilter=Array.isArray(schoolScope)?schoolScope.length?inArray(learningMeetings.schoolId,schoolScope):undefined:schoolScope?eq(learningMeetings.schoolId,schoolScope):undefined;
+ if(Array.isArray(schoolScope)&&schoolScope.length===0)return [];
  return db.select({id:learningMeetingRevisions.id,meetingId:learningMeetingRevisions.meetingId,revision:learningMeetingRevisions.revision,reason:learningMeetingRevisions.reason,before:learningMeetingRevisions.before,after:learningMeetingRevisions.after,createdAt:learningMeetingRevisions.createdAt,editorName:users.name})
   .from(learningMeetingRevisions).innerJoin(learningMeetings,eq(learningMeetings.id,learningMeetingRevisions.meetingId)).leftJoin(users,eq(users.id,learningMeetingRevisions.editorId))
-  .where(and(eq(learningMeetings.studentId,studentId),schoolId?eq(learningMeetings.schoolId,schoolId):undefined)).orderBy(desc(learningMeetingRevisions.revision));
+  .where(and(eq(learningMeetings.studentId,studentId),schoolFilter)).orderBy(desc(learningMeetingRevisions.revision));
 }
 export async function getStudentCoaching(studentId:string,page=1) {
  const {user,student}=await studentScope(studentId);
@@ -84,16 +86,21 @@ export async function reviseLearningTask(input:{id:string;revision:number;title:
 }
 export async function getWeeklyLearningPlan() {
  const user=await requireUser();
+ const licensedSchoolIds=await getUsableSchoolIdsForUser(user.id);
+ const taskSchoolFilter=licensedSchoolIds.length?or(isNull(learningTasks.schoolId),inArray(learningTasks.schoolId,licensedSchoolIds)):isNull(learningTasks.schoolId);
  const [tasks,meetings,results,history]=await Promise.all([
-  db.select().from(learningTasks).where(eq(learningTasks.studentId,user.id)).orderBy(desc(learningTasks.createdAt)),
-  db.select({id:learningMeetings.id,revision:learningMeetings.revision,note:learningMeetings.note,meetingDate:learningMeetings.meetingDate,followupDate:learningMeetings.followupDate,authorName:users.name}).from(learningMeetings).innerJoin(users,eq(users.id,learningMeetings.authorId)).where(eq(learningMeetings.studentId,user.id)).orderBy(desc(learningMeetings.meetingDate)),
-  db.select({id:schoolExamResults.id,name:schoolExams.name,date:schoolExams.date,type:schoolExams.type,net:schoolExamResults.totalNet}).from(schoolExamResults).innerJoin(schoolExams,eq(schoolExams.id,schoolExamResults.schoolExamId)).where(eq(schoolExamResults.studentUserId,user.id)),
-  meetingHistory(user.id),
+  db.select().from(learningTasks).where(and(eq(learningTasks.studentId,user.id),taskSchoolFilter)).orderBy(desc(learningTasks.createdAt)),
+  licensedSchoolIds.length?db.select({id:learningMeetings.id,revision:learningMeetings.revision,note:learningMeetings.note,meetingDate:learningMeetings.meetingDate,followupDate:learningMeetings.followupDate,authorName:users.name}).from(learningMeetings).innerJoin(users,eq(users.id,learningMeetings.authorId)).where(and(eq(learningMeetings.studentId,user.id),inArray(learningMeetings.schoolId,licensedSchoolIds))).orderBy(desc(learningMeetings.meetingDate)):Promise.resolve([]),
+  licensedSchoolIds.length?db.select({id:schoolExamResults.id,name:schoolExams.name,date:schoolExams.date,type:schoolExams.type,net:schoolExamResults.totalNet}).from(schoolExamResults).innerJoin(schoolExams,eq(schoolExams.id,schoolExamResults.schoolExamId)).where(and(eq(schoolExamResults.studentUserId,user.id),inArray(schoolExamResults.schoolId,licensedSchoolIds))):Promise.resolve([]),
+  meetingHistory(user.id,licensedSchoolIds),
  ]);
  return {studentId:user.id,tasks,meetings:meetings.map(m=>({...m,history:history.filter(h=>h.meetingId===m.id)})),results:results.map(r=>({...r,net:Number(r.net)})),today:new Date().toLocaleDateString('en-CA',{timeZone:'Europe/Istanbul'})};
 }
 export async function scheduleLearningTask(input:{id:string;revision:number;plannedDate:string;plannedMinutes:number}) {
  const user=await requireUser();
+ const [task]=await db.select({schoolId:learningTasks.schoolId}).from(learningTasks).where(and(eq(learningTasks.id,input.id),eq(learningTasks.studentId,user.id))).limit(1);
+ if(!task)throw new Error('Görev bulunamadı veya erişiminiz yok.');
+ if(task.schoolId)await requireUsableInstitutionLicense(task.schoolId);
  if((input.plannedDate&&!validCalendarDate(input.plannedDate))||!Number.isInteger(input.plannedMinutes)||input.plannedMinutes<0||input.plannedMinutes>480)throw new Error('Plan tarihi ve süreyi kontrol edin (0–480 dakika).');
  const changed=await db.update(learningTasks).set({plannedDate:input.plannedDate||null,plannedMinutes:input.plannedMinutes,revision:sql`${learningTasks.revision}+1`,updatedAt:new Date()})
   .where(and(eq(learningTasks.id,input.id),eq(learningTasks.studentId,user.id),eq(learningTasks.revision,input.revision))).returning({id:learningTasks.id});

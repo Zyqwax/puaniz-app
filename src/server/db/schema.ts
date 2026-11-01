@@ -504,3 +504,55 @@ export const schoolResultRevisions = pgTable("school_result_revisions", {
  after:jsonb("after_snapshot").$type<SchoolResultSnapshot>().notNull(),
  createdAt:timestamp("created_at",{withTimezone:true}).notNull().defaultNow(),
 },t=>[uniqueIndex("school_result_revisions_result_id_revision_key").on(t.resultId,t.revision)]);
+
+/* ── Individual subscriptions (payment-free pilot) ─────────────────────── */
+export const subscriptions = pgTable("subscriptions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  planKey: text("plan_key").notNull(),
+  planVersion: integer("plan_version").notNull().default(1),
+  status: text("status").$type<"active" | "cancelled" | "expired">().notNull(),
+  source: text("source").$type<"pilot" | "admin">().notNull().default("pilot"),
+  startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+  endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
+  acceptedTermsVersion: text("accepted_terms_version").notNull(),
+  acceptedAt: timestamp("accepted_at", { withTimezone: true }).notNull(),
+  cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index("subscriptions_user_created_idx").on(t.userId, t.createdAt.desc()),
+  uniqueIndex("subscriptions_one_active_per_user_idx").on(t.userId).where(sql`${t.status} = 'active'`),
+]);
+
+/* ── Institution licenses (manual provisioning, no payment integration) ── */
+export const schoolSubscriptions = pgTable("school_subscriptions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  schoolId: uuid("school_id").notNull().references(() => schools.id, { onDelete: "cascade" }),
+  planKey: text("plan_key").notNull(),
+  planVersion: integer("plan_version").notNull().default(1),
+  status: text("status").$type<"pending" | "awaiting_payment" | "active" | "cancelled" | "expired" | "suspended">().notNull(),
+  source: text("source").$type<"manual" | "contract" | "demo">().notNull().default("manual"),
+  startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+  endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
+  studentLimit: integer("student_limit").notNull(),
+  amountKurus: integer("amount_kurus"),
+  agreementReference: text("agreement_reference"),
+  paidAt: timestamp("paid_at", { withTimezone: true }),
+  paymentReference: text("payment_reference"),
+  createdBy: text("created_by").notNull().references(() => users.id, { onDelete: "restrict" }),
+  cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index("school_subscriptions_school_created_idx").on(t.schoolId, t.createdAt.desc()),
+  uniqueIndex("school_subscriptions_one_active_per_school_idx").on(t.schoolId).where(sql`${t.status} = 'active'`),
+]);
+
+export const schoolSubscriptionEvents = pgTable("school_subscription_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  schoolId: uuid("school_id").notNull().references(() => schools.id, { onDelete: "cascade" }),
+  subscriptionId: uuid("subscription_id").references(() => schoolSubscriptions.id, { onDelete: "set null" }),
+  actorId: text("actor_id").notNull().references(() => users.id, { onDelete: "restrict" }),
+  action: text("action").notNull(),
+  details: text("details").notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [index("school_subscription_events_school_created_idx").on(t.schoolId, t.createdAt.desc())]);

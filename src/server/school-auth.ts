@@ -1,8 +1,8 @@
 import "server-only";
 
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { db } from "@/server/db";
-import { schools, classes, schoolMembers, teacherClasses } from "@/server/db/schema";
+import { schools, classes, schoolMembers, teacherClasses, schoolSubscriptions } from "@/server/db/schema";
 import { requireUser } from "@/server/session";
 import type { SchoolMemberInfo } from "@/types";
 
@@ -23,8 +23,8 @@ export async function requireSuperAdmin() {
   return user;
 }
 
-export async function getSchoolMembership(userId: string): Promise<SchoolMemberInfo | null> {
-  const [membership] = await db
+export async function getSchoolMemberships(userId: string): Promise<SchoolMemberInfo[]> {
+  const memberships = await db
     .select({
       id: schoolMembers.id,
       schoolId: schoolMembers.schoolId,
@@ -39,11 +39,9 @@ export async function getSchoolMembership(userId: string): Promise<SchoolMemberI
     .innerJoin(schools, eq(schoolMembers.schoolId, schools.id))
     .leftJoin(classes, eq(schoolMembers.classId, classes.id))
     .where(eq(schoolMembers.userId, userId))
-    .limit(1);
+    .orderBy(schools.name, schoolMembers.createdAt);
 
-  if (!membership) return null;
-
-  return {
+  return memberships.map((membership) => ({
     id: membership.id,
     schoolId: membership.schoolId,
     schoolName: membership.schoolName,
@@ -52,7 +50,37 @@ export async function getSchoolMembership(userId: string): Promise<SchoolMemberI
     classId: membership.classId,
     className: membership.className,
     studentNumber: membership.studentNumber,
-  };
+  }));
+}
+
+export async function getSchoolMembership(userId: string): Promise<SchoolMemberInfo | null> {
+  return (await getSchoolMemberships(userId))[0] ?? null;
+}
+
+export async function getUsableInstitutionLicense(schoolId: string) {
+  const [license] = await db.select().from(schoolSubscriptions)
+    .where(and(eq(schoolSubscriptions.schoolId, schoolId), eq(schoolSubscriptions.status, "active")))
+    .orderBy(desc(schoolSubscriptions.createdAt)).limit(1);
+  const now = new Date();
+  if (!license || license.startsAt > now || license.endsAt <= now) return null;
+  if (license.source !== "demo" && !license.paidAt) return null;
+  return license;
+}
+
+export async function requireUsableInstitutionLicense(schoolId: string) {
+  const license = await getUsableInstitutionLicense(schoolId);
+  if (!license) throw new Error("Okul lisansı ödeme doğrulanana veya demo erişimi verilene kadar kullanıma açık değil.");
+  return license;
+}
+
+export async function getUsableSchoolIdsForUser(userId: string) {
+  const memberships = await getSchoolMemberships(userId);
+  const schoolIds = [...new Set(memberships.map((membership) => membership.schoolId))];
+  const usableIds: string[] = [];
+  for (const schoolId of schoolIds) {
+    if (await getUsableInstitutionLicense(schoolId)) usableIds.push(schoolId);
+  }
+  return usableIds;
 }
 
 export async function requirePrincipal() {
@@ -74,6 +102,8 @@ export async function requirePrincipal() {
     }
     throw new Error("Yetkisiz işlem: Okul müdürü yetkisi gereklidir.");
   }
+
+  await requireUsableInstitutionLicense(membership.schoolId);
 
   return {
     user,
@@ -97,12 +127,15 @@ export async function requireTeacher(classId?: string) {
       const [target] = await db.select({ id: classes.id }).from(classes).where(and(eq(classes.id, classId), eq(classes.schoolId, membership.schoolId))).limit(1);
       if (!target) throw new Error("Bu sınıfa erişim yetkiniz bulunmuyor.");
     }
+    await requireUsableInstitutionLicense(membership.schoolId);
     return { user, schoolId: membership.schoolId, isPrincipal: true };
   }
 
   if (!membership || membership.role !== "teacher") {
     throw new Error("Yetkisiz işlem: Öğretmen yetkisi gereklidir.");
   }
+
+  await requireUsableInstitutionLicense(membership.schoolId);
 
   if (classId) {
     const [assigned] = await db

@@ -1,15 +1,16 @@
 "use server";
-import { and,eq,desc,sql,lte } from 'drizzle-orm';
+import { and,eq,desc,sql,lte,inArray } from 'drizzle-orm';
 import { db } from '@/server/db';
 import { learningNotifications,learningNotificationPreferences,learningTasks,learningMeetings,schoolExamResults } from '@/server/db/schema';
 import { requireUser } from '@/server/session';
-import { getUserRoleContext,requireStudentAccess } from '@/server/school-auth';
+import { getUsableSchoolIdsForUser,getUserRoleContext,requireStudentAccess } from '@/server/school-auth';
 export async function getLearningNotificationCount() {
- const user=await requireUser();const [row]=await db.select({count:sql<number>`count(*)::int`}).from(learningNotifications).where(and(eq(learningNotifications.userId,user.id),eq(learningNotifications.read,false)));return row.count;
+ const user=await requireUser();const schoolIds=await getUsableSchoolIdsForUser(user.id);if(!schoolIds.length)return 0;const [row]=await db.select({count:sql<number>`count(*)::int`}).from(learningNotifications).where(and(eq(learningNotifications.userId,user.id),eq(learningNotifications.read,false),inArray(learningNotifications.schoolId,schoolIds)));return row.count;
 }
 export async function getLearningNotifications(page=1,unreadOnly=false) {
  const user=await requireUser();if(!Number.isInteger(page)||page<1||page>10000)throw new Error('Geçersiz sayfa.');
- const filter=and(eq(learningNotifications.userId,user.id),unreadOnly?eq(learningNotifications.read,false):undefined);
+ const schoolIds=await getUsableSchoolIdsForUser(user.id);if(!schoolIds.length)return {rows:[],total:0,page,preferences:{tasks:true,meetings:true,results:true},readBefore:new Date().toISOString()};
+ const filter=and(eq(learningNotifications.userId,user.id),inArray(learningNotifications.schoolId,schoolIds),unreadOnly?eq(learningNotifications.read,false):undefined);
  const [rows,count,preferences]=await Promise.all([
   db.select({id:learningNotifications.id,message:learningNotifications.message,category:learningNotifications.category,read:learningNotifications.read,createdAt:learningNotifications.createdAt}).from(learningNotifications).where(filter).orderBy(desc(learningNotifications.createdAt),desc(learningNotifications.id)).limit(30).offset((page-1)*30),
   db.select({count:sql<number>`count(*)::int`}).from(learningNotifications).where(filter),
@@ -33,6 +34,7 @@ export async function openLearningNotification(id:string) {
  const {user,role,membership}=await getUserRoleContext();
  const [notice]=await db.select().from(learningNotifications).where(and(eq(learningNotifications.id,id),eq(learningNotifications.userId,user.id))).limit(1);
  if(!notice)throw new Error('Bildirim bulunamadı.');
+ if(!(await getUsableSchoolIdsForUser(user.id)).includes(notice.schoolId))throw new Error('Bu okul bildirimi için güncel lisans erişiminiz bulunmuyor.');
  let exists=false;
  if(notice.eventKey.startsWith('result-unlinked:'))exists=true;
  else if(notice.taskId)exists=(await db.select({id:learningTasks.id}).from(learningTasks).where(and(eq(learningTasks.id,notice.taskId),eq(learningTasks.studentId,notice.studentId),eq(learningTasks.schoolId,notice.schoolId)))).length>0;

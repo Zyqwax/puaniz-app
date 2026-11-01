@@ -3,14 +3,14 @@
 import "server-only";
 import Groq from "groq-sdk";
 import { getUserProfile } from "@/server/actions/profile";
+import { requireUser } from "@/server/session";
+import { hasPremiumAccess } from "@/server/subscription";
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY ?? process.env.NEXT_PUBLIC_GROQ_API_KEY;
-const OPENROUTER_API_KEY = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 let groq: Groq | null = null;
 
 const GROQ_MODEL = "llama-3.1-8b-instant";
-const OPENROUTER_MODEL = "openrouter/elephant-alpha";
 
 interface AIChatOptions {
   mode?: "AI Koç" | "Soru Çözücü" | "Konu Anlatıcı" | string;
@@ -22,53 +22,18 @@ const callAI = async (
   messages: Array<{ role: "system" | "user" | "assistant"; content: string }>,
   max_tokens = 1024
 ): Promise<string | undefined> => {
-  const provider: string = "groq";
-
-  if (provider === "openrouter") {
-    const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer":
-            typeof window !== "undefined"
-              ? window.location.origin
-              : "https://puaniz.app",
-          "X-Title": "PuanIz YKS Asistan",
-        },
-        body: JSON.stringify({
-          model: OPENROUTER_MODEL,
-          messages: messages,
-          temperature: 0.7,
-          max_tokens: max_tokens,
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("OpenRouter API Error:", errText);
-      throw new Error(`OpenRouter API Error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.choices[0]?.message?.content;
+  if (!GROQ_API_KEY) {
+    throw new Error("Yapay zekâ hizmeti şu anda yapılandırılmamış.");
   }
 
-  if (provider === "groq") {
-    if (!groq) {
-      groq = new Groq({ apiKey: GROQ_API_KEY || "" });
-    }
-    const completion = await groq.chat.completions.create({
-      messages,
-      model: GROQ_MODEL,
-      temperature: 0.7,
-      max_tokens,
-    });
-    return completion.choices[0]?.message?.content || undefined;
-  }
+  if (!groq) groq = new Groq({ apiKey: GROQ_API_KEY });
+  const completion = await groq.chat.completions.create({
+    messages,
+    model: GROQ_MODEL,
+    temperature: 0.7,
+    max_tokens,
+  });
+  return completion.choices[0]?.message?.content || undefined;
 };
 
 export const chatWithAI = async (
@@ -77,6 +42,10 @@ export const chatWithAI = async (
   options: AIChatOptions = {}
 ): Promise<string> => {
   try {
+    const user = await requireUser();
+    if (!(await hasPremiumAccess(user.id))) {
+      return "AI asistanı Premium üyelikte kullanılabilir. Aboneliğim sayfasından hesabına uygun seçenekleri görebilirsin.";
+    }
     const { mode = "AI Koç", examTarget = "TYT", deepThink = false } = options;
 
     let studentProfileInfo = "";
@@ -137,6 +106,8 @@ ${context ? `Kullanıcının son deneme verileri ve bağlamı:\n${context}` : ""
 };
 
 export const generateAnalysis = async (examData: unknown): Promise<string> => {
+  const user = await requireUser();
+  if (!(await hasPremiumAccess(user.id))) return "Detaylı yapay zekâ analizi Premium üyelikte kullanılabilir. Aboneliğim sayfasından hesabına uygun seçenekleri görebilirsin.";
   try {
     const systemPrompt = `
 Aşağıdaki YKS deneme sınavı verilerini analiz et ve öğrenciye kısa, motive edici bir "Koçun Notu" yaz.

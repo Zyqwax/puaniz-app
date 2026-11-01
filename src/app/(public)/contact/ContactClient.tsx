@@ -36,7 +36,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Öğrenci verileri KVKK kapsamında nasıl korunuyor?",
-    a: "Veriler şifreli bağlantı üzerinden taşınır ve PostgreSQL üzerinde saklanır. Erişim yalnızca yetkili okul personeline ve öğrencinin kendisine açıktır; üçüncü taraflarla paylaşılmaz.",
+    a: "Puaniz, hesabı ve okul çalışma alanlarını sunmak için öğrenci ve sınav verilerini işler. Hangi verilerin hangi amaçla işlendiğini ve hizmet sağlayıcılarla paylaşımını Aydınlatma Metni'nde açıklıyoruz.",
   },
   {
     q: "Mevcut deneme sonuçlarımızı toplu aktarabilir miyiz?",
@@ -125,9 +125,9 @@ export default function ContactClient() {
             <span className="inline-flex items-center gap-1.5">
               <Clock size={14} className="text-[var(--brand)]" /> Ortalama yanıt: 2 iş günü
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <ShieldCheck size={14} className="text-emerald-500" /> KVKK uyumlu veri işleme
-            </span>
+            <Link href="/privacy" className="inline-flex items-center gap-1.5 hover:text-[var(--link)]">
+              <ShieldCheck size={14} className="text-emerald-500" /> Kişisel veri bilgilendirmesi
+            </Link>
             <span className="inline-flex items-center gap-1.5">
               <MapPin size={14} className="text-[var(--text-muted)]" /> Türkiye
             </span>
@@ -328,10 +328,7 @@ export default function ContactClient() {
 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
                   <p className="text-[11px] text-[var(--text-subtle)] leading-relaxed max-w-sm">
-                    Gönderdiğiniz bilgiler yalnızca talebinizi yanıtlamak için kullanılır.{" "}
-                    <span className="text-[var(--text-muted)]">
-                      {CONTACT_TYPE_LABELS[type]} olarak kaydedilir.
-                    </span>
+                    Form bilgileri talebinizi yanıtlamak ve kayıt altına almak için işlenir; e-posta sağlayıcısı üzerinden yanıt gönderilebilir. {CONTACT_TYPE_LABELS[type]} olarak kaydedilir. Ayrıntılar: <Link href="/privacy" className="font-semibold text-[var(--link)] underline">Aydınlatma Metni</Link>.
                   </p>
                   <button
                     type="submit"
@@ -362,7 +359,7 @@ export default function ContactClient() {
               </p>
               <ul className="space-y-2 text-[11px] text-white/85">
                 {[
-                  "Ücretsiz demo ve pilot dönem",
+                  "Ücretsiz kurum demosu",
                   "CSV ile toplu sonuç aktarımı",
                   "Müdür / öğretmen yetki yönetimi",
                 ].map((item) => (

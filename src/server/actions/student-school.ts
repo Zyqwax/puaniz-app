@@ -1,16 +1,17 @@
 "use server";
 
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, inArray, sql } from "drizzle-orm";
 import { db } from "@/server/db";
 import {
   schools,
   classes,
   schoolMembers,
+  schoolSubscriptions,
   schoolExams,
   schoolExamResults,
 } from "@/server/db/schema";
 import { requireUser } from "@/server/session";
-import { getSchoolMembership } from "@/server/school-auth";
+import { getSchoolMembership, getUsableSchoolIdsForUser } from "@/server/school-auth";
 import { toMessage } from "@/server/errors";
 import type { SchoolMemberInfo, SchoolStudentExamResult } from "@/types";
 
@@ -44,63 +45,43 @@ export async function joinSchoolClass(input: {
       return { success: false, error: "Geçersiz sınıf kodu. Lütfen öğretmeninizden veya müdürünüzden kodu kontrol etmesini isteyin." };
     }
 
-    // 2. Check if student already has a membership in this school
-    const [existingMember] = await db
-      .select()
-      .from(schoolMembers)
-      .where(
-        and(
-          eq(schoolMembers.schoolId, targetClass.schoolId),
-          eq(schoolMembers.userId, user.id),
-        ),
-      )
-      .limit(1);
+    const member = await db.transaction(async (tx) => {
+      // Serialize seat checks with both other enrollments and manual license changes.
+      await tx.select({ id: schools.id }).from(schools).where(eq(schools.id, targetClass.schoolId)).for("update");
 
-    if (existingMember) {
-      return { success: false, error: "Bu okula zaten kayıtlısınız." };
-    }
+      const [existingMember] = await tx.select({ id: schoolMembers.id }).from(schoolMembers)
+        .where(and(eq(schoolMembers.schoolId, targetClass.schoolId), eq(schoolMembers.userId, user.id))).limit(1);
+      if (existingMember) throw new Error("Bu okula zaten kayıtlısınız.");
 
-    // 3. Check if another user registered with this student number in this school
-    const [duplicateNumber] = await db
-      .select()
-      .from(schoolMembers)
-      .where(
-        and(
-          eq(schoolMembers.schoolId, targetClass.schoolId),
-          eq(schoolMembers.studentNumber, cleanNum),
-        ),
-      )
-      .limit(1);
+      const [duplicateNumber] = await tx.select({ id: schoolMembers.id }).from(schoolMembers)
+        .where(and(eq(schoolMembers.schoolId, targetClass.schoolId), eq(schoolMembers.studentNumber, cleanNum))).limit(1);
+      if (duplicateNumber) throw new Error("Bu okul numarası ile kayıtlı başka bir öğrenci bulunmaktadır.");
 
-    if (duplicateNumber) {
-      return { success: false, error: "Bu okul numarası ile kayıtlı başka bir öğrenci bulunmaktadır." };
-    }
+      const now = new Date();
+      const [license] = await tx.select().from(schoolSubscriptions)
+        .where(and(eq(schoolSubscriptions.schoolId, targetClass.schoolId), eq(schoolSubscriptions.status, "active")))
+        .limit(1);
+      if (!license || license.startsAt > now || license.endsAt <= now || (license.source !== "demo" && !license.paidAt)) {
+        throw new Error("Okul lisansı ödeme doğrulanana veya demo erişimi verilene kadar öğrenci katılımına açık değil.");
+      }
+      if (license.startsAt <= now && license.endsAt > now) {
+        const [usage] = await tx.select({ students: sql<number>`count(*)::int` }).from(schoolMembers)
+          .where(and(eq(schoolMembers.schoolId, targetClass.schoolId), eq(schoolMembers.role, "student")));
+        if (Number(usage?.students ?? 0) >= license.studentLimit) throw new Error("Okulun öğrenci kontenjanı dolu. Okul yöneticinizle iletişime geçin.");
+      }
 
-    // 4. Create membership
-    const [member] = await db
-      .insert(schoolMembers)
-      .values({
+      const [created] = await tx.insert(schoolMembers).values({
         schoolId: targetClass.schoolId,
         userId: user.id,
         role: "student",
         classId: targetClass.id,
         studentNumber: cleanNum,
-      })
-      .returning();
+      }).returning();
 
-    // 5. Automatic retroactive link: match previously uploaded school exams
-    await db
-      .update(schoolExamResults)
-      .set({
-        studentUserId: user.id,
-        classId: targetClass.id,
-      })
-      .where(
-        and(
-          eq(schoolExamResults.schoolId, targetClass.schoolId),
-          eq(schoolExamResults.studentNumber, cleanNum),
-        ),
-      );
+      await tx.update(schoolExamResults).set({ studentUserId: user.id, classId: targetClass.id })
+        .where(and(eq(schoolExamResults.schoolId, targetClass.schoolId), eq(schoolExamResults.studentNumber, cleanNum)));
+      return created;
+    });
 
     return {
       success: true,
@@ -133,6 +114,8 @@ export async function getMySchoolInfo(): Promise<SchoolMemberInfo | null> {
 export async function getMySchoolExams(): Promise<SchoolStudentExamResult[]> {
   try {
     const user = await requireUser();
+    const licensedSchoolIds = await getUsableSchoolIdsForUser(user.id);
+    if (licensedSchoolIds.length === 0) return [];
 
     const results = await db
       .select({
@@ -150,7 +133,7 @@ export async function getMySchoolExams(): Promise<SchoolStudentExamResult[]> {
       })
       .from(schoolExamResults)
       .innerJoin(schoolExams, eq(schoolExamResults.schoolExamId, schoolExams.id))
-      .where(eq(schoolExamResults.studentUserId, user.id))
+      .where(and(eq(schoolExamResults.studentUserId, user.id), inArray(schoolExamResults.schoolId, licensedSchoolIds)))
       .orderBy(desc(schoolExams.date));
 
     return results.map((r) => ({
